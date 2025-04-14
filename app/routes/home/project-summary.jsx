@@ -26,8 +26,7 @@ export function ProjectSummary({
   title,
   description,
   model,
-  buttonText,
-  buttonLink,
+  buttons = [],
   alternate,
   ...rest
 }) {
@@ -47,21 +46,21 @@ export function ProjectSummary({
     setModelLoaded(true);
   }
 
-  function renderKatakana(device, visible) {
-    return (
-      <svg
-        type="project"
-        data-visible={visible && modelLoaded}
-        data-light={theme === 'light'}
-        style={cssProps({ opacity: svgOpacity })}
-        className={styles.svg}
-        data-device={device}
-        viewBox="0 0 751 136"
-      >
-        <use href={`${katakana}#katakana-project`} />
-      </svg>
-    );
-  }
+  // function renderKatakana(device, visible) {
+  //   return (
+  //     <svg
+  //       type="project"
+  //       data-visible={visible && modelLoaded}
+  //       data-light={theme === 'light'}
+  //       style={cssProps({ opacity: svgOpacity })}
+  //       className={styles.svg}
+  //       data-device={device}
+  //       viewBox="0 0 751 136"
+  //     >
+  //       <use href={`${katakana}#katakana-project`} />
+  //     </svg>
+  //   );
+  // }
 
   function renderDetails(visible) {
     return (
@@ -90,9 +89,16 @@ export function ProjectSummary({
           {description}
         </Text>
         <div className={styles.button} data-visible={visible}>
-          <Button iconHoverShift href={buttonLink} iconEnd="arrow-right">
-            {buttonText}
-          </Button>
+          {buttons.map((button, index) => (
+            <Button
+              key={index}
+              iconHoverShift
+              href={button.link}
+              iconEnd="arrow-right"
+            >
+              {button.text}
+            </Button>
+          ))}
         </div>
       </div>
     );
@@ -103,7 +109,7 @@ export function ProjectSummary({
       <div className={styles.preview}>
         {model.type === 'laptop' && (
           <>
-            {renderKatakana('laptop', visible)}
+            {/* {renderKatakana('laptop', visible)} */}
             <div className={styles.model} data-device="laptop">
               {!modelLoaded && (
                 <Loader center className={styles.loader} data-visible={visible} />
@@ -133,7 +139,7 @@ export function ProjectSummary({
         )}
         {model.type === 'phone' && (
           <>
-            {renderKatakana('phone', visible)}
+            {/* {renderKatakana('phone', visible)} */}
             <div className={styles.model} data-device="phone">
               {!modelLoaded && (
                 <Loader center className={styles.loader} data-visible={visible} />

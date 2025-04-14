@@ -1,15 +1,17 @@
-import gamestackTexture2Large from '~/assets/gamestack-list-large.jpg';
-import gamestackTexture2Placeholder from '~/assets/gamestack-list-placeholder.jpg';
-import gamestackTexture2 from '~/assets/gamestack-list.jpg';
-import gamestackTextureLarge from '~/assets/gamestack-login-large.jpg';
-import gamestackTexturePlaceholder from '~/assets/gamestack-login-placeholder.jpg';
-import gamestackTexture from '~/assets/gamestack-login.jpg';
-import sliceTextureLarge from '~/assets/slice-app-large.jpg';
-import sliceTexturePlaceholder from '~/assets/slice-app-placeholder.jpg';
-import sliceTexture from '~/assets/slice-app.jpg';
-import sprTextureLarge from '~/assets/spr-lesson-builder-dark-large.jpg';
-import sprTexturePlaceholder from '~/assets/spr-lesson-builder-dark-placeholder.jpg';
-import sprTexture from '~/assets/spr-lesson-builder-dark.jpg';
+// import gamestackTexture2Large from '~/assets/gamestack-list-large.jpg';
+// import gamestackTexture2Placeholder from '~/assets/gamestack-list-placeholder.jpg';
+// import gamestackTexture2 from '~/assets/gamestack-list.jpg';
+// import gamestackTextureLarge from '~/assets/gamestack-login-large.jpg';
+// import gamestackTexturePlaceholder from '~/assets/gamestack-login-placeholder.jpg';
+// import gamestackTexture from '~/assets/gamestack-login.jpg';
+// import sliceTextureLarge from '~/assets/slice-app-large.jpg';
+// import sliceTexturePlaceholder from '~/assets/slice-app-placeholder.jpg';
+// import sliceTexture from '~/assets/slice-app.jpg';
+// import sprTextureLarge from '~/assets/spr-lesson-builder-dark-large.jpg';
+// import sprTexturePlaceholder from '~/assets/spr-lesson-builder-dark-placeholder.jpg';
+// import sprTexture from '~/assets/spr-lesson-builder-dark.jpg';
+import geniusShooter1 from '~/assets/geniusshooter-1.jpg';
+import geniusShooter2 from '~/assets/geniusshooter-2.jpg';
 import { Footer } from '~/components/footer';
 import { baseMeta } from '~/utils/meta';
 import { Intro } from './intro';
@@ -51,12 +53,13 @@ export const Home = () => {
   const [scrollIndicatorHidden, setScrollIndicatorHidden] = useState(false);
   const intro = useRef();
   const projectOne = useRef();
-  const projectTwo = useRef();
-  const projectThree = useRef();
+  // const projectTwo = useRef();
+  // const projectThree = useRef();
   const details = useRef();
 
   useEffect(() => {
-    const sections = [intro, projectOne, projectTwo, projectThree, details];
+    // const sections = [intro, projectOne, projectTwo, projectThree, details];
+    const sections = [intro, projectOne, details];
 
     const sectionObserver = new IntersectionObserver(
       (entries, observer) => {
@@ -103,22 +106,34 @@ export const Home = () => {
         sectionRef={projectOne}
         visible={visibleSections.includes(projectOne.current)}
         index={1}
-        title="Designing the future of education"
-        description="Designing a platform to help educators build better online courseware"
-        buttonText="View project"
-        buttonLink="/projects/smart-sparrow"
+        title="Genius Shooter"
+        description="A roguelike mobile game with over 500,000+ global MAU, made by SAGI GAMES. I was a backend engineer in the team."
+        buttons={[
+          {
+            text: "App Store",
+            link: "https://apps.apple.com/us/app/genius-shooter-monster-killer/id1484026163"
+          },
+          {
+            text: "Play Store",
+            link: "https://play.google.com/store/apps/details?id=com.sagi.barrett&hl=en"
+          }
+        ]}
         model={{
-          type: 'laptop',
-          alt: 'Smart Sparrow lesson builder',
+          type: 'phone',
+          alt: 'Game UI',
           textures: [
             {
-              srcSet: `${sprTexture} 1280w, ${sprTextureLarge} 2560w`,
-              placeholder: sprTexturePlaceholder,
+              srcSet: `${geniusShooter2} 375w, ${geniusShooter2} 750w`,
+              placeholder: geniusShooter2,
+            },
+            {
+              srcSet: `${geniusShooter1} 375w, ${geniusShooter1} 750w`,
+              placeholder: geniusShooter1,
             },
           ],
         }}
       />
-      <ProjectSummary
+      {/* <ProjectSummary
         id="project-2"
         alternate
         sectionRef={projectTwo}
@@ -162,7 +177,7 @@ export const Home = () => {
             },
           ],
         }}
-      />
+      /> */}
       <Profile
         sectionRef={details}
         visible={visibleSections.includes(details.current)}
