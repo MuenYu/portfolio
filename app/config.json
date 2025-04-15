@@ -2,10 +2,18 @@
   "name": "Muen Yu",
   "role": "Full Stack Dev",
   "disciplines": ["AWS Certified", "Master of IT", "Blogger", "Homelabber"],
-  "url": "https://mashiro.best",
-  "bluesky": "hamishw.com",
-  "figma": "@Hamish",
-  "github": "MuenYu",
+  "social": {
+    "bluesky": "",
+    "figma": "",
+    "github": "muenyu",
+    "telegram": "",
+    "blog": "https://mashiro.best",
+    "x": "",
+    "linkedin": "muenyu-dev",
+    "leetcode": "muenyu",
+    "youtube": ""
+  },
+  "url": "https://me.mashiro.best",
   "repo": "https://github.com/HamishMW/portfolio",
   "ascii": "__  __  __\n\u005C \u005C \u005C \u005C \u005C\u2215\n \u005C \u005C\u2215\u005C \u005C\n  \u005C\u2215  \u005C\u2215\n"
 }
