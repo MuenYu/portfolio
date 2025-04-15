@@ -1,7 +1,14 @@
 {
   "name": "Muen Yu",
   "role": "Full Stack Dev",
-  "disciplines": ["AWS Certified", "Master of IT", "Blogger", "Homelabber"],
+  "disciplines": [
+    "AWS Certified",
+    "Master of IT",
+    "Blogger",
+    "Homelabber"
+  ],
+  "url": "https://me.mashiro.best",
+  "repo": "https://github.com/HamishMW/portfolio",
   "social": {
     "bluesky": "",
     "figma": "",
@@ -13,7 +20,12 @@
     "leetcode": "muenyu",
     "youtube": ""
   },
-  "url": "https://me.mashiro.best",
-  "repo": "https://github.com/HamishMW/portfolio",
+  "profile": {
+    "greeting": "Hi there",
+    "paragraphs": [
+      "I’m Muen Yu, currently I live in Brisbane seeking for a full-stack software engineer position. I used to work at a start-up game company [SAGI GAMES](https://sagigames.cn) as a backend engineer, responsible for game server & interior system development and cloud infrastructure. If you’re interested in the tools and software I use check out my [uses page](/uses).",
+      "In my spare time I like to write blog posts, develop & deploy automation in my homelab, watch Esport match and play video games."
+    ]
+  },
   "ascii": "__  __  __\n\u005C \u005C \u005C \u005C \u005C\u2215\n \u005C \u005C\u2215\u005C \u005C\n  \u005C\u2215  \u005C\u2215\n"
 }

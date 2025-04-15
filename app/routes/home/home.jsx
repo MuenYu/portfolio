@@ -11,7 +11,9 @@
 // import sprTexturePlaceholder from '~/assets/spr-lesson-builder-dark-placeholder.jpg';
 // import sprTexture from '~/assets/spr-lesson-builder-dark.jpg';
 import geniusShooter1 from '~/assets/geniusshooter-1.jpg';
+import geniusShooter1Placeholder from '~/assets/geniusshooter-1-placeholder.jpg';
 import geniusShooter2 from '~/assets/geniusshooter-2.jpg';
+import geniusShooter2Placeholder from '~/assets/geniusshooter-2-placeholder.jpg';
 import { Footer } from '~/components/footer';
 import { baseMeta } from '~/utils/meta';
 import { Intro } from './intro';
@@ -124,11 +126,11 @@ export const Home = () => {
           textures: [
             {
               srcSet: `${geniusShooter2} 375w, ${geniusShooter2} 750w`,
-              placeholder: geniusShooter2,
+              placeholder: geniusShooter2Placeholder,
             },
             {
               srcSet: `${geniusShooter1} 375w, ${geniusShooter1} 750w`,
-              placeholder: geniusShooter1,
+              placeholder: geniusShooter1Placeholder,
             },
           ],
         }}
