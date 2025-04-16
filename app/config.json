@@ -20,6 +20,36 @@
     "leetcode": "muenyu",
     "youtube": ""
   },
+  "projects": [
+    {
+      "title": "Genius Shooter",
+      "description": "A roguelike mobile game with over 500,000+ global MAU, made by SAGI GAMES. I was a backend engineer in the team.",
+      "buttons": [
+        {
+          "text": "App Store",
+          "link": "https://apps.apple.com/us/app/genius-shooter-monster-killer/id1484026163"
+        },
+        {
+          "text": "Play Store",
+          "link": "https://play.google.com/store/apps/details?id=com.sagi.barrett&hl=en"
+        }
+      ],
+      "model": {
+        "type": "phone",
+        "alt": "Game UI",
+        "textures": [
+          {
+            "srcSet": "/static/geniusshooter-2.jpg",
+            "placeholder": "/static/geniusshooter-2-placeholder.jpg"
+          },
+          {
+            "srcSet": "/static/geniusshooter-1.jpg",
+            "placeholder": "/static/geniusshooter-1-placeholder.jpg"
+          }
+        ]
+      }
+    }
+  ],
   "profile": {
     "greeting": "Hi there",
     "paragraphs": [
