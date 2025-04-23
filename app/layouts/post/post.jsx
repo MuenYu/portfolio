@@ -9,7 +9,7 @@ import { Transition } from '~/components/transition';
 import { useParallax, useScrollToHash } from '~/hooks';
 import { useRef, useState, useEffect } from 'react';
 import { clamp } from '~/utils/clamp';
-import { formatDate } from '~/utils/date';
+// import { formatDate } from '~/utils/date';
 import { cssProps, msToNum, numToMs } from '~/utils/style';
 import styles from './post.module.css';
 import { Link as RouterLink } from '@remix-run/react';
@@ -17,11 +17,11 @@ import { Link as RouterLink } from '@remix-run/react';
 export const Post = ({ children, title, date, banner, timecode }) => {
   const scrollToHash = useScrollToHash();
   const imageRef = useRef();
-  const [dateTime, setDateTime] = useState(null);
+  // const [dateTime, setDateTime] = useState(null);
 
-  useEffect(() => {
-    setDateTime(formatDate(date));
-  }, [date, dateTime]);
+  // useEffect(() => {
+  //   setDateTime(formatDate(date));
+  // }, [date, dateTime]);
 
   useParallax(0.004, value => {
     if (!imageRef.current) return;
@@ -60,7 +60,7 @@ export const Post = ({ children, title, date, banner, timecode }) => {
                 <div className={styles.date} ref={nodeRef}>
                   <Divider notchWidth="64px" notchHeight="8px" collapsed={!visible} />
                   <Text className={styles.dateText} data-visible={visible}>
-                    {dateTime}
+                    {date}
                   </Text>
                 </div>
               )}

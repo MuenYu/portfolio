@@ -10,19 +10,19 @@ import { useReducedMotion } from 'framer-motion';
 import { useWindowSize } from '~/hooks';
 import { Link as RouterLink, useLoaderData } from '@remix-run/react';
 import { useState, useEffect } from 'react';
-import { formatDate } from '~/utils/date';
+// import { formatDate } from '~/utils/date';
 import { classes, cssProps } from '~/utils/style';
 import styles from './articles.module.css';
 
 function ArticlesPost({ slug, frontmatter, timecode, index }) {
   const [hovered, setHovered] = useState(false);
-  const [dateTime, setDateTime] = useState(null);
+  // const [dateTime, setDateTime] = useState(null);
   const reduceMotion = useReducedMotion();
   const { title, abstract, date, featured, banner } = frontmatter;
 
-  useEffect(() => {
-    setDateTime(formatDate(date));
-  }, [date, dateTime]);
+  // useEffect(() => {
+  //   setDateTime(formatDate(date));
+  // }, [date, dateTime]);
 
   const handleMouseEnter = () => {
     setHovered(true);
@@ -66,7 +66,7 @@ function ArticlesPost({ slug, frontmatter, timecode, index }) {
         <div className={styles.postDetails}>
           <div aria-hidden className={styles.postDate}>
             <Divider notchWidth="64px" notchHeight="8px" />
-            {dateTime}
+            {date}
           </div>
           <Heading as="h2" level={featured ? 2 : 4}>
             {title}
@@ -76,7 +76,7 @@ function ArticlesPost({ slug, frontmatter, timecode, index }) {
           </Text>
           <div className={styles.postFooter}>
             <Button secondary iconHoverShift icon="chevron-right" as="div">
-              Read article
+              Learn more
             </Button>
             <Text className={styles.timecode} size="s">
               {timecode}
@@ -121,7 +121,7 @@ function SkeletonPost({ index }) {
           />
           <div className={styles.postFooter}>
             <Button secondary iconHoverShift icon="chevron-right" as="div">
-              Read more
+              Learn more
             </Button>
             <Text className={styles.timecode} size="s">
               00:00:00:00
@@ -142,7 +142,7 @@ export function Articles() {
   const postsHeader = (
     <header className={styles.header}>
       <Heading className={styles.heading} level={5} as="h1">
-        <DecoderText text="Latest articles" />
+        <DecoderText text="Experience" />
       </Heading>
       <Barcode className={styles.barcode} />
     </header>
@@ -154,7 +154,7 @@ export function Articles() {
       {posts.map(({ slug, ...post }, index) => (
         <ArticlesPost key={slug} slug={slug} index={index} {...post} />
       ))}
-      {Array(2)
+      {Array(Math.max(0, 3 - posts.length))
         .fill()
         .map((skeleton, index) => (
           <SkeletonPost key={index} index={index} />

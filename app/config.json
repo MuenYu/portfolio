@@ -53,7 +53,7 @@
   "profile": {
     "greeting": "Hi there",
     "paragraphs": [
-      "I'm Muen Yu, currently based in Brisbane and seeking a full-stack software engineer position. I previously worked at the startup game company [SAGI GAMES](https://sagigames.cn) as a backend engineer, where I was responsible for game server and internal system development, as well as cloud infrastructure. If you’re interested in the tools/software I use or my working style, please check out my [uses page](/uses).",
+      "I'm Muen Yu, currently based in Brisbane and seeking a full-stack software engineer position. I previously worked at the startup game company [SAGI GAMES](https://sagigames.cn) as a backend engineer, where I was responsible for game server and internal system development, as well as cloud infrastructure. If you’re interested in the tools/software I use, please check out my [uses page](/uses).",
       "In my spare time I like to write [blog posts](https://mashiro.best/archives/), develop & deploy automation in my homelab, watch Esport match and play video games."
     ]
   },
