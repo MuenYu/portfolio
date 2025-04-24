@@ -34,20 +34,16 @@
           "link": "https://play.google.com/store/apps/details?id=com.sagi.barrett&hl=en"
         }
       ],
-      "model": {
-        "type": "phone",
-        "alt": "Game UI",
-        "textures": [
-          {
-            "srcSet": "/static/geniusshooter-2.jpg",
-            "placeholder": "/static/geniusshooter-2-placeholder.jpg"
-          },
-          {
-            "srcSet": "/static/geniusshooter-1.jpg",
-            "placeholder": "/static/geniusshooter-1-placeholder.jpg"
-          }
-        ]
-      }
+      "models": [
+        {
+          "srcSet": "/static/geniusshooter-2.jpg",
+          "placeholder": "/static/geniusshooter-2-placeholder.jpg"
+        },
+        {
+          "srcSet": "/static/geniusshooter-1.jpg",
+          "placeholder": "/static/geniusshooter-1-placeholder.jpg"
+        }
+      ]
     }
   ],
   "profile": {

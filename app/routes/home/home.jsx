@@ -95,14 +95,25 @@ export const Home = () => {
           description={project.description}
           buttons={project.buttons}
           model={{
-            ...project.model,
-            textures: project.model.textures.map(texture => ({
-              ...texture,
-              srcSet: 
-                project.model.type === 'phone' ?
-              `${texture.srcSet} 375w, ${texture.srcSet} 750w`:
-              `${texture.srcSet} 800w, ${texture.srcSet} 1920w`,
-            })),
+            type: project.models.length === 1? 'laptop': 'phone',
+            alt: `${project.title} UI`,
+            textures: project.models.length === 1?
+              [
+                {
+                  srcSet: `${project.models[0].srcSet} 800w, ${project.models[0].srcSet} 1920w`,
+                  placeholder: project.models[0].placeholder,
+                },
+              ]:
+              [
+                {
+                  srcSet: `${project.models[0].srcSet} 375w, ${project.models[0].srcSet} 750w`,
+                  placeholder: project.models[0].placeholder,
+                },
+                {
+                  srcSet: `${project.models[1].srcSet} 375w, ${project.models[1].srcSet} 750w`,
+                  placeholder: project.models[1].placeholder,
+                },
+              ]
           }}
         />
       ))}
