@@ -39,10 +39,10 @@ export const Home = () => {
   const [scrollIndicatorHidden, setScrollIndicatorHidden] = useState(false);
   const intro = useRef();
   const projects = new Array(config.projects.length).fill().map(() => useRef());
-  const details = useRef();
+  const about = useRef();
 
   useEffect(() => {
-    const sections = [intro, ...projects, details];
+    const sections = [intro, ...projects, about];
 
     const sectionObserver = new IntersectionObserver(
       (entries, observer) => {
@@ -107,9 +107,9 @@ export const Home = () => {
         />
       ))}
       <Profile
-        sectionRef={details}
-        visible={visibleSections.includes(details.current)}
-        id="details"
+        sectionRef={about}
+        visible={visibleSections.includes(about.current)}
+        id="about"
       />
       <Footer />
     </div>
