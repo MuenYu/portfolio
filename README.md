@@ -1,56 +1,84 @@
 <p align="center">
   <img src="/public/favicon.svg" width="50" alt="Logo" />
 </p>
-<h1 align="center">Personal portfolio</h1>
+<h1 align="center">Personal Portfolio</h1>
 
 [![Site preview](/public/site-preview.png)](https://me.mashiro.best)
 
-My design portfolio to showcase a few projects. Built with [Remix](https://remix.run/), [Three.js](https://threejs.org/), and [Framer Motion](https://www.framer.com/motion/). View the [live site](https://me.mashiro.best) or check out a live version of the [components storybook](https://storybook.hamishw.com).
+## Project Introduction
+This is my personal portfolio website, showcasing my projects and skills. The site features:
+- Interactive 3D background animations
+- Responsive design for all devices
+- Project showcases with detailed case studies
+- Contact form integration
+- Dark/Light theme support
 
-## Install & run
+## My Customizations & Contributions
+I've made several enhancements to make this portfolio more maintainable:
+- Enhanced configuration structure for easier setup
+- Integrated EmailJS for modern contact form functionality
+- Streamlined environment variable management
+- Simplified deployment configuration
 
-Make sure you have nodejs `19.9.0` or higher and npm `9.6.3` or higher installed. Install dependencies with:
+## Tech Stack
+Built with modern web technologies:
+- [Remix](https://remix.run/) - Full stack web framework
+- [Three.js](https://threejs.org/) - 3D graphics library
+- [Framer Motion](https://www.framer.com/motion/) - Animation library
+- Cloudflare Pages for hosting
+
+## Installation & Development
+
+Requires:
+- Node.js `19.9.0` or higher
+- npm `9.6.3` or higher
 
 ```bash
+# Install dependencies
 npm install
-```
 
-Once it's done start up a local server with:
-
-```bash
+# Start development server
 npm run dev
-```
 
-To view the components storybook:
-
-```bash
+# Start Storybook
 npm run dev:storybook
 ```
 
 ## Deployment
-
-I've set up the site using Cloudflare for hosting. Deploy the site to Cloudflare Pages:
-
+Deploy to Cloudflare Pages:
 ```bash
 npm run deploy
 ```
 
-## Permissions
+## Environment Setup
+1. Copy .dev.vars.example to .dev.vars
+2. Configure your environment variables
+3. Add the same variables to Cloudflare Dashboard for production
 
-I'm cool with anyone using the code or parts of the code for their own site, it is open source so people can learn from it and adapt it. However, I would encourage you to modify the theme and components it to make it your own. If you are using the site's design largely unmodified, I'd appreciate being credited as the designer of the website.
+## Credits
+This portfolio is based on the original design by Hamish Williams . While I've made substantial customizations, the core design concept and structure were created by him.
 
-I do not give permission to present any of my projects as your own (this is being actively used as my portfolio site and these are my real projects I've worked on).
+## License & Usage
+While this code is open source, please:
 
+- Credit the original designer (Hamish Williams) if using the design largely unmodified
+- Make the theme and components your own through modifications
+- Do not present the included projects as your own work
 ## FAQs
+How do I change the DisplacementSphere colors?
 
-<details>
-  <summary>How do I change the color on the <code>DisplacementSphere</code> (blobby rotating thing in the background).</summary>
-  
-  You'll need to edit the fragment shader. [Check out this issue for more details](https://github.com/HamishMW/portfolio/issues/19#issuecomment-870996615).
-</details>
+Edit the fragment shader as detailed in the original issue .
 
-<details>
-  <summary>How do I get the contact form to work?</summary>
-  
-  To get the contact form working create an AWS account and set up SES (Simple Email service). Then plug in your details into `.dev.vars.example` and rename it to `.dev.vars`. You'll also need to add these as enviroment variables in the Cloudflare dashboard for it to work in production. Or if you don't mind sending through gmail use [nodemailer](https://nodemailer.com/) instead.
-</details>
+How do I set up the contact form?
+
+The contact form uses EmailJS for email functionality:
+
+1. Create an account at EmailJS
+2. Set up an email template and service
+3. Copy .dev.vars.example to .dev.vars
+4. Fill in your EmailJS credentials:
+   - SERVICE_ID: Your EmailJS service ID
+   - TEMPLATE_ID: Your email template ID
+   - USER_ID: Your EmailJS user ID
+   - ACCESSTOKEN: Your EmailJS access token
+5. Add these same variables to your Cloudflare Pages environment variables for production
