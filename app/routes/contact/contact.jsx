@@ -66,10 +66,10 @@ export async function action({ context, request }) {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      service_id: context.env.SERVICE_ID,
-      template_id: context.env.TEMPLATE_ID,
-      user_id: context.env.USER_ID,
-      accessToken: context.env.ACCESSTOKEN,
+      service_id: context.cloudflare.env.SERVICE_ID,
+      template_id: context.cloudflare.env.TEMPLATE_ID,
+      user_id: context.cloudflare.env.USER_ID,
+      accessToken: context.cloudflare.env.ACCESSTOKEN,
       template_params: {
         email: email,
         message: message
