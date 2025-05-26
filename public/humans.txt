@@ -28,8 +28,7 @@ Dev tools:
 Trae
 Jetbrains Webstorm
 
-twitter.com/hamishmw
-github.com/hamishmw
+github.com/muenyu
 
 _______________________________________________________________________________
 
