@@ -10,6 +10,7 @@
     "build": "remix vite:build",
     "dev": "remix vite:dev",
     "start": "wrangler pages dev ./build/client",
+    "test": "npm run build && npm run start",
     "postinstall": "node ./scripts/draco.cjs",
     "deploy": "npm run build && wrangler pages deploy ./build/client --project-name portfolio",
     "dev:storybook": "storybook dev -p 6006",
@@ -64,5 +65,8 @@
   },
   "engines": {
     "node": ">=19.9.0"
+  },
+  "volta": {
+    "node": "22.19.0"
   }
 }
