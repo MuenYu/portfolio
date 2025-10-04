@@ -10,6 +10,7 @@ node_modules
 
 public/draco
 storybook-static
+.react-router
 
 .DS_Store
 Thumbs.db

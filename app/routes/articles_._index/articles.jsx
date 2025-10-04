@@ -8,7 +8,7 @@ import { Section } from '~/components/section';
 import { Text } from '~/components/text';
 import { useReducedMotion } from 'framer-motion';
 import { useWindowSize } from '~/hooks';
-import { Link as RouterLink, useLoaderData } from '@remix-run/react';
+import { Link as RouterLink, useLoaderData } from 'react-router';
 import { useState, useEffect } from 'react';
 // import { formatDate } from '~/utils/date';
 import { classes, cssProps } from '~/utils/style';

@@ -1,4 +1,4 @@
-import { json, createCookieSessionStorage } from '@remix-run/cloudflare';
+import { createCookieSessionStorage } from 'react-router';
 
 export async function action({ request, context }) {
   const formData = await request.formData();
@@ -19,7 +19,7 @@ export async function action({ request, context }) {
   const session = await getSession(request.headers.get('Cookie'));
   session.set('theme', theme);
 
-  return json(
+  return Response.json(
     { status: 'success' },
     {
       headers: {

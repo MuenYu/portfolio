@@ -1,5 +1,5 @@
 import { forwardRef } from 'react';
-import { Link as RouterLink } from '@remix-run/react';
+import { Link as RouterLink } from 'react-router';
 import { classes } from '~/utils/style';
 import styles from './link.module.css';
 

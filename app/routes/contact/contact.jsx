@@ -1,3 +1,5 @@
+import { useRef } from 'react';
+import { Form, useActionData, useNavigation } from 'react-router';
 import { Button } from '~/components/button';
 import { DecoderText } from '~/components/decoder-text';
 import { Divider } from '~/components/divider';
@@ -10,11 +12,8 @@ import { Text } from '~/components/text';
 import { tokens } from '~/components/theme-provider/theme';
 import { Transition } from '~/components/transition';
 import { useFormInput } from '~/hooks';
-import { useRef } from 'react';
 import { cssProps, msToNum, numToMs } from '~/utils/style';
 import { baseMeta } from '~/utils/meta';
-import { Form, useActionData, useNavigation } from '@remix-run/react';
-import { json } from '@remix-run/cloudflare';
 import styles from './contact.module.css';
 
 export const meta = () => {
@@ -37,7 +36,7 @@ export async function action({ context, request }) {
   const errors = {};
 
   // Return without sending if a bot trips the honeypot
-  if (isBot) return json({ success: true });
+  if (isBot) return Response.json({ success: true });
 
   // Handle input validation on the server
   if (!email || !EMAIL_PATTERN.test(email)) {
@@ -57,7 +56,7 @@ export async function action({ context, request }) {
   }
 
   if (Object.keys(errors).length > 0) {
-    return json({ errors });
+    return Response.json({ errors });
   }
 
   const resp = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
@@ -78,9 +77,9 @@ export async function action({ context, request }) {
   });
   if (!resp.ok) {
     errors.message = await resp.text();
-    return json({ errors });
+    return Response.json({ errors });
   }
-  return json({ success: true });
+  return Response.json({ success: true });
 }
 
 export const Contact = () => {

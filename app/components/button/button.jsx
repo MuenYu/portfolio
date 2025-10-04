@@ -1,8 +1,8 @@
+import { Link } from 'react-router';
+import { forwardRef } from 'react';
 import { Icon } from '~/components/icon';
 import { Loader } from '~/components/loader';
 import { Transition } from '~/components/transition';
-import { Link } from '@remix-run/react';
-import { forwardRef } from 'react';
 import { classes } from '~/utils/style';
 import styles from './button.module.css';
 

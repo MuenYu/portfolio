@@ -1,5 +1,4 @@
-import { json } from '@remix-run/cloudflare';
-import { Outlet, useLoaderData } from '@remix-run/react';
+import { Outlet, useLoaderData } from 'react-router';
 import { MDXProvider } from '@mdx-js/react';
 import { Post, postMarkdown } from '~/layouts/post';
 import { baseMeta } from '~/utils/meta';
@@ -12,7 +11,7 @@ export async function loader({ request }) {
   const readTime = readingTime(text.default);
   // const ogImage = `${config.url}/static/${slug}-og.jpg`;
 
-  return json({
+  return Response.json({
     // ogImage,
     frontmatter: module.frontmatter,
     timecode: formatTimecode(readTime),

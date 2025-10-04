@@ -8,8 +8,8 @@ import {
   useLoaderData,
   useNavigation,
   useRouteError,
-} from '@remix-run/react';
-import { createCookieSessionStorage, json } from '@remix-run/cloudflare';
+  createCookieSessionStorage,
+} from 'react-router';
 import { ThemeProvider, themeStyles } from '~/components/theme-provider';
 import GothamBook from '~/assets/fonts/gotham-book.woff2';
 import GothamMedium from '~/assets/fonts/gotham-medium.woff2';
@@ -67,7 +67,7 @@ export const loader = async ({ request, context }) => {
   const session = await getSession(request.headers.get('Cookie'));
   const theme = session.get('theme') || 'dark';
 
-  return json(
+  return Response.json(
     { canonicalUrl, theme },
     {
       headers: {
