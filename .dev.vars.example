@@ -1,7 +1,7 @@
-# Rename this file to .dev.vars
-# They are EmailJS setting for contact me functionality
+# EmailJS Configuration
+# Replace with your actual credentials
 
-SERVICE_ID=
-TEMPLATE_ID=
-USER_ID=
-ACCESSTOKEN=
+SERVICE_ID="your_service_id"
+TEMPLATE_ID="your_template_id"
+USER_ID="your_user_id"
+ACCESSTOKEN="your_access_token"

@@ -22,7 +22,7 @@ I've made several enhancements to make this portfolio more maintainable:
 
 ## Tech Stack
 Built with modern web technologies:
-- [Remix](https://remix.run/) - Full stack web framework
+- [React Router](https://reactrouter.com/) - Declarative routing for React
 - [Three.js](https://threejs.org/) - 3D graphics library
 - [Framer Motion](https://www.framer.com/motion/) - Animation library
 - Cloudflare Pages for hosting
