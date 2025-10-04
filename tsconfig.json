@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "useDefineForClassFields": true,
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "allowJs": false,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": false,
+    "forceConsistentCasingInFileNames": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "types": ["node", "vite/client"],
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["app/*"]
+    }
+  },
+  "include": [
+    "app",
+    ".storybook",
+    "functions",
+    "scripts",
+    "vite.config.ts",
+    "env.d.ts"
+  ],
+  "exclude": ["node_modules", "build", "storybook-static"]
+}
