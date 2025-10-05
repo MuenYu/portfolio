@@ -4,10 +4,7 @@
   "description": "Portfolio site for Hamish Williams",
   "repository": "https://github.com/HamishMW/portfolio.git",
   "author": "Hamish Williams",
-  "sideEffects": [
-    "./app/reset.css",
-    "./app/global.css"
-  ],
+  "sideEffects": false,
   "type": "module",
   "scripts": {
     "build": "react-router build",
