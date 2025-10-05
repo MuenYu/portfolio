@@ -16,7 +16,8 @@
     "dev:storybook": "storybook dev -p 6006",
     "build:storybook": "storybook build",
     "deploy:storybook": "wrangler pages deploy ./storybook-static --project-name portfolio-storybook --branch main",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "test:canonical": "node --test tests/loader.test.mjs"
   },
   "dependencies": {
     "@mdx-js/react": "^3.1.1",
