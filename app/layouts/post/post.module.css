@@ -43,7 +43,9 @@
 
   .header {
     display: grid;
-    grid-template-columns: 1fr var(--gutterWidth) var(--contentWidth) var(--gutterWidth) 1fr;
+    grid-template-columns: 1fr var(--gutterWidth) var(--contentWidth) var(
+        --gutterWidth
+      ) 1fr;
     gap: var(--gutter);
     align-items: center;
 
@@ -95,7 +97,8 @@
     transition: opacity var(--durationXL) ease;
 
     @media (--mediaUseMotion) {
-      transition: opacity var(--durationXL) ease,
+      transition:
+        opacity var(--durationXL) ease,
         transform var(--durationXL) var(--bezierFastoutSlowin);
     }
 
@@ -268,7 +271,9 @@
     align-self: center;
     opacity: 0;
     display: grid;
-    grid-template-columns: 1fr var(--gutterWidth) var(--contentWidth) var(--gutterWidth) 1fr;
+    grid-template-columns: 1fr var(--gutterWidth) var(--contentWidth) var(
+        --gutterWidth
+      ) 1fr;
 
     &:global {
       animation: fade-in 1.2s var(--bezierFastoutSlowin) 1s forwards;

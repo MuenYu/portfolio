@@ -1,12 +1,7 @@
 {
   "name": "Muen Yu",
   "role": "Full Stack Dev",
-  "disciplines": [
-    "AWS Certified",
-    "Master of IT",
-    "Blogger",
-    "Homelabber"
-  ],
+  "disciplines": ["AWS Certified", "Master of IT", "Blogger", "Homelabber"],
   "url": "https://me.mashiro.best",
   "social": {
     "bluesky": "",

@@ -85,7 +85,8 @@
     left: var(--spaceS);
     transform: none;
     text-decoration: none;
-    transition: opacity var(--durationM) ease var(--durationXL),
+    transition:
+      opacity var(--durationM) ease var(--durationXL),
       color var(--durationM) ease;
     opacity: 0;
 

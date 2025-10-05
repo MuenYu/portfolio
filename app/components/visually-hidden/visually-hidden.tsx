@@ -16,7 +16,14 @@ type VisuallyHiddenComponent = <E extends ElementType = 'span'>(
 ) => ReactElement | null;
 
 const VisuallyHiddenBase = <E extends ElementType = 'span'>(
-  { className, showOnFocus, as, children, visible, ...rest }: PolymorphicProps<E, VisuallyHiddenOwnProps>,
+  {
+    className,
+    showOnFocus,
+    as,
+    children,
+    visible,
+    ...rest
+  }: PolymorphicProps<E, VisuallyHiddenOwnProps>,
   ref: PolymorphicRef<E>
 ) => {
   const Component = (as ?? 'span') as ElementType;

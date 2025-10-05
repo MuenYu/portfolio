@@ -19,7 +19,11 @@ export async function getPosts() {
     })
   );
 
-  return sortBy(posts.filter(x => x.frontmatter?.category === 'biography'), post => post.frontmatter.date, 'desc');
+  return sortBy(
+    posts.filter(x => x.frontmatter?.category === 'biography'),
+    post => post.frontmatter.date,
+    'desc'
+  );
 }
 
 function sortBy(arr, key, dir = 'asc') {

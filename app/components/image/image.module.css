@@ -7,7 +7,8 @@
     isolation: isolate;
 
     &[data-raised='true'] {
-      box-shadow: 0 50px 100px -20px color-mix(in lab, var(--black) 25%, transparent),
+      box-shadow:
+        0 50px 100px -20px color-mix(in lab, var(--black) 25%, transparent),
         0 30px 60px -30px color-mix(in lab, var(--black) 30%, transparent);
     }
 

@@ -79,7 +79,8 @@
     --angle: 180deg;
     --mask: #0000 var(--angle), #000 0;
 
-    mask: conic-gradient(white 0 25%, #0000 0 50%, white 0 75%, white 0 75%),
+    mask:
+      conic-gradient(white 0 25%, #0000 0 50%, white 0 75%, white 0 75%),
       conic-gradient(
           from calc(var(--angle) / -2 + 135deg) at bottom var(--size) right var(--size),
           var(--mask)

@@ -1,8 +1,4 @@
-export const clamp = (
-  number: number,
-  boundOne: number,
-  boundTwo?: number
-): number => {
+export const clamp = (number: number, boundOne: number, boundTwo?: number): number => {
   if (typeof boundTwo !== 'number') {
     return Math.max(number, boundOne) === boundOne ? number : boundOne;
   }

@@ -13,13 +13,17 @@ import katakana from './katakana.svg';
 import styles from './profile.module.css';
 import config from '~/config.json';
 
-const renderTextWithLinks = (text) => {
+const renderTextWithLinks = text => {
   const parts = text.split(/(\[.*?\]\(.*?\))/g);
   return parts.map((part, index) => {
     const linkMatch = part.match(/\[(.*?)\]\((.*?)\)/);
     if (linkMatch) {
       const [_, title, link] = linkMatch;
-      return <Link key={index} href={link}>{title}</Link>;
+      return (
+        <Link key={index} href={link}>
+          {title}
+        </Link>
+      );
     }
     return part;
   });
@@ -27,7 +31,13 @@ const renderTextWithLinks = (text) => {
 
 const ProfileText = ({ visible, titleId }) => {
   const paragraphs = config.profile.paragraphs.map((paragraph, index) => (
-    <Text key={index} className={styles.description} data-visible={visible} size="l" as="p">
+    <Text
+      key={index}
+      className={styles.description}
+      data-visible={visible}
+      size="l"
+      as="p"
+    >
       {renderTextWithLinks(paragraph)}
     </Text>
   ));

@@ -71,9 +71,9 @@ export async function action({ context, request }) {
       accessToken: context.cloudflare.env.ACCESSTOKEN,
       template_params: {
         email: email,
-        message: message
-      }
-    })
+        message: message,
+      },
+    }),
   });
   if (!resp.ok) {
     errors.message = await resp.text();

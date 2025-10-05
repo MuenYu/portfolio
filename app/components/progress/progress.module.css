@@ -26,7 +26,8 @@
       --delay: 300ms;
       --opacity: 0;
 
-      transition: transform var(--duration) var(--bezierFastoutSlowin) var(--delay),
+      transition:
+        transform var(--duration) var(--bezierFastoutSlowin) var(--delay),
         opacity var(--duration) var(--bezierFastoutSlowin);
     }
 

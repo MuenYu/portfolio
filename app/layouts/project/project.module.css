@@ -107,7 +107,8 @@
       inset: 0;
       transition: var(--durationM) ease;
       transition-property: --background1, --background2, --background3;
-      background: linear-gradient(
+      background:
+        linear-gradient(
           var(--background1) 0%,
           var(--background2) 20%,
           var(--background3) 100%
@@ -119,7 +120,8 @@
         );
 
       @supports (background: linear-gradient(in lab, red, red)) {
-        background: linear-gradient(
+        background:
+          linear-gradient(
             in lab,
             var(--background1) 0%,
             var(--background2) 20%,

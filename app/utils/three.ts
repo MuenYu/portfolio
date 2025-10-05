@@ -49,7 +49,11 @@ export const cleanMaterial = (material: DisposableMaterial): void => {
 
   for (const key of Object.keys(material)) {
     const value = material[key];
-    if (value && typeof value === 'object' && 'minFilter' in (value as Record<string, unknown>)) {
+    if (
+      value &&
+      typeof value === 'object' &&
+      'minFilter' in (value as Record<string, unknown>)
+    ) {
       const disposable = value as {
         dispose?: () => void;
         source?: { data?: { close?: () => void } };

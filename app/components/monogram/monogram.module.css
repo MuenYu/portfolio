@@ -12,7 +12,8 @@
     transition: opacity 0.1s ease var(--durationM);
 
     @media (--mediaUseMotion) {
-      transition: transform var(--durationM) var(--bezierFastoutSlowin),
+      transition:
+        transform var(--durationM) var(--bezierFastoutSlowin),
         opacity 0.1s ease var(--durationM);
     }
 
@@ -23,7 +24,8 @@
       transition: opacity 0.1s ease;
 
       @media (--mediaUseMotion) {
-        transition: transform var(--durationM) var(--bezierFastoutSlowin),
+        transition:
+          transform var(--durationM) var(--bezierFastoutSlowin),
           opacity 0.1s ease;
       }
     }

@@ -5,10 +5,7 @@ import { baseMeta } from '~/utils/meta';
 import { formatTimecode, readingTime } from '~/utils/timecode';
 
 export async function loader({ request }) {
-  const slug = new URL(request.url).pathname
-    .split('/')
-    .filter(Boolean)
-    .at(-1);
+  const slug = new URL(request.url).pathname.split('/').filter(Boolean).at(-1);
 
   if (!slug || slug === 'articles') {
     return null;

@@ -78,8 +78,6 @@ export function cssProps(
 /**
  * Concatenate classNames together
  */
-export function classes(
-  ...classNames: Array<string | false | null | undefined>
-): string {
+export function classes(...classNames: Array<string | false | null | undefined>): string {
   return classNames.filter(Boolean).join(' ');
 }

@@ -90,12 +90,7 @@ export function ProjectSummary({
         </Text>
         <div className={styles.button} data-visible={visible}>
           {buttons.map((button, index) => (
-            <Button
-              key={index}
-              iconHoverShift
-              href={button.link}
-              iconEnd="arrow-right"
-            >
+            <Button key={index} iconHoverShift href={button.link} iconEnd="arrow-right">
               {button.text}
             </Button>
           ))}

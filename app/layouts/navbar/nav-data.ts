@@ -65,7 +65,7 @@ export const socialLinks = [
     url: `https://www.figma.com/${config.social.figma}`,
     icon: 'figma',
   },
-].filter(x=> {
+].filter(x => {
   const flag = config.social[x.label.toLowerCase()];
   // Filter out social links that are not in config.json
   return flag !== undefined && flag.length > 0;

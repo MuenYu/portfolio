@@ -81,7 +81,8 @@
     transition: color var(--durationM) ease;
 
     @media (--mediaUseMotion) {
-      transition: transform var(--durationM) var(--bezierFastoutSlowin),
+      transition:
+        transform var(--durationM) var(--bezierFastoutSlowin),
         color var(--durationM) ease;
     }
 

@@ -38,7 +38,11 @@ type CharOutput = {
   value: string;
 };
 
-function shuffle(content: string[], output: CharOutput[], position: number): CharOutput[] {
+function shuffle(
+  content: string[],
+  output: CharOutput[],
+  position: number
+): CharOutput[] {
   return content.map((value, index) => {
     if (index < position) {
       return { type: CharType.Value, value };
@@ -61,7 +65,13 @@ type DecoderTextProps = Omit<ComponentPropsWithoutRef<'span'>, 'children'> & {
 };
 
 const DecoderTextComponent = memo(
-  ({ text, start = true, delay: startDelay = 0, className, ...rest }: DecoderTextProps) => {
+  ({
+    text,
+    start = true,
+    delay: startDelay = 0,
+    className,
+    ...rest
+  }: DecoderTextProps) => {
     const output = useRef<CharOutput[]>([{ type: CharType.Glyph, value: '' }]);
     const container = useRef<HTMLSpanElement | null>(null);
     const reduceMotion = useReducedMotion();

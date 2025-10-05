@@ -6,7 +6,9 @@
 [![Site preview](/public/site-preview.png)](https://me.mashiro.best)
 
 ## Project Introduction
+
 This is my personal portfolio website, showcasing my projects and skills. The site features:
+
 - Interactive 3D background animations
 - Responsive design for all devices
 - Project showcases with detailed case studies
@@ -14,14 +16,18 @@ This is my personal portfolio website, showcasing my projects and skills. The si
 - Dark/Light theme support
 
 ## My Customizations & Contributions
+
 I've made several enhancements to make this portfolio more maintainable:
+
 - Enhanced configuration structure for easier setup
 - Integrated EmailJS for modern contact form functionality
 - Streamlined environment variable management
 - Simplified deployment configuration
 
 ## Tech Stack
+
 Built with modern web technologies:
+
 - [React Router](https://reactrouter.com/) - Declarative routing for React
 - [Three.js](https://threejs.org/) - 3D graphics library
 - [Framer Motion](https://www.framer.com/motion/) - Animation library
@@ -30,6 +36,7 @@ Built with modern web technologies:
 ## Installation & Development
 
 Requires:
+
 - Node.js `19.9.0` or higher
 - npm `9.6.3` or higher
 
@@ -42,29 +49,39 @@ npm run dev
 
 # Start Storybook
 npm run dev:storybook
+
+# format codebase
+npm run format
 ```
 
 ## Deployment
+
 Deploy to Cloudflare Pages:
+
 ```bash
 npm run deploy
 ```
 
 ## Environment Setup
+
 1. Copy .dev.vars.example to .dev.vars
 2. Configure your environment variables
 3. Add the same variables to Cloudflare Dashboard for production
 
 ## Credits
+
 This portfolio is based on the original design by Hamish Williams . While I've made substantial customizations, the core design concept and structure were created by him.
 
 ## License & Usage
+
 While this code is open source, please:
 
 - Credit the original designer (Hamish Williams) if using the design largely unmodified
 - Make the theme and components your own through modifications
 - Do not present the included projects as your own work
+
 ## FAQs
+
 How do I change the DisplacementSphere colors?
 
 Edit the fragment shader as detailed in the original issue .

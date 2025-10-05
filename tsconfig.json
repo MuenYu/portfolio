@@ -21,13 +21,6 @@
       "~/*": ["app/*"]
     }
   },
-  "include": [
-    "app",
-    ".storybook",
-    "functions",
-    "scripts",
-    "vite.config.ts",
-    "env.d.ts"
-  ],
+  "include": ["app", ".storybook", "functions", "scripts", "vite.config.ts", "env.d.ts"],
   "exclude": ["node_modules", "build", "storybook-static"]
 }
