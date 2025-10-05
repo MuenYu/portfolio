@@ -18,7 +18,9 @@
     "deploy": "npm run build && wrangler pages deploy ./build/client --project-name portfolio",
     "dev:storybook": "storybook dev -p 6006",
     "build:storybook": "storybook build",
-    "deploy:storybook": "wrangler pages deploy ./storybook-static --project-name portfolio-storybook --branch main"
+    "deploy:storybook": "wrangler pages deploy ./storybook-static --project-name portfolio-storybook --branch main",
+    "lint": "node ./scripts/run-eslint.cjs --ext .js,.jsx,.ts,.tsx .",
+    "lint:fix": "node ./scripts/run-eslint.cjs --ext .js,.jsx,.ts,.tsx --fix ."
   },
   "dependencies": {
     "@mdx-js/react": "^3.1.1",
@@ -49,6 +51,8 @@
     "@storybook/react-vite": "^8.6.14",
     "@storybook/test": "^8.6.14",
     "@vitejs/plugin-react": "^5.0.4",
+    "@typescript-eslint/eslint-plugin": "file:vendor/@typescript-eslint/eslint-plugin",
+    "@typescript-eslint/parser": "file:vendor/@typescript-eslint/parser",
     "eslint": "^9.35.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",

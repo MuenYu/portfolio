@@ -4,6 +4,7 @@ import { Intro } from './intro';
 import { Profile } from './profile';
 import { ProjectSummary } from './project-summary';
 import { useEffect, useRef, useState } from 'react';
+import type { RefObject } from 'react';
 import config from '~/config.json';
 import styles from './home.module.css';
 
@@ -35,14 +36,16 @@ export const meta = () => {
 };
 
 export const Home = () => {
-  const [visibleSections, setVisibleSections] = useState([]);
+  const [visibleSections, setVisibleSections] = useState<HTMLElement[]>([]);
   const [scrollIndicatorHidden, setScrollIndicatorHidden] = useState(false);
-  const intro = useRef();
-  const projects = new Array(config.projects.length).fill().map(() => useRef());
-  const about = useRef();
+  const intro = useRef<HTMLElement | null>(null);
+  const projects = useRef<RefObject<HTMLElement>[]>(
+    config.projects.map(() => ({ current: null } as RefObject<HTMLElement>))
+  );
+  const about = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    const sections = [intro, ...projects, about];
+    const sections = [intro, ...projects.current, about];
 
     const sectionObserver = new IntersectionObserver(
       (entries, observer) => {
@@ -66,10 +69,14 @@ export const Home = () => {
     );
 
     sections.forEach(section => {
-      sectionObserver.observe(section.current);
+      if (section.current) {
+        sectionObserver.observe(section.current);
+      }
     });
 
-    indicatorObserver.observe(intro.current);
+    if (intro.current) {
+      indicatorObserver.observe(intro.current);
+    }
 
     return () => {
       sectionObserver.disconnect();
@@ -84,39 +91,44 @@ export const Home = () => {
         sectionRef={intro}
         scrollIndicatorHidden={scrollIndicatorHidden}
       />
-      {config.projects.map((project, index) => (
-        <ProjectSummary
-          key={index}
-          id={`project-${index + 1}`}
-          sectionRef={projects[index]}
-          visible={visibleSections.includes(projects[index].current)}
-          index={index + 1}
-          title={project.title}
-          description={project.description}
-          buttons={project.buttons}
-          model={{
-            type: project.models.length === 1? 'laptop': 'phone',
-            alt: `${project.title} UI`,
-            textures: project.models.length === 1?
-              [
-                {
-                  srcSet: `${project.models[0].srcSet} 800w, ${project.models[0].srcSet} 1920w`,
-                  placeholder: project.models[0].placeholder,
-                },
-              ]:
-              [
-                {
-                  srcSet: `${project.models[0].srcSet} 375w, ${project.models[0].srcSet} 750w`,
-                  placeholder: project.models[0].placeholder,
-                },
-                {
-                  srcSet: `${project.models[1].srcSet} 375w, ${project.models[1].srcSet} 750w`,
-                  placeholder: project.models[1].placeholder,
-                },
-              ]
-          }}
-        />
-      ))}
+      {config.projects.map((project, index) => {
+        const section = projects.current[index]?.current ?? null;
+
+        return (
+          <ProjectSummary
+            key={index}
+            id={`project-${index + 1}`}
+            sectionRef={projects.current[index]}
+            visible={section != null && visibleSections.includes(section)}
+            index={index + 1}
+            title={project.title}
+            description={project.description}
+            buttons={project.buttons}
+            model={{
+              type: project.models.length === 1 ? 'laptop' : 'phone',
+              alt: `${project.title} UI`,
+              textures:
+                project.models.length === 1
+                  ? [
+                      {
+                        srcSet: `${project.models[0].srcSet} 800w, ${project.models[0].srcSet} 1920w`,
+                        placeholder: project.models[0].placeholder,
+                      },
+                    ]
+                  : [
+                      {
+                        srcSet: `${project.models[0].srcSet} 375w, ${project.models[0].srcSet} 750w`,
+                        placeholder: project.models[0].placeholder,
+                      },
+                      {
+                        srcSet: `${project.models[1].srcSet} 375w, ${project.models[1].srcSet} 750w`,
+                        placeholder: project.models[1].placeholder,
+                      },
+                    ],
+            }}
+          />
+        );
+      })}
       <Profile
         sectionRef={about}
         visible={visibleSections.includes(about.current)}

@@ -10,11 +10,6 @@ declare module '*.css?url' {
   export default href;
 }
 
-declare module '*.css' {
-  const classes: { readonly [key: string]: string };
-  export default classes;
-}
-
 declare module '*.mdx' {
   import type { MDXProps } from 'mdx/types';
   const MDXComponent: (props: MDXProps) => JSX.Element;
@@ -23,31 +18,31 @@ declare module '*.mdx' {
 }
 
 declare module '*.glb' {
-  const src: string;
-  export default src;
+  const glbSrc: string;
+  export default glbSrc;
 }
 
 declare module '*.hdr' {
-  const src: string;
-  export default src;
+  const hdrSrc: string;
+  export default hdrSrc;
 }
 
 declare module '*.glsl' {
-  const src: string;
-  export default src;
+  const glslSrc: string;
+  export default glslSrc;
 }
 
 declare module '*.woff2' {
-  const src: string;
-  export default src;
+  const fontSrc: string;
+  export default fontSrc;
 }
 
 declare module '*.svg?url' {
-  const href: string;
-  export default href;
+  const svgHref: string;
+  export default svgHref;
 }
 
 declare module '*.png?url' {
-  const href: string;
-  export default href;
+  const pngHref: string;
+  export default pngHref;
 }
