@@ -25,7 +25,7 @@
    - Update `app/routes/contact/contact.tsx` to consume the typed APIs without explicit casts.
    - Run `npx tsc --noEmit` to verify contact form stories and route compile.
 
-6. [ ] Type media and animation components
+6. [x] Type media and animation components
    - Introduce precise prop/state types for `Image`, `Carousel`, `Model`, `Progress`, and `Code` components (plus their stories).
    - Ensure Three.js helpers (`app/routes/home/displacement-sphere.tsx`, `app/utils/three.ts`) expose typed contracts used by these components.
    - Validate via `npx tsc --noEmit` focusing on media-related modules.
