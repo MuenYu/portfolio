@@ -7,20 +7,24 @@
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "strict": false,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
     "forceConsistentCasingInFileNames": true,
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "resolveJsonModule": true,
+    "allowArbitraryExtensions": true,
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
     "types": ["node", "vite/client"],
     "baseUrl": ".",
     "paths": {
-      "~/*": ["app/*"]
+      "~/*": ["app/*"],
+      "miniflare": ["types/miniflare"],
+      "miniflare/*": ["types/miniflare/*"]
     }
   },
-  "include": ["app", ".storybook", "functions", "scripts", "vite.config.ts", "env.d.ts"],
+  "include": ["app", ".storybook", "functions", "scripts", "vite.config.ts", "env.d.ts", "types"],
   "exclude": ["node_modules", "build", "storybook-static"]
 }

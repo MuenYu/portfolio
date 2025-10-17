@@ -40,7 +40,7 @@
    - Share route data types via `app/routes.ts` (or a new `app/types/routes.ts`) to eliminate duplicate shapes.
    - Confirm `npx tsc --noEmit` succeeds with no implicit `any` in routes.
 
-9. [ ] Enforce strict compiler settings and tooling
+9. [x] Enforce strict compiler settings and tooling
    - Enable `strict: true`, add `noUncheckedIndexedAccess`, tighten `skipLibCheck` as feasible, and surface remaining errors.
    - Create a `typecheck` npm script (e.g. `"typecheck": "tsc --noEmit"`) and update CI/docs.
    - Address the `vite.config.ts` typing mismatch (plugin options) so the stricter compiler run is green.

@@ -52,6 +52,9 @@ npm run dev:storybook
 
 # format codebase
 npm run format
+
+# Run the strict type checker
+npm run typecheck
 ```
 
 ## Deployment

@@ -1,0 +1,191 @@
+
+> typecheck
+> tsc --noEmit
+
+app/components/button/button.tsx(127,34): error TS2345: Argument of type '<E extends ElementType = "button">({ className, as, secondary, loading, loadingText, icon, iconEnd, iconHoverShift, iconOnly, children, rel, target, href, disabled, ...rest }: ButtonProps<E>, ref: PolymorphicRef<E>) => JSX.Element' is not assignable to parameter of type 'ForwardRefRenderFunction<unknown, Omit<ButtonProps<ElementType>, "ref">>'.
+  Types of parameters 'ref' and 'ref' are incompatible.
+    Type 'ForwardedRef<unknown>' is not assignable to type 'PolymorphicRef<"button">'.
+      Type 'MutableRefObject<unknown>' is not assignable to type 'PolymorphicRef<"button">'.
+        Type 'MutableRefObject<unknown>' is not assignable to type 'MutableRefObject<HTMLButtonElement | null>'.
+          Type 'unknown' is not assignable to type 'HTMLButtonElement | null'.
+app/components/carousel/carousel.tsx(184,25): error TS2322: Type '{ dispFactor: { type: string; value: number; }; direction: { type: string; value: number; }; currentImage: { type: string; value: Texture | undefined; }; nextImage: { type: string; value: Texture | undefined; }; reduceMotion: { ...; }; }' is not assignable to type 'Record<string, IUniform>'.
+  Property 'dispFactor' is incompatible with index signature.
+    Object literal may only specify known properties, and 'type' does not exist in type 'IUniform'.
+app/components/carousel/carousel.tsx(186,38): error TS2322: Type 'Texture | undefined' is not assignable to type 'Texture'.
+  Type 'undefined' is not assignable to type 'Texture'.
+app/components/carousel/carousel.tsx(187,35): error TS2322: Type 'Texture | undefined' is not assignable to type 'Texture'.
+  Type 'undefined' is not assignable to type 'Texture'.
+app/components/carousel/carousel.tsx(188,38): error TS2322: Type 'boolean | null' is not assignable to type 'boolean'.
+  Type 'null' is not assignable to type 'boolean'.
+app/components/icon/icon.stories.tsx(16,3): error TS2322: Type '{}' is not assignable to type 'Partial<{ string?: string | number | undefined; opacity?: string | number | undefined; end?: string | number | undefined; accumulate?: "none" | "sum" | undefined; local?: string | number | undefined; ... 471 more ...; ref?: LegacyRef<...> | undefined; }> & { ...; }'.
+  Property 'icon' is missing in type '{}' but required in type '{ string?: string | number | undefined; opacity?: string | number | undefined; end?: string | number | undefined; accumulate?: "none" | "sum" | undefined; local?: string | number | undefined; ... 471 more ...; ref?: LegacyRef<...> | undefined; }'.
+app/components/image/image.tsx(22,18): error TS2430: Interface 'ImageProps' incorrectly extends interface 'Omit<MediaElementAttributes, "style" | "className">'.
+  Types of property 'onLoad' are incompatible.
+    Type '((event: SyntheticEvent<HTMLImageElement, Event>) => void) | undefined' is not assignable to type '(ReactEventHandler<HTMLImageElement> & ReactEventHandler<HTMLVideoElement>) | undefined'.
+      Type '(event: SyntheticEvent<HTMLImageElement, Event>) => void' is not assignable to type 'ReactEventHandler<HTMLImageElement> & ReactEventHandler<HTMLVideoElement>'.
+        Type '(event: SyntheticEvent<HTMLImageElement, Event>) => void' is not assignable to type 'ReactEventHandler<HTMLVideoElement>'.
+          Types of parameters 'event' and 'event' are incompatible.
+            Type 'SyntheticEvent<HTMLVideoElement, Event>' is not assignable to type 'SyntheticEvent<HTMLImageElement, Event>'.
+              Type 'HTMLVideoElement' is missing the following properties from type 'HTMLImageElement': align, alt, border, complete, and 18 more.
+app/components/model/device-models.ts(1,22): error TS2307: Cannot find module '~/assets/iphone-11.glb' or its corresponding type declarations.
+app/components/model/device-models.ts(2,24): error TS2307: Cannot find module '~/assets/macbook-pro.glb' or its corresponding type declarations.
+app/components/model/model.tsx(32,10): error TS2614: Module '"three-stdlib"' has no exported member 'HorizontalBlurShader'. Did you mean to use 'import HorizontalBlurShader from "three-stdlib"' instead?
+app/components/model/model.tsx(32,32): error TS2614: Module '"three-stdlib"' has no exported member 'VerticalBlurShader'. Did you mean to use 'import VerticalBlurShader from "three-stdlib"' instead?
+app/components/model/model.tsx(237,7): error TS2322: Type 'IUniform | undefined' is not assignable to type 'IUniform'.
+  Type 'undefined' is not assignable to type 'IUniform'.
+app/components/model/model.tsx(373,13): error TS18046: 'event' is of type 'unknown'.
+app/components/model/model.tsx(374,13): error TS18046: 'event' is of type 'unknown'.
+app/components/model/model.tsx(494,28): error TS2722: Cannot invoke an object which is possibly 'undefined'.
+app/components/model/model.tsx(519,33): error TS7006: Parameter 'node' implicitly has an 'any' type.
+app/components/model/model.tsx(597,13): error TS7006: Parameter 'node' implicitly has an 'any' type.
+app/components/model/model.tsx(659,3): error TS2322: Type 'null' is not assignable to type 'Element'.
+app/components/section/section.tsx(31,35): error TS2345: Argument of type '<E extends ElementType = "div">({ as, children, className, ...rest }: SectionProps<E>, ref: PolymorphicRef<E>) => JSX.Element' is not assignable to parameter of type 'ForwardRefRenderFunction<unknown, Omit<SectionProps<ElementType>, "ref">>'.
+  Types of parameters 'ref' and 'ref' are incompatible.
+    Type 'ForwardedRef<unknown>' is not assignable to type 'PolymorphicRef<"div">'.
+      Type 'MutableRefObject<unknown>' is not assignable to type 'PolymorphicRef<"div">'.
+        Type 'MutableRefObject<unknown>' is not assignable to type 'MutableRefObject<HTMLDivElement | null>'.
+          Type 'unknown' is not assignable to type 'HTMLDivElement | null'.
+app/components/table/table.tsx(3,25): error TS7031: Binding element 'children' implicitly has an 'any' type.
+app/components/table/table.tsx(5,28): error TS7031: Binding element 'children' implicitly has an 'any' type.
+app/components/table/table.tsx(7,29): error TS7031: Binding element 'children' implicitly has an 'any' type.
+app/components/table/table.tsx(11,29): error TS7031: Binding element 'children' implicitly has an 'any' type.
+app/components/table/table.tsx(15,33): error TS7031: Binding element 'children' implicitly has an 'any' type.
+app/components/table/table.tsx(19,29): error TS7031: Binding element 'children' implicitly has an 'any' type.
+app/components/text/text.tsx(54,32): error TS2345: Argument of type '<E extends ElementType = "span">({ children, size, as, align, weight, secondary, className, ...rest }: PolymorphicProps<E, TextOwnProps>, ref: PolymorphicRef<E>) => JSX.Element' is not assignable to parameter of type 'ForwardRefRenderFunction<unknown, Omit<PolymorphicProps<ElementType, TextOwnProps>, "ref">>'.
+  Types of parameters 'ref' and 'ref' are incompatible.
+    Type 'ForwardedRef<unknown>' is not assignable to type 'PolymorphicRef<"span">'.
+      Type 'MutableRefObject<unknown>' is not assignable to type 'PolymorphicRef<"span">'.
+        Type 'MutableRefObject<unknown>' is not assignable to type 'MutableRefObject<HTMLSpanElement | null>'.
+          Type 'unknown' is not assignable to type 'HTMLSpanElement | null'.
+app/components/theme-provider/theme-provider.tsx(75,24): error TS7006: Parameter 'styles' implicitly has an 'any' type.
+app/components/theme-provider/theme-provider.tsx(82,39): error TS7006: Parameter 'theme' implicitly has an 'any' type.
+app/components/theme-provider/theme-provider.tsx(93,40): error TS7006: Parameter 'theme' implicitly has an 'any' type.
+app/components/theme-provider/theme-provider.tsx(97,5): error TS7053: Element implicitly has an 'any' type because expression of type '`--${string}`' can't be used to index type '{}'.
+app/components/theme-provider/theme-provider.tsx(111,30): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ desktop: number; laptop: number; tablet: number; mobile: number; mobileS: number; }'.
+  No index signature with a parameter of type 'string' was found on type '{ desktop: number; laptop: number; tablet: number; mobile: number; mobileS: number; }'.
+app/components/theme-provider/theme-provider.tsx(113,37): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ base: { black: string; white: string; bezierFastoutSlowin: string; durationXS: string; durationS: string; durationM: string; durationL: string; durationXL: string; systemFontStack: string; fontStack: string; ... 37 more ...; zIndex5: number; }; ... 4 more ...; mobileS: { ...; }; }'.
+  No index signature with a parameter of type 'string' was found on type '{ base: { black: string; white: string; bezierFastoutSlowin: string; durationXS: string; durationS: string; durationM: string; durationL: string; durationXL: string; systemFontStack: string; fontStack: string; ... 37 more ...; zIndex5: number; }; ... 4 more ...; mobileS: { ...; }; }'.
+app/components/visually-hidden/visually-hidden.tsx(44,42): error TS2345: Argument of type '<E extends ElementType = "span">({ className, showOnFocus, as, children, visible, ...rest }: PolymorphicProps<E, VisuallyHiddenOwnProps>, ref: PolymorphicRef<E>) => JSX.Element' is not assignable to parameter of type 'ForwardRefRenderFunction<unknown, Omit<PolymorphicProps<ElementType, VisuallyHiddenOwnProps>, "ref">>'.
+  Types of parameters 'ref' and 'ref' are incompatible.
+    Type 'ForwardedRef<unknown>' is not assignable to type 'PolymorphicRef<"span">'.
+      Type 'MutableRefObject<unknown>' is not assignable to type 'PolymorphicRef<"span">'.
+        Type 'MutableRefObject<unknown>' is not assignable to type 'MutableRefObject<HTMLSpanElement | null>'.
+          Type 'unknown' is not assignable to type 'HTMLSpanElement | null'.
+app/entry.server.tsx(6,3): error TS7006: Parameter 'request' implicitly has an 'any' type.
+app/entry.server.tsx(7,3): error TS7006: Parameter 'responseStatusCode' implicitly has an 'any' type.
+app/entry.server.tsx(8,3): error TS7006: Parameter 'responseHeaders' implicitly has an 'any' type.
+app/entry.server.tsx(9,3): error TS7006: Parameter 'routerContext' implicitly has an 'any' type.
+app/hooks/useInViewport.ts(17,15): error TS2339: Property 'isIntersecting' does not exist on type 'IntersectionObserverEntry | undefined'.
+app/hooks/useInViewport.ts(17,31): error TS2339: Property 'target' does not exist on type 'IntersectionObserverEntry | undefined'.
+app/hooks/useScrollToHash.ts(51,3): error TS2322: Type '(hash: string, onDone?: () => void) => (() => void) | undefined' is not assignable to type '(hash: string, onDone?: (() => void) | undefined) => () => void'.
+  Type '(() => void) | undefined' is not assignable to type '() => void'.
+    Type 'undefined' is not assignable to type '() => void'.
+app/layouts/error/error.tsx(28,42): error TS2339: Property 'message' does not exist on type '{}'.
+app/layouts/navbar/navbar.tsx(188,14): error TS2322: Type '{ children: string; unstable_viewtransition: string; prefetch: "intent"; to: string; key: string; "data-navbar-item": true; className: string | undefined; "aria-current": "" | "page"; onClick: (event: MouseEvent<...>) => void; }' is not assignable to type 'LinkProps'.
+  Types of property '"aria-current"' are incompatible.
+    Type '"" | "page"' is not assignable to type 'boolean | "page" | "false" | "true" | "time" | "step" | "location" | "date" | undefined'.
+      Type '""' is not assignable to type 'boolean | "page" | "false" | "true" | "time" | "step" | "location" | "date" | undefined'.
+app/layouts/navbar/navbar.tsx(206,68): error TS2322: Type 'MutableRefObject<Element | null>' is not assignable to type 'LegacyRef<HTMLElement> | undefined'.
+  Type 'MutableRefObject<Element | null>' is not assignable to type 'RefObject<HTMLElement>'.
+    Types of property 'current' are incompatible.
+      Type 'Element | null' is not assignable to type 'HTMLElement | null'.
+        Type 'Element' is missing the following properties from type 'HTMLElement': accessKey, accessKeyLabel, autocapitalize, autocorrect, and 130 more.
+app/layouts/navbar/navbar.tsx(208,16): error TS2322: Type '{ children: string; unstable_viewtransition: string; prefetch: "intent"; to: string; key: string; className: string | undefined; "data-visible": boolean; "aria-current": "" | "page"; onClick: (event: MouseEvent<...>) => void; style: CSSProperties; }' is not assignable to type 'LinkProps'.
+  Types of property '"aria-current"' are incompatible.
+    Type '"" | "page"' is not assignable to type 'boolean | "page" | "false" | "true" | "time" | "step" | "location" | "date" | undefined'.
+      Type '""' is not assignable to type 'boolean | "page" | "false" | "true" | "time" | "step" | "location" | "date" | undefined'.
+app/layouts/navbar/theme-toggle.tsx(21,22): error TS2722: Cannot invoke an object which is possibly 'undefined'.
+app/layouts/post/post-markdown.tsx(30,22): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+app/layouts/post/post-markdown.tsx(37,22): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+app/layouts/post/post-markdown.tsx(44,22): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+app/layouts/post/post-markdown.tsx(51,22): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+app/layouts/project/project.tsx(157,11): error TS2322: Type 'MutableRefObject<Element | null>' is not assignable to type 'LegacyRef<HTMLDivElement> | undefined'.
+  Type 'MutableRefObject<Element | null>' is not assignable to type 'RefObject<HTMLDivElement>'.
+    Types of property 'current' are incompatible.
+      Type 'Element | null' is not assignable to type 'HTMLDivElement | null'.
+        Type 'Element' is missing the following properties from type 'HTMLDivElement': align, accessKey, accessKeyLabel, autocapitalize, and 131 more.
+app/routes/articles_._index/articles.tsx(65,9): error TS2322: Type '{ children: Element; unstable_viewtransition: string; prefetch: "intent"; to: string; className: string | undefined; onMouseEnter: MouseEventHandler<HTMLAnchorElement>; onMouseLeave: MouseEventHandler<...>; }' is not assignable to type 'IntrinsicAttributes & LinkProps & RefAttributes<HTMLAnchorElement>'.
+  Property 'unstable_viewtransition' does not exist on type 'IntrinsicAttributes & LinkProps & RefAttributes<HTMLAnchorElement>'.
+app/routes/articles_._index/articles.tsx(168,10): error TS2554: Expected 1-3 arguments, but got 0.
+app/routes/articles_._index/route.tsx(11,53): error TS2322: Type 'ArticleSummary | undefined' is not assignable to type 'ArticleSummary'.
+  Type 'undefined' is not assignable to type 'ArticleSummary'.
+app/routes/contact/contact.tsx(113,13): error TS2322: Type 'MutableRefObject<Element | null>' is not assignable to type 'LegacyRef<HTMLFormElement> | undefined'.
+  Type 'MutableRefObject<Element | null>' is not assignable to type 'RefObject<HTMLFormElement>'.
+    Types of property 'current' are incompatible.
+      Type 'Element | null' is not assignable to type 'HTMLFormElement | null'.
+        Type 'Element' is missing the following properties from type 'HTMLFormElement': acceptCharset, action, autocomplete, elements, and 149 more.
+app/routes/contact/contact.tsx(168,19): error TS2322: Type 'MutableRefObject<Element | null>' is not assignable to type 'LegacyRef<HTMLDivElement> | undefined'.
+  Type 'MutableRefObject<Element | null>' is not assignable to type 'RefObject<HTMLDivElement>'.
+    Types of property 'current' are incompatible.
+      Type 'Element | null' is not assignable to type 'HTMLDivElement | null'.
+        Type 'Element' is missing the following properties from type 'HTMLDivElement': align, accessKey, accessKeyLabel, autocapitalize, and 131 more.
+app/routes/contact/contact.tsx(202,63): error TS2322: Type 'MutableRefObject<Element | null>' is not assignable to type 'LegacyRef<HTMLDivElement> | undefined'.
+  Type 'MutableRefObject<Element | null>' is not assignable to type 'RefObject<HTMLDivElement>'.
+    Types of property 'current' are incompatible.
+      Type 'Element | null' is not assignable to type 'HTMLDivElement | null'.
+        Type 'Element' is missing the following properties from type 'HTMLDivElement': align, accessKey, accessKeyLabel, autocapitalize, and 131 more.
+app/routes/home/displacement-sphere.tsx(16,3): error TS2305: Module '"three"' has no exported member 'UniformsUtils'.
+app/routes/home/displacement-sphere.tsx(78,40): error TS7006: Parameter 'shader' implicitly has an 'any' type.
+app/routes/home/displacement-sphere.tsx(90,45): error TS2554: Expected 0 arguments, but got 3.
+app/routes/home/displacement-sphere.tsx(117,37): error TS18047: 'scene.current' is possibly 'null'.
+app/routes/home/displacement-sphere.tsx(156,12): error TS18046: 'event' is of type 'unknown'.
+app/routes/home/displacement-sphere.tsx(157,12): error TS18046: 'event' is of type 'unknown'.
+app/routes/home/displacement-sphere.tsx(180,9): error TS18048: 'uniforms.current.time' is possibly 'undefined'.
+app/routes/home/displacement-sphere.tsx(214,11): error TS2322: Type 'MutableRefObject<Element | null>' is not assignable to type 'LegacyRef<HTMLCanvasElement> | undefined'.
+  Type 'MutableRefObject<Element | null>' is not assignable to type 'RefObject<HTMLCanvasElement>'.
+    Types of property 'current' are incompatible.
+      Type 'Element | null' is not assignable to type 'HTMLCanvasElement | null'.
+        Type 'Element' is missing the following properties from type 'HTMLCanvasElement': height, width, captureStream, getContext, and 137 more.
+app/routes/home/home.tsx(66,35): error TS18048: 'entry' is possibly 'undefined'.
+app/routes/home/home.tsx(72,31): error TS2345: Argument of type 'HTMLElement | null' is not assignable to parameter of type 'Element'.
+  Type 'null' is not assignable to type 'Element'.
+app/routes/home/home.tsx(75,31): error TS2345: Argument of type 'HTMLElement | null' is not assignable to parameter of type 'Element'.
+  Type 'null' is not assignable to type 'Element'.
+app/routes/home/home.tsx(91,28): error TS2532: Object is possibly 'undefined'.
+app/routes/home/home.tsx(103,13): error TS2322: Type 'SiteConfigProjectButton[]' is not assignable to type 'never[]'.
+  Type 'SiteConfigProjectButton' is not assignable to type 'never'.
+app/routes/home/home.tsx(112,36): error TS2532: Object is possibly 'undefined'.
+app/routes/home/home.tsx(112,70): error TS2532: Object is possibly 'undefined'.
+app/routes/home/home.tsx(113,38): error TS2532: Object is possibly 'undefined'.
+app/routes/home/home.tsx(118,36): error TS2532: Object is possibly 'undefined'.
+app/routes/home/home.tsx(118,70): error TS2532: Object is possibly 'undefined'.
+app/routes/home/home.tsx(119,38): error TS2532: Object is possibly 'undefined'.
+app/routes/home/home.tsx(122,36): error TS2532: Object is possibly 'undefined'.
+app/routes/home/home.tsx(122,70): error TS2532: Object is possibly 'undefined'.
+app/routes/home/home.tsx(123,38): error TS2532: Object is possibly 'undefined'.
+app/routes/home/intro.tsx(20,25): error TS7031: Binding element 'id' implicitly has an 'any' type.
+app/routes/home/intro.tsx(20,29): error TS7031: Binding element 'sectionRef' implicitly has an 'any' type.
+app/routes/home/intro.tsx(20,41): error TS7031: Binding element 'scrollIndicatorHidden' implicitly has an 'any' type.
+app/routes/home/intro.tsx(48,29): error TS7006: Parameter 'event' implicitly has an 'any' type.
+app/routes/home/intro.tsx(100,27): error TS2322: Type 'MutableRefObject<Element | null>' is not assignable to type 'LegacyRef<HTMLSpanElement> | undefined'.
+  Type 'MutableRefObject<Element | null>' is not assignable to type 'RefObject<HTMLSpanElement>'.
+    Types of property 'current' are incompatible.
+      Type 'Element | null' is not assignable to type 'HTMLSpanElement | null'.
+        Type 'Element' is missing the following properties from type 'HTMLSpanElement': accessKey, accessKeyLabel, autocapitalize, autocorrect, and 130 more.
+app/routes/home/project-summary.tsx(22,3): error TS7031: Binding element 'id' implicitly has an 'any' type.
+app/routes/home/project-summary.tsx(23,12): error TS7031: Binding element 'sectionVisible' implicitly has an 'any' type.
+app/routes/home/project-summary.tsx(24,3): error TS7031: Binding element 'sectionRef' implicitly has an 'any' type.
+app/routes/home/project-summary.tsx(25,3): error TS7031: Binding element 'index' implicitly has an 'any' type.
+app/routes/home/project-summary.tsx(26,3): error TS7031: Binding element 'title' implicitly has an 'any' type.
+app/routes/home/project-summary.tsx(27,3): error TS7031: Binding element 'description' implicitly has an 'any' type.
+app/routes/home/project-summary.tsx(28,3): error TS7031: Binding element 'model' implicitly has an 'any' type.
+app/routes/home/project-summary.tsx(30,3): error TS7031: Binding element 'alternate' implicitly has an 'any' type.
+app/routes/home/project-summary.tsx(65,26): error TS7006: Parameter 'visible' implicitly has an 'any' type.
+app/routes/home/project-summary.tsx(93,61): error TS2339: Property 'link' does not exist on type 'never'.
+app/routes/home/project-summary.tsx(94,23): error TS2339: Property 'text' does not exist on type 'never'.
+app/routes/home/project-summary.tsx(102,26): error TS7006: Parameter 'visible' implicitly has an 'any' type.
+app/utils/image.ts(95,27): error TS18048: 'width' is possibly 'undefined'.
+app/utils/image.ts(109,3): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+app/utils/style.ts(74,5): error TS7053: Element implicitly has an 'any' type because expression of type '`--${string}`' can't be used to index type 'CSSProperties'.
+app/utils/three.ts(3,10): error TS2614: Module '"three-stdlib"' has no exported member 'DRACOLoader'. Did you mean to use 'import DRACOLoader from "three-stdlib"' instead?
+app/utils/three.ts(3,23): error TS2614: Module '"three-stdlib"' has no exported member 'GLTFLoader'. Did you mean to use 'import GLTFLoader from "three-stdlib"' instead?
+app/utils/three.ts(6,7): error TS2339: Property 'enabled' does not exist on type '{ add(key: string, data: unknown): void; get<T = unknown>(key: string): T | undefined; remove(key: string): void; clear(): void; }'.
+app/utils/three.ts(26,5): error TS18046: 'object.geometry' is of type 'unknown'.
+app/utils/three.ts(35,21): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'DisposableMaterial'.
+  Type 'unknown' is not assignable to type 'Material'.
+functions/[[path]].ts(5,55): error TS2322: Type 'unknown' is not assignable to type 'ServerBuild | (() => ServerBuild | Promise<ServerBuild>)'.
