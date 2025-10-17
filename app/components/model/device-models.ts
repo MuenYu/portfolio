@@ -4,9 +4,17 @@ import macbookPro from '~/assets/macbook-pro.glb';
 export const ModelAnimationType = {
   SpringUp: 'spring-up',
   LaptopOpen: 'laptop-open',
+} as const;
+
+export type DeviceModelDefinition = {
+  url: string;
+  width: number;
+  height: number;
+  position: { x: number; y: number; z: number };
+  animation: (typeof ModelAnimationType)[keyof typeof ModelAnimationType];
 };
 
-export const deviceModels = {
+export const deviceModels: Record<'phone' | 'laptop', DeviceModelDefinition> = {
   phone: {
     url: iphone11,
     width: 374,

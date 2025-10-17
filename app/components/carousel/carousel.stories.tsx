@@ -1,11 +1,15 @@
+import type { Meta, StoryFn } from '@storybook/react';
 import { Carousel } from '~/components/carousel';
 import { StoryContainer } from '../../../.storybook/story-container';
 
-export default {
+const meta: Meta<typeof Carousel> = {
   title: 'Carousel',
+  component: Carousel,
 };
 
-export const Images = () => (
+export default meta;
+
+const Template: StoryFn<typeof Carousel> = args => (
   <StoryContainer>
     <Carousel
       style={{ maxWidth: 800, width: '100%' }}
@@ -22,6 +26,9 @@ export const Images = () => (
       ]}
       width={1920}
       height={1080}
+      {...args}
     />
   </StoryContainer>
 );
+
+export const Images = Template.bind({});
