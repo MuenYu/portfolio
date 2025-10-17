@@ -11,7 +11,7 @@ import { Fragment, useState } from 'react';
 import { media } from '~/utils/style';
 import katakana from './katakana.svg';
 import styles from './profile.module.css';
-import config from '~/config.json';
+import config from '~/config';
 
 const renderTextWithLinks = text => {
   const parts = text.split(/(\[.*?\]\(.*?\))/g);
