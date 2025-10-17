@@ -9,12 +9,17 @@ import { Text } from '~/components/text';
 import { useReducedMotion } from 'framer-motion';
 import { useWindowSize } from '~/hooks';
 import { Link as RouterLink, useLoaderData } from 'react-router';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type MouseEventHandler } from 'react';
 // import { formatDate } from '~/utils/date';
 import { classes, cssProps } from '~/utils/style';
 import styles from './articles.module.css';
+import type { ArticleListData, ArticleSummary } from '~/types/articles';
 
-function ArticlesPost({ slug, frontmatter, timecode, index }) {
+interface ArticlesPostProps extends ArticleSummary {
+  index?: number;
+}
+
+function ArticlesPost({ slug, frontmatter, timecode, index }: ArticlesPostProps) {
   const [hovered, setHovered] = useState(false);
   // const [dateTime, setDateTime] = useState(null);
   const reduceMotion = useReducedMotion();
@@ -24,11 +29,11 @@ function ArticlesPost({ slug, frontmatter, timecode, index }) {
   //   setDateTime(formatDate(date));
   // }, [date, dateTime]);
 
-  const handleMouseEnter = () => {
+  const handleMouseEnter: MouseEventHandler<HTMLAnchorElement> = () => {
     setHovered(true);
   };
 
-  const handleMouseLeave = () => {
+  const handleMouseLeave: MouseEventHandler<HTMLAnchorElement> = () => {
     setHovered(false);
   };
 
@@ -93,7 +98,11 @@ function ArticlesPost({ slug, frontmatter, timecode, index }) {
   );
 }
 
-function SkeletonPost({ index }) {
+interface SkeletonPostProps {
+  index?: number;
+}
+
+function SkeletonPost({ index }: SkeletonPostProps) {
   return (
     <article
       aria-hidden="true"
@@ -134,7 +143,7 @@ function SkeletonPost({ index }) {
 }
 
 export function Articles() {
-  const { posts, featured } = useLoaderData();
+  const { posts, featured } = useLoaderData<ArticleListData>();
   const { width } = useWindowSize();
   const singleColumnWidth = 1190;
   const isSingleColumn = width <= singleColumnWidth;
@@ -186,7 +195,11 @@ export function Articles() {
   );
 }
 
-function Barcode({ className }) {
+interface BarcodeProps {
+  className?: string;
+}
+
+function Barcode({ className }: BarcodeProps) {
   return (
     <svg
       className={className}

@@ -3,43 +3,52 @@ import { MDXProvider } from '@mdx-js/react';
 import { Post, postMarkdown } from '~/layouts/post';
 import { baseMeta } from '~/utils/meta';
 import { formatTimecode, readingTime } from '~/utils/timecode';
+import type { LoaderFunctionArgs, MetaFunction } from 'react-router';
+import type { ArticleLoaderData, ArticleModule } from '~/types/articles';
 
-export async function loader({ request }) {
+type ArticleTextModule = {
+  default: string;
+};
+
+export async function loader({ request }: LoaderFunctionArgs) {
   const slug = new URL(request.url).pathname.split('/').filter(Boolean).at(-1);
 
   if (!slug || slug === 'articles') {
     return null;
   }
 
-  const modules = import.meta.glob('../articles.*.mdx');
+  const modules = import.meta.glob<ArticleModule>('../articles.*.mdx');
   const moduleKey = `../articles.${slug}.mdx`;
+  const moduleLoader = modules[moduleKey];
 
-  if (!modules[moduleKey]) {
+  if (!moduleLoader) {
     throw new Response('Not found', { status: 404 });
   }
 
-  const module = await modules[moduleKey]();
-  const text = await import(`../articles.${slug}.mdx?raw`);
+  const module = await moduleLoader();
+  const text = (await import(`../articles.${slug}.mdx?raw`)) as ArticleTextModule;
   const readTime = readingTime(text.default);
   // const ogImage = `${config.url}/static/${slug}-og.jpg`;
 
-  return Response.json({
+  const payload: ArticleLoaderData = {
     // ogImage,
     frontmatter: module.frontmatter,
     timecode: formatTimecode(readTime),
-  });
+  };
+
+  return Response.json(payload);
 }
 
-export function meta({ data }) {
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
   if (!data) return [];
 
   const { title, abstract } = data.frontmatter;
   // return baseMeta({ title, description: abstract, prefix: '', ogImage: data.ogImage });
   return baseMeta({ title, description: abstract, prefix: '' });
-}
+};
 
 export default function Articles() {
-  const data = useLoaderData();
+  const data = useLoaderData<ArticleLoaderData | null>();
 
   if (!data) {
     return <Outlet />;

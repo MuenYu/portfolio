@@ -1,4 +1,4 @@
-import { Children } from 'react';
+import { Children, isValidElement, type ComponentPropsWithoutRef, type ReactElement } from 'react';
 import { Link as RouterLink } from 'react-router';
 import { Code } from '~/components/code';
 import { Heading } from '~/components/heading';
@@ -7,8 +7,13 @@ import { Link } from '~/components/link';
 import { List, ListItem } from '~/components/list';
 import { Text } from '~/components/text';
 import styles from './post-markdown.module.css';
+import type { MDXComponents } from 'mdx/types';
 
-const PostHeadingLink = ({ id }) => {
+type PostHeadingLinkProps = {
+  id: string;
+};
+
+const PostHeadingLink = ({ id }: PostHeadingLinkProps) => {
   return (
     <RouterLink className={styles.headingLink} to={`#${id}`} aria-label="Link to heading">
       <Icon icon="link" />
@@ -16,41 +21,47 @@ const PostHeadingLink = ({ id }) => {
   );
 };
 
-const PostH1 = ({ children, id, ...rest }) => (
+type PostHeadingProps = ComponentPropsWithoutRef<typeof Heading> & {
+  id?: string;
+};
+
+const PostH1 = ({ children, id, ...rest }: PostHeadingProps) => (
   <Heading className={styles.heading} id={id} level={2} as="h1" {...rest}>
     <PostHeadingLink id={id} />
     {children}
   </Heading>
 );
 
-const PostH2 = ({ children, id, ...rest }) => (
+const PostH2 = ({ children, id, ...rest }: PostHeadingProps) => (
   <Heading className={styles.heading} id={id} level={3} as="h2" {...rest}>
     <PostHeadingLink id={id} />
     {children}
   </Heading>
 );
 
-const PostH3 = ({ children, id, ...rest }) => (
+const PostH3 = ({ children, id, ...rest }: PostHeadingProps) => (
   <Heading className={styles.heading} id={id} level={4} as="h3" {...rest}>
     <PostHeadingLink id={id} />
     {children}
   </Heading>
 );
 
-const PostH4 = ({ children, id, ...rest }) => (
+const PostH4 = ({ children, id, ...rest }: PostHeadingProps) => (
   <Heading className={styles.heading} id={id} level={5} as="h4" {...rest}>
     <PostHeadingLink id={id} />
     {children}
   </Heading>
 );
 
-const PostParagraph = ({ children, ...rest }) => {
+type PostParagraphProps = ComponentPropsWithoutRef<typeof Text>;
+
+const PostParagraph = ({ children, ...rest }: PostParagraphProps): ReactElement => {
   const hasSingleChild = Children.count(children) === 1;
   const firstChild = Children.toArray(children)[0];
 
   // Prevent `img` being wrapped in `p`
-  if (hasSingleChild && firstChild.type === PostImage) {
-    return children;
+  if (hasSingleChild && isValidElement(firstChild) && firstChild.type === PostImage) {
+    return firstChild;
   }
 
   return (
@@ -60,27 +71,45 @@ const PostParagraph = ({ children, ...rest }) => {
   );
 };
 
-const PostLink = ({ ...props }) => <Link {...props} />;
+type PostLinkProps = ComponentPropsWithoutRef<typeof Link>;
 
-const PostUl = props => {
-  return <List className={styles.list} {...props} />;
+const PostLink = ({ ...props }: PostLinkProps) => <Link {...props} />;
+
+type PostListProps = ComponentPropsWithoutRef<typeof List>;
+
+const PostUl = ({ children, ...rest }: PostListProps) => {
+  return (
+    <List className={styles.list} {...rest}>
+      {children}
+    </List>
+  );
 };
 
-const PostOl = props => {
-  return <List className={styles.list} ordered {...props} />;
+const PostOl = ({ children, ...rest }: PostListProps) => {
+  return (
+    <List className={styles.list} ordered {...rest}>
+      {children}
+    </List>
+  );
 };
 
-const PostLi = ({ children, ...props }) => {
+type PostListItemProps = ComponentPropsWithoutRef<typeof ListItem>;
+
+const PostLi = ({ children, ...props }: PostListItemProps) => {
   return <ListItem {...props}>{children}</ListItem>;
 };
 
-const PostCode = ({ children, ...rest }) => (
+type PostCodeProps = ComponentPropsWithoutRef<'code'>;
+
+const PostCode = ({ children, ...rest }: PostCodeProps) => (
   <code className={styles.code} {...rest}>
     {children}
   </code>
 );
 
-const PostPre = props => {
+type PostPreProps = ComponentPropsWithoutRef<typeof Code>;
+
+const PostPre = (props: PostPreProps) => {
   return (
     <div className={styles.pre}>
       <Code {...props} />
@@ -88,19 +117,27 @@ const PostPre = props => {
   );
 };
 
-const PostBlockquote = props => {
+type PostBlockquoteProps = ComponentPropsWithoutRef<'blockquote'>;
+
+const PostBlockquote = (props: PostBlockquoteProps) => {
   return <blockquote className={styles.blockquote} {...props} />;
 };
 
-const PostHr = props => {
+type PostHrProps = ComponentPropsWithoutRef<'hr'>;
+
+const PostHr = (props: PostHrProps) => {
   return <hr className={styles.hr} {...props} />;
 };
 
-const PostStrong = props => {
+type PostStrongProps = ComponentPropsWithoutRef<'strong'>;
+
+const PostStrong = (props: PostStrongProps) => {
   return <strong className={styles.strong} {...props} />;
 };
 
-const PostImage = ({ src, alt, width, height, ...rest }) => {
+type PostImageProps = ComponentPropsWithoutRef<'img'>;
+
+const PostImage = ({ src, alt, width, height, ...rest }: PostImageProps) => {
   return (
     <img
       className={styles.image}
@@ -114,7 +151,11 @@ const PostImage = ({ src, alt, width, height, ...rest }) => {
   );
 };
 
-const Embed = ({ src }) => {
+type EmbedProps = {
+  src: string;
+};
+
+const Embed = ({ src }: EmbedProps) => {
   return (
     <div className={styles.embed}>
       <iframe src={src} loading="lazy" title="Embed" />
@@ -122,7 +163,7 @@ const Embed = ({ src }) => {
   );
 };
 
-export const postMarkdown = {
+export const postMarkdown: MDXComponents = {
   h1: PostH1,
   h2: PostH2,
   h3: PostH3,
