@@ -13,8 +13,8 @@ export function useWindowSize(): Dimensions {
 
     ruler.style.position = 'fixed';
     ruler.style.height = '100vh';
-    ruler.style.width = 0;
-    ruler.style.top = 0;
+    ruler.style.width = '0px';
+    ruler.style.top = '0px';
 
     document.documentElement.appendChild(ruler);
 
