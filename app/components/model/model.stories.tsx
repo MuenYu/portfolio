@@ -1,3 +1,5 @@
+import type { Meta, StoryFn } from '@storybook/react';
+import type { CSSProperties } from 'react';
 import phoneTexture2Large from '~/assets/gamestack-list-large.jpg';
 import phoneTexture2Placeholder from '~/assets/gamestack-list-placeholder.jpg';
 import phoneTexture2 from '~/assets/gamestack-list.jpg';
@@ -11,13 +13,22 @@ import { Model } from '~/components/model';
 import { StoryContainer } from '../../../.storybook/story-container';
 import { deviceModels } from './device-models';
 
-export default {
+const meta: Meta<typeof Model> = {
   title: 'Model',
+  component: Model,
 };
 
-const modelStyle = { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 };
+export default meta;
 
-export const Phone = () => (
+const modelStyle: CSSProperties = {
+  position: 'absolute',
+  top: 0,
+  right: 0,
+  bottom: 0,
+  left: 0,
+};
+
+const PhoneTemplate: StoryFn<typeof Model> = () => (
   <StoryContainer padding={0}>
     <Model
       style={modelStyle}
@@ -45,7 +56,9 @@ export const Phone = () => (
   </StoryContainer>
 );
 
-export const Laptop = () => (
+export const Phone = PhoneTemplate.bind({});
+
+const LaptopTemplate: StoryFn<typeof Model> = () => (
   <StoryContainer padding={0}>
     <Model
       style={modelStyle}
@@ -64,3 +77,5 @@ export const Laptop = () => (
     />
   </StoryContainer>
 );
+
+export const Laptop = LaptopTemplate.bind({});

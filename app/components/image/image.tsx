@@ -3,10 +3,45 @@ import { Icon } from '~/components/icon';
 import { useTheme } from '~/components/theme-provider';
 import { useReducedMotion } from 'framer-motion';
 import { useHasMounted, useInViewport } from '~/hooks';
-import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
+import type {
+  CSSProperties,
+  ImgHTMLAttributes,
+  JSX,
+  MouseEvent,
+  SyntheticEvent,
+  VideoHTMLAttributes,
+} from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { resolveSrcFromSrcSet } from '~/utils/image';
 import { classes, cssProps, numToMs } from '~/utils/style';
 import styles from './image.module.css';
+
+type MediaElementAttributes = ImgHTMLAttributes<HTMLImageElement> &
+  VideoHTMLAttributes<HTMLVideoElement>;
+
+export interface ImageProps
+  extends Omit<MediaElementAttributes, 'className' | 'style' | 'onLoad'> {
+  className?: string;
+  style?: CSSProperties;
+  reveal?: boolean;
+  delay?: number;
+  raised?: boolean;
+  placeholder?: string;
+  noPauseButton?: boolean;
+  cover?: boolean;
+  restartOnPause?: boolean;
+  play?: boolean;
+}
+
+type ImageElementsProps = ImageProps & {
+  onLoad: (event: SyntheticEvent<HTMLImageElement | HTMLVideoElement>) => void;
+  loaded: boolean;
+  inViewport: boolean;
+  reveal?: boolean;
+  delay: number;
+  src: string | undefined;
+  placeholder?: string;
+};
 
 export const Image = ({
   className,
@@ -17,17 +52,31 @@ export const Image = ({
   src: baseSrc,
   srcSet,
   placeholder,
+  onLoad: onLoadProp,
   ...rest
-}) => {
+}: ImageProps): JSX.Element => {
   const [loaded, setLoaded] = useState(false);
   const { theme } = useTheme();
-  const containerRef = useRef();
-  const src = baseSrc || srcSet.split(' ')[0];
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const src = useMemo(() => {
+    if (baseSrc) return baseSrc;
+    if (srcSet) {
+      return srcSet.split(' ')[0];
+    }
+
+    return undefined;
+  }, [baseSrc, srcSet]);
   const inViewport = useInViewport(containerRef, !getIsVideo(src));
 
-  const onLoad = useCallback(() => {
-    setLoaded(true);
-  }, []);
+  const handleLoad = useCallback(
+    (event: SyntheticEvent<HTMLImageElement | HTMLVideoElement>) => {
+      setLoaded(true);
+      if (event.currentTarget instanceof HTMLImageElement) {
+        onLoadProp?.(event as SyntheticEvent<HTMLImageElement>);
+      }
+    },
+    [onLoadProp]
+  );
 
   return (
     <div
@@ -41,7 +90,7 @@ export const Image = ({
     >
       <ImageElements
         delay={delay}
-        onLoad={onLoad}
+        onLoad={handleLoad}
         loaded={loaded}
         inViewport={inViewport}
         reveal={reveal}
@@ -72,27 +121,28 @@ const ImageElements = ({
   noPauseButton,
   cover,
   ...rest
-}) => {
+}: ImageElementsProps): JSX.Element => {
   const reduceMotion = useReducedMotion();
   const [showPlaceholder, setShowPlaceholder] = useState(true);
   const [playing, setPlaying] = useState(!reduceMotion);
-  const [videoSrc, setVideoSrc] = useState();
+  const [videoSrc, setVideoSrc] = useState<string | undefined>();
   const [videoInteracted, setVideoInteracted] = useState(false);
-  const placeholderRef = useRef();
-  const videoRef = useRef();
+  const placeholderRef = useRef<HTMLImageElement | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
   const isVideo = getIsVideo(src);
   const showFullRes = inViewport;
   const hasMounted = useHasMounted();
 
   useEffect(() => {
     const resolveVideoSrc = async () => {
+      if (!srcSet) return;
       const resolvedVideoSrc = await resolveSrcFromSrcSet({ srcSet, sizes });
       setVideoSrc(resolvedVideoSrc);
     };
 
     if (isVideo && srcSet) {
       resolveVideoSrc();
-    } else if (isVideo) {
+    } else if (isVideo && src) {
       setVideoSrc(src);
     }
   }, [isVideo, sizes, src, srcSet]);
@@ -102,19 +152,21 @@ const ImageElements = ({
 
     const playVideo = () => {
       setPlaying(true);
-      videoRef.current.play();
+      void videoRef.current?.play();
     };
 
     const pauseVideo = () => {
       setPlaying(false);
-      videoRef.current.pause();
+      videoRef.current?.pause();
     };
 
     if (!play) {
       pauseVideo();
 
       if (restartOnPause) {
-        videoRef.current.currentTime = 0;
+        if (videoRef.current) {
+          videoRef.current.currentTime = 0;
+        }
       }
     }
 
@@ -127,19 +179,24 @@ const ImageElements = ({
     }
   }, [inViewport, play, reduceMotion, restartOnPause, videoInteracted, videoSrc]);
 
-  const togglePlaying = event => {
-    event.preventDefault();
+  const togglePlaying = useCallback(
+    (event: MouseEvent<HTMLButtonElement>) => {
+      event.preventDefault();
 
-    setVideoInteracted(true);
+      setVideoInteracted(true);
 
-    if (videoRef.current.paused) {
-      setPlaying(true);
-      videoRef.current.play();
-    } else {
-      setPlaying(false);
-      videoRef.current.pause();
-    }
-  };
+      if (!videoRef.current) return;
+
+      if (videoRef.current.paused) {
+        setPlaying(true);
+        void videoRef.current.play();
+      } else {
+        setPlaying(false);
+        videoRef.current.pause();
+      }
+    },
+    []
+  );
 
   return (
     <div
@@ -210,6 +267,6 @@ const ImageElements = ({
   );
 };
 
-function getIsVideo(src) {
+function getIsVideo(src: string | undefined): boolean {
   return typeof src === 'string' && src.includes('.mp4');
 }
