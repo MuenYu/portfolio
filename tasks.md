@@ -15,7 +15,7 @@
    - Add return types and generics to `useWindowSize`, `useScrollToHash`, and any other shared hooks feeding layout/components.
    - Re-run `npx tsc --noEmit` ensuring `hooks` and `theme` folders are clean.
 
-4. [ ] Add prop interfaces for UI primitives
+4. [x] Add prop interfaces for UI primitives
    - Author proper prop types for `Button`, `Link`, `Heading`, `Section`, `List`, `Loader`, and associated Storybook stories.
    - Leverage existing polymorphic helpers where relevant and patch tests/stories to satisfy stricter props.
    - Confirm `app/components/*` primitives pass with `npx tsc --noEmit`.
