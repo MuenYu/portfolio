@@ -30,7 +30,7 @@
    - Ensure Three.js helpers (`app/routes/home/displacement-sphere.tsx`, `app/utils/three.ts`) expose typed contracts used by these components.
    - Validate via `npx tsc --noEmit` focusing on media-related modules.
 
-7. [ ] Tighten layout modules with typed data
+7. [x] Tighten layout modules with typed data
    - Apply typed props/state to `Navbar`, `NavToggle`, `ThemeToggle`, `Project`, `Profile`, `Post`, and the error layout, wiring them to the typed hooks/components from prior tasks.
    - Replace loose refs (`useRef()`) with explicit element types and model derived data shapes (e.g. project cards).
    - Verify layouts compile cleanly with `npx tsc --noEmit`.
