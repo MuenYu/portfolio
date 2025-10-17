@@ -1,6 +1,93 @@
 import config from '~/config';
+import type { SiteConfigSocial } from '~/types/config';
 
-export const navLinks = [
+export type NavLink = {
+  label: string;
+  pathname: string;
+};
+
+type SocialLinkIcon =
+  | 'home'
+  | 'github'
+  | 'telegram'
+  | 'linkedin'
+  | 'x'
+  | 'leetcode'
+  | 'youtube'
+  | 'bluesky'
+  | 'figma';
+
+export type SocialLink = {
+  label: string;
+  url: string;
+  icon: SocialLinkIcon;
+};
+
+type SocialLinkDescriptor = {
+  label: string;
+  icon: SocialLinkIcon;
+  key: keyof SiteConfigSocial;
+  resolveUrl: (value: string) => string;
+};
+
+const SOCIAL_LINK_DESCRIPTORS: ReadonlyArray<SocialLinkDescriptor> = [
+  {
+    label: 'Blog',
+    icon: 'home',
+    key: 'blog',
+    resolveUrl: value => value,
+  },
+  {
+    label: 'Github',
+    icon: 'github',
+    key: 'github',
+    resolveUrl: value => `https://github.com/${value}`,
+  },
+  {
+    label: 'Telegram',
+    icon: 'telegram',
+    key: 'telegram',
+    resolveUrl: value => `https://t.me/${value}`,
+  },
+  {
+    label: 'LinkedIn',
+    icon: 'linkedin',
+    key: 'linkedin',
+    resolveUrl: value => `https://www.linkedin.com/in/${value}/`,
+  },
+  {
+    label: 'X',
+    icon: 'x',
+    key: 'x',
+    resolveUrl: value => `https://x.com/${value}`,
+  },
+  {
+    label: 'LeetCode',
+    icon: 'leetcode',
+    key: 'leetcode',
+    resolveUrl: value => `https://leetcode.com/u/${value}`,
+  },
+  {
+    label: 'YouTube',
+    icon: 'youtube',
+    key: 'youtube',
+    resolveUrl: value => `https://www.youtube.com/${value}`,
+  },
+  {
+    label: 'Bluesky',
+    icon: 'bluesky',
+    key: 'bluesky',
+    resolveUrl: value => `https://bsky.app/profile/${value}`,
+  },
+  {
+    label: 'Figma',
+    icon: 'figma',
+    key: 'figma',
+    resolveUrl: value => `https://www.figma.com/${value}`,
+  },
+];
+
+export const navLinks: ReadonlyArray<NavLink> = [
   {
     label: 'Projects',
     pathname: '/#project-1',
@@ -19,54 +106,20 @@ export const navLinks = [
   },
 ];
 
-export const socialLinks = [
-  {
-    label: 'Blog',
-    url: `${config.social.blog}`,
-    icon: 'home',
-  },
-  {
-    label: 'Github',
-    url: `https://github.com/${config.social.github}`,
-    icon: 'github',
-  },
-  {
-    label: 'Telegram',
-    url: `https://t.me/${config.social.telegram}`,
-    icon: 'telegram',
-  },
-  {
-    label: 'LinkedIn',
-    url: `https://www.linkedin.com/in/${config.social.linkedin}/`,
-    icon: 'linkedin',
-  },
-  {
-    label: 'X',
-    url: `https://x.com/${config.social.x}`,
-    icon: 'x',
-  },
-  {
-    label: 'LeetCode',
-    url: `https://leetcode.com/u/${config.social.leetcode}`,
-    icon: 'leetcode',
-  },
-  {
-    label: 'YouTube',
-    url: `https://www.youtube.com/${config.social.youtube}`,
-    icon: 'youtube',
-  },
-  {
-    label: 'Bluesky',
-    url: `https://bsky.app/profile/${config.social.bluesky}`,
-    icon: 'bluesky',
-  },
-  {
-    label: 'Figma',
-    url: `https://www.figma.com/${config.social.figma}`,
-    icon: 'figma',
-  },
-].filter(x => {
-  const flag = config.social[x.label.toLowerCase()];
-  // Filter out social links that are not in config.json
-  return flag !== undefined && flag.length > 0;
-});
+export const socialLinks: ReadonlyArray<SocialLink> = SOCIAL_LINK_DESCRIPTORS.flatMap(
+  ({ key, label, resolveUrl, icon }) => {
+    const value = config.social[key];
+
+    if (!value) {
+      return [];
+    }
+
+    return [
+      {
+        label,
+        url: resolveUrl(value),
+        icon,
+      },
+    ];
+  }
+);

@@ -11,31 +11,74 @@ import styles from './error.module.css';
 import { Image } from '~/components/image';
 import flatlineSkull from './error-flatline.svg';
 
-export function Error({ error }) {
-  const flatlined = !error.status;
+import { isRouteErrorResponse } from 'react-router';
 
-  const getMessage = () => {
+type ErrorProps = {
+  error: unknown;
+};
+
+type NormalizedError = {
+  status?: number;
+  summary: string;
+  message: string;
+};
+
+const getErrorDataMessage = (data: unknown): string | undefined => {
+  if (typeof data === 'string') return data;
+  if (data instanceof Error) return data.message;
+  if (typeof data === 'object' && data !== null && 'message' in data) {
+    const maybeMessage = (data as { message?: unknown }).message;
+    if (typeof maybeMessage === 'string') {
+      return maybeMessage;
+    }
+  }
+
+  return undefined;
+};
+
+const isError = (value: unknown): value is Error => value instanceof Error;
+
+const getNormalizedError = (error: unknown): NormalizedError => {
+  if (isRouteErrorResponse(error)) {
     switch (error.status) {
       case 404:
         return {
+          status: error.status,
           summary: 'Error: redacted',
           message:
             'This page could not be found. It either doesn’t exist or was deleted. Or perhaps you don’t exist and this webpage couldn’t find you.',
         };
       case 405:
         return {
+          status: error.status,
           summary: 'Error: method denied',
-          message: error.data,
+          message: String(error.data),
         };
       default:
         return {
+          status: error.status,
           summary: 'Error: anomaly',
-          message: error.statusText || error.data || error.toString(),
+          message: error.statusText || getErrorDataMessage(error.data) || 'Unknown error',
         };
     }
-  };
+  }
 
-  const { summary, message } = getMessage();
+  if (isError(error)) {
+    return {
+      summary: 'Error: anomaly',
+      message: error.message,
+    };
+  }
+
+  return {
+    summary: 'Error: anomaly',
+    message: typeof error === 'string' ? error : 'Unknown error',
+  };
+};
+
+export function Error({ error }: ErrorProps) {
+  const { status, summary, message } = getNormalizedError(error);
+  const flatlined = typeof status !== 'number';
 
   return (
     <section className={styles.page}>
@@ -67,7 +110,7 @@ export function Error({ error }) {
                     level={0}
                     weight="bold"
                   >
-                    {error.status}
+                    {status}
                   </Heading>
                 )}
                 {flatlined && (
