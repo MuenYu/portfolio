@@ -5,43 +5,67 @@ import GothamBook from '~/assets/fonts/gotham-book.woff2';
 import GothamMediumItalic from '~/assets/fonts/gotham-medium-italic.woff2';
 import GothamMedium from '~/assets/fonts/gotham-medium.woff2';
 import IPAGothic from '~/assets/fonts/ipa-gothic.woff2';
-import { createContext, useContext } from 'react';
+import type { ElementType, ReactNode } from 'react';
+import { createContext, useContext, useMemo } from 'react';
 import { classes, media } from '~/utils/style';
 import { themes, tokens } from './theme';
 
-export const ThemeContext = createContext({});
+type ThemeName = keyof typeof themes;
 
-export const ThemeProvider = ({
+export type ThemeContextValue = {
+  theme: ThemeName;
+  toggleTheme?: () => void;
+};
+
+export type ThemeProviderProps = Partial<ThemeContextValue> & {
+  as?: ElementType;
+  className?: string;
+  children?: ReactNode;
+  [key: string]: unknown;
+};
+
+export const ThemeContext = createContext<ThemeContextValue | null>(null);
+
+export function ThemeProvider({
   theme = 'dark',
   children,
   className,
   as: Component = 'div',
   toggleTheme,
   ...rest
-}) => {
-  const parentTheme = useTheme();
-  const isRootProvider = !parentTheme.theme;
+}: ThemeProviderProps) {
+  const parentTheme = useContext(ThemeContext);
+  const parentToggleTheme = parentTheme?.toggleTheme;
+  const isRootProvider = parentTheme === null;
+
+  const contextValue = useMemo<ThemeContextValue>(
+    () => ({
+      theme,
+      toggleTheme: toggleTheme ?? parentToggleTheme,
+    }),
+    [theme, toggleTheme, parentToggleTheme]
+  );
 
   return (
-    <ThemeContext.Provider
-      value={{
-        theme,
-        toggleTheme: toggleTheme || parentTheme.toggleTheme,
-      }}
-    >
+    <ThemeContext.Provider value={contextValue}>
       {isRootProvider && children}
       {/* Nested providers need a div to override theme tokens */}
-      {!isRootProvider && (
-        <Component className={classes(className)} data-theme={theme} {...rest}>
-          {children}
-        </Component>
-      )}
+        {!isRootProvider && (
+          <Component className={classes(className)} data-theme={theme} {...rest}>
+            {children}
+          </Component>
+        )}
     </ThemeContext.Provider>
   );
-};
+}
 
-export function useTheme() {
+export function useTheme(): ThemeContextValue {
   const currentTheme = useContext(ThemeContext);
+
+  if (!currentTheme) {
+    throw new Error('useTheme must be used within a ThemeProvider');
+  }
+
   return currentTheme;
 }
 

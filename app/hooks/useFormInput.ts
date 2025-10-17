@@ -3,7 +3,15 @@ import { useState } from 'react';
 
 type FormFieldElement = HTMLInputElement | HTMLTextAreaElement;
 
-export function useFormInput(initialValue = '') {
+export type UseFormInputResult = {
+  value: string;
+  error: string | null;
+  onChange: (event: ChangeEvent<FormFieldElement>) => void;
+  onBlur: (event: FocusEvent<FormFieldElement>) => void;
+  onInvalid: (event: FormEvent<FormFieldElement>) => void;
+};
+
+export function useFormInput(initialValue = ''): UseFormInputResult {
   const [value, setValue] = useState(initialValue);
   const [error, setError] = useState<string | null>(null);
   const [isDirty, setIsDirty] = useState(false);

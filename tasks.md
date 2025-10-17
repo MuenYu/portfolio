@@ -10,7 +10,7 @@
    - Introduce shared post/article types (e.g. `ArticleSummary`, `ArticleLoaderData`) and apply them to `app/layouts/post/*` and `app/routes/articles_._index/articles.tsx`.
    - Validate with `npx tsc --noEmit` so article routes compile without `any`.
 
-3. [ ] Type the theme provider and global hooks
+3. [x] Type the theme provider and global hooks
    - Create explicit `ThemeContextValue` types for `app/components/theme-provider/theme-provider.tsx` and annotate `useTheme`.
    - Add return types and generics to `useWindowSize`, `useScrollToHash`, and any other shared hooks feeding layout/components.
    - Re-run `npx tsc --noEmit` ensuring `hooks` and `theme` folders are clean.
