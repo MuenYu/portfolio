@@ -1,6 +1,6 @@
 # TypeScript Type Safety TODO
 
-1. [ ] Ground the shared domain types
+1. [x] Ground the shared domain types
    - Define a `SiteConfig` interface (e.g. `app/types/config.ts`) and use `satisfies` when importing `app/config.json` so config consumers get real types.
    - Reconcile `config` usage vs data (e.g. provide `social.twitter` or stop destructuring `twitter` in `app/utils/meta.ts`).
    - Add a focused `npx tsc --noEmit --pretty false --maxNodeModuleJsDepth 0` run to confirm no remaining config/meta errors.

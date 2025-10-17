@@ -1,7 +1,8 @@
 import type { MetaDescriptor } from 'react-router';
-import config from '~/config.json';
+import config from '~/config';
 
-const { name, url, twitter } = config;
+const { name, url } = config;
+const twitterHandle = config.social.twitter ?? config.social.x ?? '';
 const defaultOgImage = `${url}/preview.png`;
 
 type BaseMetaArgs = {
@@ -37,7 +38,7 @@ export function baseMeta({
     { property: 'twitter:description', content: descriptionText },
     { property: 'twitter:title', content: titleText },
     { property: 'twitter:site', content: url },
-    { property: 'twitter:creator', content: twitter },
+    { property: 'twitter:creator', content: twitterHandle },
     { property: 'twitter:image', content: ogImage },
   ];
 }

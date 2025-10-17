@@ -1,5 +1,5 @@
 import { createCookieSessionStorage } from 'react-router';
-import config from '~/config.json';
+import config from '~/config';
 import { buildCanonicalUrl } from '~/utils/url';
 
 export const loader = async ({ request, context }) => {

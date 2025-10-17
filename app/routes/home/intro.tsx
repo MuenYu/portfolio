@@ -9,7 +9,7 @@ import { Link as RouterLink } from 'react-router';
 import { useInterval, usePrevious, useScrollToHash } from '~/hooks';
 import { Suspense, lazy, useEffect, useState } from 'react';
 import { cssProps } from '~/utils/style';
-import config from '~/config.json';
+import config from '~/config';
 import { useHydrated } from '~/hooks/useHydrated';
 import styles from './intro.module.css';
 
