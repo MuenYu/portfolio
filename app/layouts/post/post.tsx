@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, type ReactNode, type MouseEvent } from 'react';
 import { Link as RouterLink } from 'react-router';
 import { Divider } from '~/components/divider';
 import { Footer } from '~/components/footer';
@@ -13,10 +13,16 @@ import { clamp } from '~/utils/clamp';
 // import { formatDate } from '~/utils/date';
 import { cssProps, msToNum, numToMs } from '~/utils/style';
 import styles from './post.module.css';
+import type { ArticleFrontmatter } from '~/types/articles';
 
-export const Post = ({ children, title, date, banner, timecode }) => {
+type PostProps = ArticleFrontmatter & {
+  children: ReactNode;
+  timecode: string;
+};
+
+export const Post = ({ children, title, date, banner, timecode }: PostProps) => {
   const scrollToHash = useScrollToHash();
-  const imageRef = useRef();
+  const imageRef = useRef<HTMLDivElement | null>(null);
   // const [dateTime, setDateTime] = useState(null);
 
   // useEffect(() => {
@@ -28,26 +34,26 @@ export const Post = ({ children, title, date, banner, timecode }) => {
     imageRef.current.style.setProperty('--blurOpacity', clamp(value, 0, 1));
   });
 
-  const handleScrollIndicatorClick = event => {
+  const handleScrollIndicatorClick = (event: MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
     scrollToHash(event.currentTarget.href);
   };
 
-  const placeholder = `${banner?.split('.')[0]}-placeholder.jpg`;
+  const bannerPlaceholder = banner ? `${banner.split('.')[0]}-placeholder.jpg` : null;
 
   return (
     <article className={styles.post}>
       <Section>
-        {banner && (
+        {banner && bannerPlaceholder && (
           <div className={styles.banner} ref={imageRef}>
             <div className={styles.bannerImage}>
-              <Image role="presentation" src={banner} placeholder={placeholder} alt="" />
+              <Image role="presentation" src={banner} placeholder={bannerPlaceholder} alt="" />
             </div>
             <div className={styles.bannerImageBlur}>
               <Image
                 role="presentation"
-                src={placeholder}
-                placeholder={placeholder}
+                src={bannerPlaceholder}
+                placeholder={bannerPlaceholder}
                 alt=""
               />
             </div>
