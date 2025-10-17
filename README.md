@@ -52,6 +52,13 @@ npm run dev:storybook
 
 # format codebase
 npm run format
+
+# Lint (oxlint first, then ESLint with Google TS config)
+npm run lint
+
+# Autofix lint issues
+npm run lint:ox:fix
+npm run lint:eslint:fix
 ```
 
 ## Deployment
