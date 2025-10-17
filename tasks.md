@@ -20,7 +20,7 @@
    - Leverage existing polymorphic helpers where relevant and patch tests/stories to satisfy stricter props.
    - Confirm `app/components/*` primitives pass with `npx tsc --noEmit`.
 
-5. [ ] Normalize typed form + control components
+5. [x] Normalize typed form + control components
    - Annotate props for `components/input` (both `Input` and `TextArea`), `segmented-control`, and any shared form helpers.
    - Update `app/routes/contact/contact.tsx` to consume the typed APIs without explicit casts.
    - Run `npx tsc --noEmit` to verify contact form stories and route compile.
