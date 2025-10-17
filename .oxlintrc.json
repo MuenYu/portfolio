@@ -1,0 +1,48 @@
+{
+  "$schema": "https://oxlint.dev/schema/oxlintrc.schema.json",
+  "env": {
+    "browser": true,
+    "es2024": true,
+    "node": true
+  },
+  "ignores": [
+    "node_modules",
+    "build",
+    "dist",
+    "storybook-static",
+    "coverage"
+  ],
+  "rules": {
+    "no-undef": "error",
+    "no-unused-vars": "error",
+    "semi": ["error", "always"],
+    "quotes": ["error", "single", { "avoidEscape": true }],
+    "curly": ["error", "all"],
+    "eqeqeq": ["error", "always"],
+    "prefer-const": ["error", { "destructuring": "all" }],
+    "no-var": "error",
+    "no-trailing-spaces": "error",
+    "spaced-comment": ["error", "always", { "block": { "balanced": true } }],
+    "object-curly-spacing": ["error", "always"],
+    "array-bracket-spacing": ["error", "never"],
+    "arrow-parens": ["error", "always"],
+    "indent": ["error", 2, { "SwitchCase": 1 }],
+    "comma-dangle": ["error", "always-multiline"],
+    "space-before-function-paren": [
+      "error",
+      { "anonymous": "never", "named": "never", "asyncArrow": "always" }
+    ]
+  },
+  "files": [
+    {
+      "files": [
+        "*.config.{js,ts,cjs,mjs}",
+        "scripts/**/*.{js,ts}",
+        ".storybook/**/*.{js,ts,tsx}"
+      ],
+      "env": {
+        "node": true
+      }
+    }
+  ]
+}
