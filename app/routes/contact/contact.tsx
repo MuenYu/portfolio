@@ -1,3 +1,4 @@
+import type { ActionFunctionArgs } from 'react-router';
 import { useRef } from 'react';
 import { Form, useActionData, useNavigation } from 'react-router';
 import { Button } from '~/components/button';
@@ -16,6 +17,33 @@ import { cssProps, msToNum, numToMs } from '~/utils/style';
 import { baseMeta } from '~/utils/meta';
 import styles from './contact.module.css';
 
+type ContactActionErrors = {
+  email?: string;
+  message?: string;
+};
+
+type ContactActionData = {
+  errors?: ContactActionErrors;
+  success?: boolean;
+};
+
+type ContactEnv = {
+  ACCESSTOKEN: string;
+  SERVICE_ID: string;
+  TEMPLATE_ID: string;
+  USER_ID: string;
+};
+
+type ContactContext = {
+  cloudflare: {
+    env: ContactEnv;
+  };
+};
+
+type ContactActionArgs = Omit<ActionFunctionArgs, 'context'> & {
+  context: ContactContext;
+};
+
 export const meta = () => {
   return baseMeta({
     title: 'Contact',
@@ -28,12 +56,12 @@ const MAX_EMAIL_LENGTH = 512;
 const MAX_MESSAGE_LENGTH = 4096;
 const EMAIL_PATTERN = /(.+)@(.+){2,}\.(.+){2,}/;
 
-export async function action({ context, request }) {
+export async function action({ context, request }: ContactActionArgs) {
   const formData = await request.formData();
   const isBot = String(formData.get('name'));
   const email = String(formData.get('email'));
   const message = String(formData.get('message'));
-  const errors = {};
+  const errors: ContactActionErrors = {};
 
   // Return without sending if a bot trips the honeypot
   if (isBot) return Response.json({ success: true });
@@ -56,7 +84,7 @@ export async function action({ context, request }) {
   }
 
   if (Object.keys(errors).length > 0) {
-    return Response.json({ errors });
+    return Response.json<ContactActionData>({ errors });
   }
 
   const resp = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
@@ -77,23 +105,23 @@ export async function action({ context, request }) {
   });
   if (!resp.ok) {
     errors.message = await resp.text();
-    return Response.json({ errors });
+    return Response.json<ContactActionData>({ errors });
   }
-  return Response.json({ success: true });
+  return Response.json<ContactActionData>({ success: true });
 }
 
 export const Contact = () => {
-  const errorRef = useRef();
+  const errorRef = useRef<HTMLDivElement | null>(null);
   const email = useFormInput('');
   const message = useFormInput('');
   const initDelay = tokens.base.durationS;
-  const actionData = useActionData();
+  const actionData = useActionData<ContactActionData>();
   const { state } = useNavigation();
   const sending = state === 'submitting';
 
   return (
     <Section className={styles.contact}>
-      <Transition unmount in={!actionData?.success} timeout={1600}>
+      <Transition unmount in={!Boolean(actionData?.success)} timeout={1600}>
         {({ status, nodeRef }) => (
           <Form
             unstable_viewtransition="true"
@@ -148,7 +176,7 @@ export const Contact = () => {
             />
             <Transition
               unmount
-              in={!sending && actionData?.errors}
+              in={!sending && Boolean(actionData?.errors)}
               timeout={msToNum(tokens.base.durationM)}
             >
               {({ status: errorStatus, nodeRef }) => (
@@ -225,7 +253,8 @@ export const Contact = () => {
   );
 };
 
-function getDelay(delayMs, offset = numToMs(0), multiplier = 1) {
-  const numDelay = msToNum(delayMs) * multiplier;
-  return cssProps({ delay: numToMs((msToNum(offset) + numDelay).toFixed(0)) });
+function getDelay(delayMs: string, offset: string = numToMs(0), multiplier = 1) {
+  const baseDelay = msToNum(delayMs) * multiplier;
+  const totalDelay = Math.round(msToNum(offset) + baseDelay);
+  return cssProps({ delay: numToMs(totalDelay) });
 }

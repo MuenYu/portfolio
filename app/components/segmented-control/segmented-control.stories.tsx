@@ -1,21 +1,34 @@
-import { SegmentedControl, SegmentedControlOption } from '~/components/segmented-control';
+import type { ComponentPropsWithoutRef } from 'react';
+import type { Meta, StoryFn } from '@storybook/react';
 import { useState } from 'react';
+import { SegmentedControl, SegmentedControlOption } from '~/components/segmented-control';
 import { StoryContainer } from '../../../.storybook/story-container';
 
-export default {
+type SegmentedControlProps = ComponentPropsWithoutRef<typeof SegmentedControl>;
+
+const meta: Meta<typeof SegmentedControl> = {
   title: 'SegmentedControl',
+  component: SegmentedControl,
   args: {
-    options: ['Option 1', 'Option 2', 'Option 3'],
+    label: 'Example segmented control',
   },
 };
 
-function Story({ options, ...args }) {
+export default meta;
+
+const options = ['Option 1', 'Option 2', 'Option 3'];
+
+const Story: StoryFn<typeof SegmentedControl> = args => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   return (
     <StoryContainer>
-      <SegmentedControl currentIndex={currentIndex} onChange={setCurrentIndex} {...args}>
-        {options?.map((option, index) => (
+      <SegmentedControl
+        {...(args as SegmentedControlProps)}
+        currentIndex={currentIndex}
+        onChange={setCurrentIndex}
+      >
+        {options.map((option, index) => (
           <SegmentedControlOption key={`${option}-${index}`}>
             {option}
           </SegmentedControlOption>
@@ -23,6 +36,6 @@ function Story({ options, ...args }) {
       </SegmentedControl>
     </StoryContainer>
   );
-}
+};
 
 export const Default = Story.bind({});
