@@ -1,8 +1,23 @@
 import { createCookieSessionStorage } from 'react-router';
+import type { ActionFunctionArgs } from 'react-router';
+import {
+  isThemePreference,
+  type CloudflareContext,
+  type SetThemeActionData,
+  type ThemePreference,
+} from '~/types/routes';
 
-export async function action({ request, context }) {
+type SetThemeActionArgs = ActionFunctionArgs & { context: CloudflareContext };
+
+export async function action({ request, context }: SetThemeActionArgs) {
   const formData = await request.formData();
-  const theme = formData.get('theme');
+  const submittedTheme = formData.get('theme');
+
+  if (!isThemePreference(submittedTheme)) {
+    return new Response('Invalid theme preference', { status: 400 });
+  }
+
+  const theme: ThemePreference = submittedTheme;
 
   const { getSession, commitSession } = createCookieSessionStorage({
     cookie: {
@@ -19,8 +34,10 @@ export async function action({ request, context }) {
   const session = await getSession(request.headers.get('Cookie'));
   session.set('theme', theme);
 
+  const payload = { status: 'success' } satisfies SetThemeActionData;
+
   return Response.json(
-    { status: 'success' },
+    payload,
     {
       headers: {
         'Set-Cookie': await commitSession(session),

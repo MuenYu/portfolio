@@ -13,7 +13,8 @@ import { useState, useEffect, type MouseEventHandler } from 'react';
 // import { formatDate } from '~/utils/date';
 import { classes, cssProps } from '~/utils/style';
 import styles from './articles.module.css';
-import type { ArticleListData, ArticleSummary } from '~/types/articles';
+import type { ArticleSummary } from '~/types/articles';
+import type { ArticlesIndexLoaderData } from '~/types/routes';
 
 interface ArticlesPostProps extends ArticleSummary {
   index?: number;
@@ -143,7 +144,7 @@ function SkeletonPost({ index }: SkeletonPostProps) {
 }
 
 export function Articles() {
-  const { posts, featured } = useLoaderData<ArticleListData>();
+  const { posts, featured } = useLoaderData<ArticlesIndexLoaderData>();
   const { width } = useWindowSize();
   const singleColumnWidth = 1190;
   const isSingleColumn = width <= singleColumnWidth;

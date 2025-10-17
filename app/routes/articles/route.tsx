@@ -36,7 +36,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     timecode: formatTimecode(readTime),
   };
 
-  return Response.json(payload);
+  return payload;
 }
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
