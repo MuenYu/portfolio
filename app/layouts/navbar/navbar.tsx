@@ -1,5 +1,16 @@
-import { useEffect, useRef, useState } from 'react';
-import { Link as RouterLink, useLocation } from 'react-router';
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ForwardRefExoticComponent,
+  type MouseEvent,
+  type RefAttributes,
+} from 'react';
+import {
+  Link as RouterLink,
+  useLocation,
+  type LinkProps as RouterLinkProps,
+} from 'react-router';
 import { Icon } from '~/components/icon';
 import { Monogram } from '~/components/monogram';
 import { useTheme } from '~/components/theme-provider';
@@ -9,18 +20,32 @@ import { useScrollToHash, useWindowSize } from '~/hooks';
 import { cssProps, media, msToNum, numToMs } from '~/utils/style';
 import { NavToggle } from './nav-toggle';
 import { ThemeToggle } from './theme-toggle';
-import { navLinks, socialLinks } from './nav-data';
+import { navLinks, socialLinks, type SocialLink } from './nav-data';
 import config from '~/config';
 import styles from './navbar.module.css';
 
+type ElementMeasurement = {
+  element: HTMLElement;
+  top: number;
+  bottom: number;
+};
+
+type NavbarIconsProps = {
+  desktop?: boolean;
+};
+
+const RouterLinkWithViewTransition = RouterLink as ForwardRefExoticComponent<
+  RouterLinkProps & { unstable_viewtransition?: boolean | string } & RefAttributes<HTMLAnchorElement>
+>;
+
 export const Navbar = () => {
-  const [current, setCurrent] = useState();
+  const [current, setCurrent] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [target, setTarget] = useState();
+  const [target, setTarget] = useState<string | null>(null);
   const { theme } = useTheme();
   const location = useLocation();
   const windowSize = useWindowSize();
-  const headerRef = useRef();
+  const headerRef = useRef<HTMLElement | null>(null);
   const isMobile = windowSize.width <= media.mobile || windowSize.height <= 696;
   const scrollToHash = useScrollToHash();
 
@@ -38,14 +63,18 @@ export const Navbar = () => {
 
   // Handle swapping the theme when intersecting with inverse themed elements
   useEffect(() => {
-    const navItems = document.querySelectorAll('[data-navbar-item]');
+    const navItems = document.querySelectorAll<HTMLElement>('[data-navbar-item]');
     const inverseTheme = theme === 'dark' ? 'light' : 'dark';
     const { innerHeight } = window;
 
-    let inverseMeasurements = [];
-    let navItemMeasurements = [];
+    let inverseMeasurements: ElementMeasurement[] = [];
+    let navItemMeasurements: ElementMeasurement[] = [];
 
-    const isOverlap = (rect1, rect2, scrollY) => {
+    const isOverlap = (
+      rect1: ElementMeasurement,
+      rect2: ElementMeasurement,
+      scrollY: number
+    ): boolean => {
       return !(rect1.bottom - scrollY < rect2.top || rect1.top - scrollY > rect2.bottom);
     };
 
@@ -56,7 +85,7 @@ export const Navbar = () => {
     };
 
     const handleInversion = () => {
-      const invertedElements = document.querySelectorAll(
+      const invertedElements = document.querySelectorAll<HTMLElement>(
         `[data-theme='${inverseTheme}'][data-invert]`
       );
 
@@ -113,8 +142,8 @@ export const Navbar = () => {
   }, [theme, windowSize, location.key]);
 
   // Check if a nav item should be active
-  const getCurrent = (url = '') => {
-    const nonTrailing = current?.endsWith('/') ? current?.slice(0, -1) : current;
+  const getCurrent = (url: string = ''): 'page' | '' => {
+    const nonTrailing = current?.endsWith('/') ? current.slice(0, -1) : current;
 
     if (url === nonTrailing) {
       return 'page';
@@ -124,7 +153,7 @@ export const Navbar = () => {
   };
 
   // Store the current hash to scroll to
-  const handleNavItemClick = event => {
+  const handleNavItemClick = (event: MouseEvent<HTMLAnchorElement>) => {
     const hash = event.currentTarget.href.split('#')[1];
     setTarget(null);
 
@@ -134,29 +163,29 @@ export const Navbar = () => {
     }
   };
 
-  const handleMobileNavClick = event => {
+  const handleMobileNavClick = (event: MouseEvent<HTMLAnchorElement>) => {
     handleNavItemClick(event);
     if (menuOpen) setMenuOpen(false);
   };
 
   return (
     <header className={styles.navbar} ref={headerRef}>
-      <RouterLink
-        unstable_viewtransition="true"
-        prefetch="intent"
-        to={location.pathname === '/' ? '/#intro' : '/'}
-        data-navbar-item
-        className={styles.logo}
-        aria-label={`${config.name}, ${config.role}`}
-        onClick={handleMobileNavClick}
-      >
-        <Monogram highlight />
-      </RouterLink>
+        <RouterLinkWithViewTransition
+          unstable_viewtransition="true"
+          prefetch="intent"
+          to={location.pathname === '/' ? '/#intro' : '/'}
+          data-navbar-item
+          className={styles.logo}
+          aria-label={`${config.name}, ${config.role}`}
+          onClick={handleMobileNavClick}
+        >
+          <Monogram highlight />
+        </RouterLinkWithViewTransition>
       <NavToggle onClick={() => setMenuOpen(!menuOpen)} menuOpen={menuOpen} />
       <nav className={styles.nav}>
         <div className={styles.navList}>
           {navLinks.map(({ label, pathname }) => (
-            <RouterLink
+            <RouterLinkWithViewTransition
               unstable_viewtransition="true"
               prefetch="intent"
               to={pathname}
@@ -167,7 +196,7 @@ export const Navbar = () => {
               onClick={handleNavItemClick}
             >
               {label}
-            </RouterLink>
+            </RouterLinkWithViewTransition>
           ))}
         </div>
         <NavbarIcons desktop />
@@ -176,7 +205,7 @@ export const Navbar = () => {
         {({ visible, nodeRef }) => (
           <nav className={styles.mobileNav} data-visible={visible} ref={nodeRef}>
             {navLinks.map(({ label, pathname }, index) => (
-              <RouterLink
+              <RouterLinkWithViewTransition
                 unstable_viewtransition="true"
                 prefetch="intent"
                 to={pathname}
@@ -192,7 +221,7 @@ export const Navbar = () => {
                 })}
               >
                 {label}
-              </RouterLink>
+              </RouterLinkWithViewTransition>
             ))}
             <NavbarIcons />
             <ThemeToggle isMobile />
@@ -204,9 +233,9 @@ export const Navbar = () => {
   );
 };
 
-const NavbarIcons = ({ desktop }) => (
+const NavbarIcons = ({ desktop }: NavbarIconsProps) => (
   <div className={styles.navIcons}>
-    {socialLinks.map(({ label, url, icon }) => (
+    {socialLinks.map(({ label, url, icon }: SocialLink) => (
       <a
         key={label}
         data-navbar-item={desktop || undefined}

@@ -7,40 +7,54 @@ import { Link } from '~/components/link';
 import { Section } from '~/components/section';
 import { Text } from '~/components/text';
 import { Transition } from '~/components/transition';
-import { Fragment, useState } from 'react';
+import { Fragment, useMemo, useState, type MutableRefObject, type ReactNode } from 'react';
 import { media } from '~/utils/style';
 import katakana from './katakana.svg';
 import styles from './profile.module.css';
 import config from '~/config';
 
-const renderTextWithLinks = text => {
+type RenderedText = Array<string | ReactNode>;
+
+const renderTextWithLinks = (text: string): RenderedText => {
   const parts = text.split(/(\[.*?\]\(.*?\))/g);
+
   return parts.map((part, index) => {
     const linkMatch = part.match(/\[(.*?)\]\((.*?)\)/);
     if (linkMatch) {
-      const [_, title, link] = linkMatch;
+      const [, title, link] = linkMatch;
       return (
         <Link key={index} href={link}>
           {title}
         </Link>
       );
     }
+
     return part;
   });
 };
 
-const ProfileText = ({ visible, titleId }) => {
-  const paragraphs = config.profile.paragraphs.map((paragraph, index) => (
-    <Text
-      key={index}
-      className={styles.description}
-      data-visible={visible}
-      size="l"
-      as="p"
-    >
-      {renderTextWithLinks(paragraph)}
-    </Text>
-  ));
+type ProfileTextProps = {
+  visible: boolean;
+  titleId: string;
+};
+
+const ProfileText = ({ visible, titleId }: ProfileTextProps) => {
+  const paragraphs = useMemo(
+    () =>
+      config.profile.paragraphs.map((paragraph, index) => (
+        <Text
+          key={index}
+          className={styles.description}
+          data-visible={visible}
+          size="l"
+          as="p"
+        >
+          {renderTextWithLinks(paragraph)}
+        </Text>
+      )),
+    [visible]
+  );
+
   return (
     <Fragment>
       <Heading className={styles.title} data-visible={visible} level={3} id={titleId}>
@@ -51,7 +65,13 @@ const ProfileText = ({ visible, titleId }) => {
   );
 };
 
-export const Profile = ({ id, visible, sectionRef }) => {
+type ProfileProps = {
+  id: string;
+  visible: boolean;
+  sectionRef: MutableRefObject<HTMLElement | null>;
+};
+
+export const Profile = ({ id, visible, sectionRef }: ProfileProps) => {
   const [focused, setFocused] = useState(false);
   const titleId = `${id}-title`;
 
@@ -67,14 +87,17 @@ export const Profile = ({ id, visible, sectionRef }) => {
       tabIndex={-1}
     >
       <Transition in={visible || focused} timeout={0}>
-        {({ visible, nodeRef }) => (
-          <div className={styles.content} ref={nodeRef}>
+        {({ visible: transitionVisible, nodeRef }) => (
+          <div
+            className={styles.content}
+            ref={nodeRef as MutableRefObject<HTMLDivElement | null>}
+          >
             <div className={styles.column}>
-              <ProfileText visible={visible} titleId={titleId} />
+              <ProfileText visible={transitionVisible} titleId={titleId} />
               <Button
                 secondary
                 className={styles.button}
-                data-visible={visible}
+                data-visible={transitionVisible}
                 href="/contact"
                 icon="send"
               >
@@ -86,10 +109,10 @@ export const Profile = ({ id, visible, sectionRef }) => {
                 <Divider
                   notchWidth="64px"
                   notchHeight="8px"
-                  collapsed={!visible}
+                  collapsed={!transitionVisible}
                   collapseDelay={1000}
                 />
-                <div className={styles.tagText} data-visible={visible}>
+                <div className={styles.tagText} data-visible={transitionVisible}>
                   About me
                 </div>
               </div>
@@ -104,7 +127,7 @@ export const Profile = ({ id, visible, sectionRef }) => {
                   sizes={`(max-width: ${media.mobile}px) 100vw, 480px`}
                   alt="My profile picture"
                 />
-                {/* <svg className={styles.svg} data-visible={visible} viewBox="0 0 136 766">
+                {/* <svg className={styles.svg} data-visible={transitionVisible} viewBox="0 0 136 766">
                   <use href={`${katakana}#katakana-profile`} />
                 </svg> */}
               </div>

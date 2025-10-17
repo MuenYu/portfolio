@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, type ReactNode, type MouseEvent } from 'react';
+import { useRef, type MutableRefObject, type ReactNode, type MouseEvent } from 'react';
 import { Link as RouterLink } from 'react-router';
 import { Divider } from '~/components/divider';
 import { Footer } from '~/components/footer';
@@ -31,7 +31,7 @@ export const Post = ({ children, title, date, banner, timecode }: PostProps) => 
 
   useParallax(0.004, value => {
     if (!imageRef.current) return;
-    imageRef.current.style.setProperty('--blurOpacity', clamp(value, 0, 1));
+    imageRef.current.style.setProperty('--blurOpacity', clamp(value, 0, 1).toString());
   });
 
   const handleScrollIndicatorClick = (event: MouseEvent<HTMLAnchorElement>) => {
@@ -62,8 +62,11 @@ export const Post = ({ children, title, date, banner, timecode }: PostProps) => 
         <header className={styles.header}>
           <div className={styles.headerText}>
             <Transition in timeout={msToNum(tokens.base.durationM)}>
-              {({ visible, nodeRef }) => (
-                <div className={styles.date} ref={nodeRef}>
+                {({ visible, nodeRef }) => (
+                  <div
+                    className={styles.date}
+                    ref={nodeRef as MutableRefObject<HTMLDivElement | null>}
+                  >
                   <Divider notchWidth="64px" notchHeight="8px" collapsed={!visible} />
                   <Text className={styles.dateText} data-visible={visible}>
                     {date}

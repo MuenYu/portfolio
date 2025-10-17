@@ -1,9 +1,13 @@
 import { useId } from 'react';
-import { Button } from '~/components/button';
+import { Button, type ButtonProps } from '~/components/button';
 import { useTheme } from '~/components/theme-provider';
 import styles from './theme-toggle.module.css';
 
-export const ThemeToggle = ({ isMobile, ...rest }) => {
+type ThemeToggleProps = ButtonProps<'button'> & {
+  isMobile?: boolean;
+};
+
+export const ThemeToggle = ({ isMobile, ...rest }: ThemeToggleProps) => {
   const id = useId();
   const { toggleTheme } = useTheme();
   const maskId = `${id}theme-toggle-mask`;

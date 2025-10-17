@@ -1,8 +1,12 @@
-import { Button } from '~/components/button';
+import { Button, type ButtonProps } from '~/components/button';
 import { Icon } from '~/components/icon';
 import styles from './nav-toggle.module.css';
 
-export const NavToggle = ({ menuOpen, ...rest }) => {
+type NavToggleProps = ButtonProps<'button'> & {
+  menuOpen: boolean;
+};
+
+export const NavToggle = ({ menuOpen, ...rest }: NavToggleProps) => {
   return (
     <Button
       iconOnly

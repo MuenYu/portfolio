@@ -1,16 +1,30 @@
 import { Button } from '~/components/button';
 import { Heading } from '~/components/heading';
-import { Image } from '~/components/image';
+import { Image, type ImageProps } from '~/components/image';
 import { Section } from '~/components/section';
 import { Text } from '~/components/text';
 import { tokens } from '~/components/theme-provider/theme';
 import { Transition } from '~/components/transition';
 import { useParallax } from '~/hooks';
-import { forwardRef, useRef } from 'react';
+import {
+  forwardRef,
+  useRef,
+  type ComponentPropsWithoutRef,
+  type ReactNode,
+} from 'react';
 import { classes, cssProps, msToNum, numToMs } from '~/utils/style';
 import styles from './project.module.css';
 
 const initDelay = 300;
+
+type ProjectHeaderProps = {
+  title: string;
+  description: string;
+  linkLabel?: string;
+  url?: string;
+  roles?: string[];
+  className?: string;
+};
 
 export function ProjectHeader({
   title,
@@ -19,7 +33,7 @@ export function ProjectHeader({
   url,
   roles,
   className,
-}) {
+}: ProjectHeaderProps) {
   return (
     <Section className={classes(styles.header, className)} as="section">
       <div
@@ -63,11 +77,25 @@ export function ProjectHeader({
   );
 }
 
-export const ProjectContainer = ({ className, ...rest }) => (
+type ProjectContainerProps = ComponentPropsWithoutRef<'article'>;
+
+export const ProjectContainer = ({ className, ...rest }: ProjectContainerProps) => (
   <article className={classes(styles.project, className)} {...rest} />
 );
 
-export const ProjectSection = forwardRef(
+type ProjectSectionPadding = 'both' | 'top' | 'bottom' | 'none';
+
+type ProjectSectionProps = Omit<ComponentPropsWithoutRef<'section'>, 'children'> & {
+  className?: string;
+  light?: boolean;
+  padding?: ProjectSectionPadding;
+  fullHeight?: boolean;
+  backgroundOverlayOpacity?: number;
+  backgroundElement?: ReactNode;
+  children?: ReactNode;
+};
+
+export const ProjectSection = forwardRef<HTMLElement, ProjectSectionProps>(
   (
     {
       className,
@@ -103,8 +131,17 @@ export const ProjectSection = forwardRef(
   )
 );
 
-export const ProjectBackground = ({ opacity = 0.7, className, ...rest }) => {
-  const imageRef = useRef();
+type ProjectBackgroundProps = Omit<ImageProps, 'className'> & {
+  opacity?: number;
+  className?: string;
+};
+
+export const ProjectBackground = ({
+  opacity = 0.7,
+  className,
+  ...rest
+}: ProjectBackgroundProps) => {
+  const imageRef = useRef<HTMLDivElement | null>(null);
 
   useParallax(0.6, value => {
     if (!imageRef.current) return;
@@ -129,13 +166,29 @@ export const ProjectBackground = ({ opacity = 0.7, className, ...rest }) => {
   );
 };
 
-export const ProjectImage = ({ className, alt, ...rest }) => (
+type ProjectImageProps = ImageProps & {
+  className?: string;
+  alt: string;
+};
+
+export const ProjectImage = ({ className, alt, ...rest }: ProjectImageProps) => (
   <div className={classes(styles.image, className)}>
     <Image reveal alt={alt} delay={300} {...rest} />
   </div>
 );
 
-export const ProjectSectionContent = ({ className, width = 'l', ...rest }) => (
+type ProjectSectionContentWidth = 'l' | 'xl' | 'full';
+
+type ProjectSectionContentProps = ComponentPropsWithoutRef<'div'> & {
+  className?: string;
+  width?: ProjectSectionContentWidth;
+};
+
+export const ProjectSectionContent = ({
+  className,
+  width = 'l',
+  ...rest
+}: ProjectSectionContentProps) => (
   <div
     className={classes(styles.sectionContent, className)}
     data-width={width}
@@ -143,7 +196,14 @@ export const ProjectSectionContent = ({ className, width = 'l', ...rest }) => (
   />
 );
 
-export const ProjectSectionHeading = ({ className, level = 3, as = 'h2', ...rest }) => (
+type ProjectSectionHeadingProps = Parameters<typeof Heading>[0];
+
+export const ProjectSectionHeading = ({
+  className,
+  level = 3,
+  as = 'h2',
+  ...rest
+}: ProjectSectionHeadingProps) => (
   <Heading
     className={classes(styles.sectionHeading, className)}
     as={as}
@@ -153,9 +213,24 @@ export const ProjectSectionHeading = ({ className, level = 3, as = 'h2', ...rest
   />
 );
 
-export const ProjectSectionText = ({ className, ...rest }) => (
+type ProjectSectionTextProps = Parameters<typeof Text>[0];
+
+export const ProjectSectionText = ({ className, ...rest }: ProjectSectionTextProps) => (
   <Text className={classes(styles.sectionText, className)} size="l" as="p" {...rest} />
 );
+
+type ProjectTextRowJustify = 'start' | 'center' | 'end';
+type ProjectTextRowWidth = 's' | 'm' | 'l';
+
+type ProjectTextRowProps = ComponentPropsWithoutRef<'div'> & {
+  center?: boolean;
+  stretch?: boolean;
+  justify?: ProjectTextRowJustify;
+  width?: ProjectTextRowWidth;
+  noMargin?: boolean;
+  className?: string;
+  centerMobile?: boolean;
+};
 
 export const ProjectTextRow = ({
   center,
@@ -166,7 +241,7 @@ export const ProjectTextRow = ({
   className,
   centerMobile,
   ...rest
-}) => (
+}: ProjectTextRowProps) => (
   <div
     className={classes(styles.textRow, className)}
     data-center={center}
@@ -179,7 +254,15 @@ export const ProjectTextRow = ({
   />
 );
 
-export const ProjectSectionColumns = ({ className, centered, ...rest }) => (
+type ProjectSectionColumnsProps = ProjectSectionContentProps & {
+  centered?: boolean;
+};
+
+export const ProjectSectionColumns = ({
+  className,
+  centered,
+  ...rest
+}: ProjectSectionColumnsProps) => (
   <ProjectSectionContent
     className={classes(styles.sectionColumns, className)}
     data-centered={centered}
