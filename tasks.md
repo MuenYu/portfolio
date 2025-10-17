@@ -5,7 +5,7 @@
    - Reconcile `config` usage vs data (e.g. provide `social.twitter` or stop destructuring `twitter` in `app/utils/meta.ts`).
    - Add a focused `npx tsc --noEmit --pretty false --maxNodeModuleJsDepth 0` run to confirm no remaining config/meta errors.
 
-2. [ ] Type the MDX content pipeline
+2. [x] Type the MDX content pipeline
    - Extend `env.d.ts` with a typed `ArticleFrontmatter` export and update `import.meta.glob` usages in `app/routes/articles_._index/posts.server.ts` and `app/routes/articles/route.tsx`.
    - Introduce shared post/article types (e.g. `ArticleSummary`, `ArticleLoaderData`) and apply them to `app/layouts/post/*` and `app/routes/articles_._index/articles.tsx`.
    - Validate with `npx tsc --noEmit` so article routes compile without `any`.
