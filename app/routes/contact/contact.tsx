@@ -1,4 +1,4 @@
-import type { ActionFunctionArgs } from 'react-router';
+import type { ActionFunctionArgs, MetaFunction } from 'react-router';
 import { useRef } from 'react';
 import { Form, useActionData, useNavigation } from 'react-router';
 import { Button } from '~/components/button';
@@ -16,35 +16,18 @@ import { useFormInput } from '~/hooks';
 import { cssProps, msToNum, numToMs } from '~/utils/style';
 import { baseMeta } from '~/utils/meta';
 import styles from './contact.module.css';
-
-type ContactActionErrors = {
-  email?: string;
-  message?: string;
-};
-
-type ContactActionData = {
-  errors?: ContactActionErrors;
-  success?: boolean;
-};
-
-type ContactEnv = {
-  ACCESSTOKEN: string;
-  SERVICE_ID: string;
-  TEMPLATE_ID: string;
-  USER_ID: string;
-};
-
-type ContactContext = {
-  cloudflare: {
-    env: ContactEnv;
-  };
-};
+import type {
+  ContactActionData,
+  ContactActionErrors,
+  ContactEnv,
+  CloudflareContext,
+} from '~/types/routes';
 
 type ContactActionArgs = Omit<ActionFunctionArgs, 'context'> & {
-  context: ContactContext;
+  context: CloudflareContext<ContactEnv>;
 };
 
-export const meta = () => {
+export const meta: MetaFunction = () => {
   return baseMeta({
     title: 'Contact',
     description:
@@ -84,7 +67,7 @@ export async function action({ context, request }: ContactActionArgs) {
   }
 
   if (Object.keys(errors).length > 0) {
-    return Response.json<ContactActionData>({ errors });
+    return Response.json({ errors } satisfies ContactActionData);
   }
 
   const resp = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
@@ -105,9 +88,9 @@ export async function action({ context, request }: ContactActionArgs) {
   });
   if (!resp.ok) {
     errors.message = await resp.text();
-    return Response.json<ContactActionData>({ errors });
+    return Response.json({ errors } satisfies ContactActionData);
   }
-  return Response.json<ContactActionData>({ success: true });
+  return Response.json({ success: true } satisfies ContactActionData);
 }
 
 export const Contact = () => {

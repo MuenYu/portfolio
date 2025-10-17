@@ -35,7 +35,7 @@
    - Replace loose refs (`useRef()`) with explicit element types and model derived data shapes (e.g. project cards).
    - Verify layouts compile cleanly with `npx tsc --noEmit`.
 
-8. [ ] Type route modules and loaders end-to-end
+8. [x] Type route modules and loaders end-to-end
    - Use `LoaderFunctionArgs`, `MetaFunction`, and typed `useLoaderData` generics across `home`, `articles`, `contact`, `root`, and API routes.
    - Share route data types via `app/routes.ts` (or a new `app/types/routes.ts`) to eliminate duplicate shapes.
    - Confirm `npx tsc --noEmit` succeeds with no implicit `any` in routes.

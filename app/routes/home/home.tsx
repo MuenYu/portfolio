@@ -4,11 +4,12 @@ import { Intro } from './intro';
 import { Profile } from './profile';
 import { ProjectSummary } from './project-summary';
 import { useEffect, useRef, useState } from 'react';
+import type { LinksFunction, MetaFunction } from 'react-router';
 import config from '~/config';
 import styles from './home.module.css';
 
 // Prefetch draco decoader wasm
-export const links = () => {
+export const links: LinksFunction = () => {
   return [
     {
       rel: 'prefetch',
@@ -27,7 +28,7 @@ export const links = () => {
   ];
 };
 
-export const meta = () => {
+export const meta: MetaFunction = () => {
   return baseMeta({
     title: config.role,
     description: `Portfolio of ${config.name} — a ${config.role}`,
@@ -35,11 +36,13 @@ export const meta = () => {
 };
 
 export const Home = () => {
-  const [visibleSections, setVisibleSections] = useState([]);
+  const [visibleSections, setVisibleSections] = useState<Element[]>([]);
   const [scrollIndicatorHidden, setScrollIndicatorHidden] = useState(false);
-  const intro = useRef();
-  const projects = new Array(config.projects.length).fill().map(() => useRef());
-  const about = useRef();
+  const intro = useRef<HTMLElement | null>(null);
+  const projects = new Array(config.projects.length)
+    .fill(null)
+    .map(() => useRef<HTMLElement | null>(null));
+  const about = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     const sections = [intro, ...projects, about];
@@ -84,46 +87,52 @@ export const Home = () => {
         sectionRef={intro}
         scrollIndicatorHidden={scrollIndicatorHidden}
       />
-      {config.projects.map((project, index) => (
-        <ProjectSummary
-          key={index}
-          id={`project-${index + 1}`}
-          sectionRef={projects[index]}
-          visible={visibleSections.includes(projects[index].current)}
-          index={index + 1}
-          title={project.title}
-          description={project.description}
-          buttons={project.buttons}
-          model={{
-            type: project.models.length === 1 ? 'laptop' : 'phone',
-            alt: `${project.title} UI`,
-            textures:
-              project.models.length === 1
-                ? [
-                    {
-                      srcSet: `${project.models[0].srcSet} 800w, ${project.models[0].srcSet} 1920w`,
-                      placeholder: project.models[0].placeholder,
-                    },
-                  ]
-                : [
-                    {
-                      srcSet: `${project.models[0].srcSet} 375w, ${project.models[0].srcSet} 750w`,
-                      placeholder: project.models[0].placeholder,
-                    },
-                    {
-                      srcSet: `${project.models[1].srcSet} 375w, ${project.models[1].srcSet} 750w`,
-                      placeholder: project.models[1].placeholder,
-                    },
-                  ],
-          }}
-        />
-      ))}
+      {config.projects.map((project, index) => {
+        const projectRef = projects[index].current;
+        const isProjectVisible = projectRef ? visibleSections.includes(projectRef) : false;
+
+        return (
+          <ProjectSummary
+            key={index}
+            id={`project-${index + 1}`}
+            sectionRef={projects[index]}
+            visible={isProjectVisible}
+            index={index + 1}
+            title={project.title}
+            description={project.description}
+            buttons={project.buttons}
+            alternate={index % 2 === 1}
+            model={{
+              type: project.models.length === 1 ? 'laptop' : 'phone',
+              alt: `${project.title} UI`,
+              textures:
+                project.models.length === 1
+                  ? [
+                      {
+                        srcSet: `${project.models[0].srcSet} 800w, ${project.models[0].srcSet} 1920w`,
+                        placeholder: project.models[0].placeholder,
+                      },
+                    ]
+                  : [
+                      {
+                        srcSet: `${project.models[0].srcSet} 375w, ${project.models[0].srcSet} 750w`,
+                        placeholder: project.models[0].placeholder,
+                      },
+                      {
+                        srcSet: `${project.models[1].srcSet} 375w, ${project.models[1].srcSet} 750w`,
+                        placeholder: project.models[1].placeholder,
+                      },
+                    ],
+            }}
+          />
+        );
+      })}
       <Profile
         sectionRef={about}
-        visible={visibleSections.includes(about.current)}
+        visible={about.current ? visibleSections.includes(about.current) : false}
         id="about"
       />
-      <Footer />
+      <Footer className={undefined} />
     </div>
   );
 };

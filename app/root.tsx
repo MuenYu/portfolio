@@ -9,6 +9,7 @@ import {
   useNavigation,
   useRouteError,
 } from 'react-router';
+import type { LinksFunction } from 'react-router';
 import { ThemeProvider, themeStyles } from '~/components/theme-provider';
 import GothamBook from '~/assets/fonts/gotham-book.woff2';
 import GothamMedium from '~/assets/fonts/gotham-medium.woff2';
@@ -19,21 +20,27 @@ import { Progress } from '~/components/progress';
 import styles from './root.module.css';
 import resetStylesHref from './reset.css?url';
 import globalStylesHref from './global.css?url';
+import {
+  isThemePreference,
+  type RootLoaderData,
+  type SetThemeActionData,
+  type ThemePreference,
+} from '~/types/routes';
 
-export const links = () => [
+export const links: LinksFunction = () => [
   {
     rel: 'preload',
     href: GothamMedium,
     as: 'font',
     type: 'font/woff2',
-    crossOrigin: '',
+    crossOrigin: 'anonymous',
   },
   {
     rel: 'preload',
     href: GothamBook,
     as: 'font',
     type: 'font/woff2',
-    crossOrigin: '',
+    crossOrigin: 'anonymous',
   },
   { rel: 'manifest', href: '/manifest.json' },
   { rel: 'icon', href: '/favicon.ico' },
@@ -48,20 +55,25 @@ export const links = () => [
 export { loader } from './root.loader';
 
 export default function App() {
-  let { canonicalUrl, theme } = useLoaderData();
-  const fetcher = useFetcher();
+  const { canonicalUrl, theme: initialTheme } = useLoaderData<RootLoaderData>();
+  const fetcher = useFetcher<SetThemeActionData>();
   const { state } = useNavigation();
+  let theme: ThemePreference = initialTheme;
 
   if (fetcher.formData?.has('theme')) {
-    theme = fetcher.formData.get('theme');
+    const submittedTheme = fetcher.formData.get('theme');
+    if (isThemePreference(submittedTheme)) {
+      theme = submittedTheme;
+    }
   }
 
-  function toggleTheme(newTheme) {
+  const toggleTheme = (newTheme?: ThemePreference) => {
+    const nextTheme: ThemePreference = newTheme ?? (theme === 'dark' ? 'light' : 'dark');
     fetcher.submit(
-      { theme: newTheme ? newTheme : theme === 'dark' ? 'light' : 'dark' },
+      { theme: nextTheme },
       { action: '/api/set-theme', method: 'post' }
     );
-  }
+  };
 
   return (
     <html lang="en">
