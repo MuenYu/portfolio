@@ -16,7 +16,10 @@
     "dev:storybook": "storybook dev -p 6006",
     "build:storybook": "storybook build",
     "deploy:storybook": "wrangler pages deploy ./storybook-static --project-name portfolio-storybook --branch main",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "lint": "eslint --max-warnings=0 .",
+    "lint:fix": "eslint --max-warnings=0 --fix .",
+    "clean": "rm -rf node_modules && rm -rf build && rm -rf dist && rm -rf storybook-static && rm -rf .react-router && rm -rf .wrangler"
   },
   "dependencies": {
     "@mdx-js/react": "^3.1.1",
