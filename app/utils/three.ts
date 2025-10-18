@@ -22,9 +22,7 @@ interface SceneLike {
   traverse(callback: (object: Object3DLike) => void): void;
 }
 
-interface MaterialLike extends Disposable {
-  [key: string]: unknown;
-}
+type MaterialLike = Disposable & Record<string, unknown>;
 
 interface TextureLike {
   dispose?: () => void;

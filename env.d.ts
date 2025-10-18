@@ -51,3 +51,48 @@ declare module '*.png?url' {
   const href: string;
   export default href;
 }
+
+interface ConfigProjectButton {
+  readonly text: string;
+  readonly link: string;
+}
+
+interface ConfigProjectModel {
+  readonly srcSet: string;
+  readonly placeholder?: string;
+}
+
+interface ConfigProject {
+  readonly title: string;
+  readonly description: string;
+  readonly buttons: readonly ConfigProjectButton[];
+  readonly models: readonly ConfigProjectModel[];
+}
+
+interface ConfigProfileImage {
+  readonly placeholder: string;
+  readonly normal: string;
+  readonly large: string;
+}
+
+interface ConfigProfile {
+  readonly greeting: string;
+  readonly paragraphs: readonly string[];
+  readonly img: ConfigProfileImage;
+}
+
+interface SiteConfig {
+  readonly name: string;
+  readonly role: string;
+  readonly disciplines: readonly string[];
+  readonly url: string;
+  readonly social: Readonly<Record<string, string>>;
+  readonly projects: readonly ConfigProject[];
+  readonly profile: ConfigProfile;
+  readonly ascii: string;
+}
+
+declare module '~/config.json' {
+  const value: SiteConfig;
+  export default value;
+}
