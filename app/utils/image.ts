@@ -2,11 +2,11 @@
  * Use the browser's image loading to load an image and
  * grab the `src` it chooses from a `srcSet`
  */
-type LoadImageFromSrcSetArgs = {
+interface LoadImageFromSrcSetArgs {
   src?: string;
   srcSet?: string;
   sizes?: string;
-};
+}
 
 export async function loadImageFromSrcSet({
   src,

@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 
 declare module '*.module.css' {
-  const classes: { readonly [key: string]: string };
+  const classes: Readonly<Record<string, string>>;
   export default classes;
 }
 
@@ -11,7 +11,7 @@ declare module '*.css?url' {
 }
 
 declare module '*.css' {
-  const classes: { readonly [key: string]: string };
+  const classes: Readonly<Record<string, string>>;
   export default classes;
 }
 
