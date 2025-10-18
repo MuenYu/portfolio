@@ -1,28 +1,55 @@
+import { useReducedMotion } from 'framer-motion';
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
+import type {
+  CSSProperties,
+  ComponentPropsWithoutRef,
+  MouseEvent,
+} from 'react';
 import { Button } from '~/components/button';
 import { Icon } from '~/components/icon';
 import { useTheme } from '~/components/theme-provider';
-import { useReducedMotion } from 'framer-motion';
 import { useHasMounted, useInViewport } from '~/hooks';
-import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { resolveSrcFromSrcSet } from '~/utils/image';
 import { classes, cssProps, numToMs } from '~/utils/style';
 import styles from './image.module.css';
+
+type MediaElementAttributes =
+  Partial<ComponentPropsWithoutRef<'img'>> &
+  Partial<ComponentPropsWithoutRef<'video'>>;
+
+interface ImageProps
+  extends Omit<MediaElementAttributes, 'className' | 'style' | 'src' | 'srcSet'> {
+  className?: string;
+  style?: CSSProperties;
+  reveal?: boolean;
+  delay?: number;
+  raised?: boolean;
+  src?: string;
+  srcSet?: string;
+  placeholder?: string;
+  play?: boolean;
+  restartOnPause?: boolean;
+  noPauseButton?: boolean;
+  cover?: boolean;
+}
+
+const DEFAULT_DELAY = 0;
 
 export const Image = ({
   className,
   style,
   reveal,
-  delay = 0,
+  delay = DEFAULT_DELAY,
   raised,
   src: baseSrc,
   srcSet,
   placeholder,
   ...rest
-}) => {
+}: ImageProps) => {
   const [loaded, setLoaded] = useState(false);
   const { theme } = useTheme();
-  const containerRef = useRef();
-  const src = baseSrc || srcSet.split(' ')[0];
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const src = baseSrc ?? srcSet?.split(' ')[0] ?? '';
   const inViewport = useInViewport(containerRef, !getIsVideo(src));
 
   const onLoad = useCallback(() => {
@@ -54,6 +81,15 @@ export const Image = ({
   );
 };
 
+type ImageElementsProps =
+  Omit<ImageProps, 'className' | 'style' | 'raised' | 'src' | 'onLoad'> & {
+    onLoad: () => void;
+    loaded: boolean;
+    inViewport: boolean;
+    src: string;
+    delay: number;
+  };
+
 const ImageElements = ({
   onLoad,
   loaded,
@@ -72,14 +108,14 @@ const ImageElements = ({
   noPauseButton,
   cover,
   ...rest
-}) => {
+}: ImageElementsProps) => {
   const reduceMotion = useReducedMotion();
   const [showPlaceholder, setShowPlaceholder] = useState(true);
   const [playing, setPlaying] = useState(!reduceMotion);
-  const [videoSrc, setVideoSrc] = useState();
+  const [videoSrc, setVideoSrc] = useState<string>();
   const [videoInteracted, setVideoInteracted] = useState(false);
-  const placeholderRef = useRef();
-  const videoRef = useRef();
+  const placeholderRef = useRef<HTMLImageElement | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
   const isVideo = getIsVideo(src);
   const showFullRes = inViewport;
   const hasMounted = useHasMounted();
@@ -91,30 +127,33 @@ const ImageElements = ({
     };
 
     if (isVideo && srcSet) {
-      resolveVideoSrc();
+      void resolveVideoSrc();
     } else if (isVideo) {
       setVideoSrc(src);
     }
   }, [isVideo, sizes, src, srcSet]);
 
   useEffect(() => {
-    if (!videoRef.current || !videoSrc) return;
+    const videoElement = videoRef.current;
+    if (!videoElement || !videoSrc) {
+      return;
+    }
 
     const playVideo = () => {
       setPlaying(true);
-      videoRef.current.play();
+      void videoElement.play();
     };
 
     const pauseVideo = () => {
       setPlaying(false);
-      videoRef.current.pause();
+      videoElement.pause();
     };
 
     if (!play) {
       pauseVideo();
 
       if (restartOnPause) {
-        videoRef.current.currentTime = 0;
+        videoElement.currentTime = 0;
       }
     }
 
@@ -127,17 +166,22 @@ const ImageElements = ({
     }
   }, [inViewport, play, reduceMotion, restartOnPause, videoInteracted, videoSrc]);
 
-  const togglePlaying = event => {
+  const togglePlaying = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
 
     setVideoInteracted(true);
 
-    if (videoRef.current.paused) {
+    const videoElement = videoRef.current;
+    if (!videoElement) {
+      return;
+    }
+
+    if (videoElement.paused) {
       setPlaying(true);
-      videoRef.current.play();
+      void videoElement.play();
     } else {
       setPlaying(false);
-      videoRef.current.pause();
+      videoElement.pause();
     }
   };
 
@@ -210,6 +254,6 @@ const ImageElements = ({
   );
 };
 
-function getIsVideo(src) {
-  return typeof src === 'string' && src.includes('.mp4');
+function getIsVideo(src: string): boolean {
+  return src.includes('.mp4');
 }
