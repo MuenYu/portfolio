@@ -8,29 +8,60 @@ import { Section } from '~/components/section';
 import { Text } from '~/components/text';
 import { Transition } from '~/components/transition';
 import { Fragment, useState } from 'react';
+import type { JSX, RefObject } from 'react';
 import { media } from '~/utils/style';
-import katakana from './katakana.svg';
 import styles from './profile.module.css';
 import config from '~/config.json';
 
-const renderTextWithLinks = text => {
-  const parts = text.split(/(\[.*?\]\(.*?\))/g);
+interface ProfileImageConfig {
+  placeholder: string;
+  normal: string;
+  large: string;
+}
+
+interface ProfileContentConfig {
+  greeting: string;
+  paragraphs: string[];
+  img: ProfileImageConfig;
+}
+
+interface ProfileTextProps {
+  visible: boolean;
+  titleId: string;
+}
+
+interface ProfileProps {
+  id: string;
+  visible: boolean;
+  sectionRef: RefObject<HTMLElement>;
+}
+
+const portfolioProfile: ProfileContentConfig = config.profile;
+
+const linkPattern = /\[(.*?)\]\((.*?)\)/;
+
+const renderTextWithLinks = (text: string): (string | JSX.Element)[] => {
+  const parts = text.split(new RegExp(`(${linkPattern.source})`, 'g'));
+
   return parts.map((part, index) => {
-    const linkMatch = part.match(/\[(.*?)\]\((.*?)\)/);
-    if (linkMatch) {
-      const [_, title, link] = linkMatch;
-      return (
-        <Link key={index} href={link}>
-          {title}
-        </Link>
-      );
+    const linkMatch = linkPattern.exec(part);
+
+    if (!linkMatch) {
+      return part;
     }
-    return part;
+
+    const [, label, href] = linkMatch;
+
+    return (
+      <Link key={`${href}-${index}`} href={href}>
+        {label}
+      </Link>
+    );
   });
 };
 
-const ProfileText = ({ visible, titleId }) => {
-  const paragraphs = config.profile.paragraphs.map((paragraph, index) => (
+const ProfileText = ({ visible, titleId }: ProfileTextProps): JSX.Element => {
+  const paragraphs = portfolioProfile.paragraphs.map((paragraph, index) => (
     <Text
       key={index}
       className={styles.description}
@@ -44,14 +75,14 @@ const ProfileText = ({ visible, titleId }) => {
   return (
     <Fragment>
       <Heading className={styles.title} data-visible={visible} level={3} id={titleId}>
-        <DecoderText text={config.profile.greeting} start={visible} delay={500} />
+        <DecoderText text={portfolioProfile.greeting} start={visible} delay={500} />
       </Heading>
       {paragraphs}
     </Fragment>
   );
 };
 
-export const Profile = ({ id, visible, sectionRef }) => {
+export const Profile = ({ id, visible, sectionRef }: ProfileProps): JSX.Element => {
   const [focused, setFocused] = useState(false);
   const titleId = `${id}-title`;
 
@@ -67,14 +98,14 @@ export const Profile = ({ id, visible, sectionRef }) => {
       tabIndex={-1}
     >
       <Transition in={visible || focused} timeout={0}>
-        {({ visible, nodeRef }) => (
+        {({ visible: isVisible, nodeRef }) => (
           <div className={styles.content} ref={nodeRef}>
             <div className={styles.column}>
-              <ProfileText visible={visible} titleId={titleId} />
+              <ProfileText visible={isVisible} titleId={titleId} />
               <Button
                 secondary
                 className={styles.button}
-                data-visible={visible}
+                data-visible={isVisible}
                 href="/contact"
                 icon="send"
               >
@@ -86,10 +117,10 @@ export const Profile = ({ id, visible, sectionRef }) => {
                 <Divider
                   notchWidth="64px"
                   notchHeight="8px"
-                  collapsed={!visible}
+                  collapsed={!isVisible}
                   collapseDelay={1000}
                 />
-                <div className={styles.tagText} data-visible={visible}>
+                <div className={styles.tagText} data-visible={isVisible}>
                   About me
                 </div>
               </div>
@@ -97,16 +128,13 @@ export const Profile = ({ id, visible, sectionRef }) => {
                 <Image
                   reveal
                   delay={100}
-                  placeholder={config.profile.img.placeholder}
-                  srcSet={`${config.profile.img.normal} 480w, ${config.profile.img.large} 960w`}
+                  placeholder={portfolioProfile.img.placeholder}
+                  srcSet={`${portfolioProfile.img.normal} 480w, ${portfolioProfile.img.large} 960w`}
                   width={960}
                   height={1280}
                   sizes={`(max-width: ${media.mobile}px) 100vw, 480px`}
                   alt="My profile picture"
                 />
-                {/* <svg className={styles.svg} data-visible={visible} viewBox="0 0 136 766">
-                  <use href={`${katakana}#katakana-profile`} />
-                </svg> */}
               </div>
             </div>
           </div>

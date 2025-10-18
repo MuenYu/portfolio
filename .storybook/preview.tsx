@@ -5,7 +5,7 @@ import '../app/reset.css';
 import '../app/global.css';
 import './preview.css';
 
-const themeDecorator: Decorator = (Story, context) => {
+const ThemeDecorator: Decorator = (Story, context) => {
   const theme = context.globals.theme as string;
 
   useEffect(() => {
@@ -22,7 +22,7 @@ const themeDecorator: Decorator = (Story, context) => {
   );
 };
 
-export const decorators = [themeDecorator];
+export const decorators = [ThemeDecorator];
 
 export const globalTypes = {
   theme: {

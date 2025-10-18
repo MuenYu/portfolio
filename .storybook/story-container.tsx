@@ -1,14 +1,14 @@
 import type { CSSProperties, ReactNode } from 'react';
 import './story-container.css';
 
-type StoryContainerProps = {
+interface StoryContainerProps {
   padding?: number;
   stretch?: boolean;
   gutter?: number;
   vertical?: boolean;
   children?: ReactNode;
   style?: CSSProperties;
-};
+}
 
 export const StoryContainer = ({
   padding = 32,

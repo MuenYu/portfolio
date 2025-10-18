@@ -20,7 +20,7 @@ const config: StorybookConfig = {
   docs: {
     autodocs: 'tag',
   },
-  async viteFinal(config) {
+  viteFinal(config) {
     // Merge custom configuration into the default config
     return mergeConfig(config, {
       assetsInclude: ['**/*.glb', '**/*.hdr', '**/*.glsl'],
