@@ -13,9 +13,9 @@ import {
   Scene,
   SphereGeometry,
   UniformsUtils,
-  Vector2,
   WebGLRenderer,
 } from 'three';
+import type { Light, Shader } from 'three';
 import { media } from '~/utils/style';
 import { throttle } from '~/utils/throttle';
 import { cleanRenderer, cleanScene, removeLights } from '~/utils/three';
@@ -23,25 +23,29 @@ import fragmentShader from './displacement-sphere-fragment.glsl?raw';
 import vertexShader from './displacement-sphere-vertex.glsl?raw';
 import styles from './displacement-sphere.module.css';
 
+type DisplacementSphereProps = Omit<JSX.IntrinsicElements['canvas'], 'ref'>;
+
+type SphereMesh = Mesh<SphereGeometry, MeshPhongMaterial> & {
+  modifier: number;
+};
+
 const springConfig = {
   stiffness: 30,
   damping: 20,
   mass: 2,
 };
 
-export const DisplacementSphere = props => {
+export const DisplacementSphere = (props: DisplacementSphereProps) => {
   const { theme } = useTheme();
-  const start = useRef(Date.now());
-  const canvasRef = useRef();
-  const mouse = useRef();
-  const renderer = useRef();
-  const camera = useRef();
-  const scene = useRef();
-  const lights = useRef();
-  const uniforms = useRef();
-  const material = useRef();
-  const geometry = useRef();
-  const sphere = useRef();
+  const start = useRef<number>(Date.now());
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const renderer = useRef<WebGLRenderer | null>(null);
+  const camera = useRef<PerspectiveCamera | null>(null);
+  const scene = useRef<Scene | null>(null);
+  const lights = useRef<Light[]>([]);
+  const uniforms = useRef<Shader['uniforms'] | null>(null);
+  const material = useRef<MeshPhongMaterial | null>(null);
+  const sphere = useRef<SphereMesh | null>(null);
   const reduceMotion = useReducedMotion();
   const isInViewport = useInViewport(canvasRef);
   const windowSize = useWindowSize();
@@ -50,50 +54,84 @@ export const DisplacementSphere = props => {
 
   useEffect(() => {
     const { innerWidth, innerHeight } = window;
-    mouse.current = new Vector2(0.8, 0.5);
-    renderer.current = new WebGLRenderer({
-      canvas: canvasRef.current,
+    const canvas = canvasRef.current;
+
+    if (!canvas) {
+      return;
+    }
+
+    const rendererInstance = new WebGLRenderer({
+      canvas,
       antialias: false,
       alpha: true,
       powerPreference: 'high-performance',
       failIfMajorPerformanceCaveat: true,
     });
-    renderer.current.setSize(innerWidth, innerHeight);
-    renderer.current.setPixelRatio(1);
-    renderer.current.outputColorSpace = LinearSRGBColorSpace;
 
-    camera.current = new PerspectiveCamera(54, innerWidth / innerHeight, 0.1, 100);
-    camera.current.position.z = 52;
+    renderer.current = rendererInstance;
+    rendererInstance.setSize(innerWidth, innerHeight);
+    rendererInstance.setPixelRatio(1);
+    rendererInstance.outputColorSpace = LinearSRGBColorSpace;
 
-    scene.current = new Scene();
+    const cameraInstance = new PerspectiveCamera(
+      54,
+      innerWidth / innerHeight,
+      0.1,
+      100
+    );
 
-    material.current = new MeshPhongMaterial();
-    material.current.onBeforeCompile = shader => {
-      uniforms.current = UniformsUtils.merge([
+    camera.current = cameraInstance;
+    cameraInstance.position.z = 52;
+
+    const sceneInstance = new Scene();
+    scene.current = sceneInstance;
+
+    const materialInstance = new MeshPhongMaterial();
+    material.current = materialInstance;
+    materialInstance.onBeforeCompile = (shader: Shader) => {
+      const mergedUniforms = UniformsUtils.merge([
         shader.uniforms,
         { time: { type: 'f', value: 0 } },
-      ]);
+      ]) as Shader['uniforms'];
 
-      shader.uniforms = uniforms.current;
+      uniforms.current = mergedUniforms;
+      shader.uniforms = mergedUniforms;
       shader.vertexShader = vertexShader;
       shader.fragmentShader = fragmentShader;
     };
 
     startTransition(() => {
-      geometry.current = new SphereGeometry(32, 128, 128);
-      sphere.current = new Mesh(geometry.current, material.current);
-      sphere.current.position.z = 0;
-      sphere.current.modifier = Math.random();
-      scene.current.add(sphere.current);
+      const materialForSphere = material.current;
+
+      if (!materialForSphere) {
+        return;
+      }
+
+      const geometry = new SphereGeometry(32, 128, 128);
+
+      const mesh = new Mesh(geometry, materialForSphere) as SphereMesh;
+      mesh.position.z = 0;
+      mesh.modifier = Math.random();
+
+      sphere.current = mesh;
+      sceneInstance.add(mesh);
     });
 
     return () => {
-      cleanScene(scene.current);
-      cleanRenderer(renderer.current);
+      cleanScene(scene.current ?? undefined);
+      if (renderer.current) {
+        cleanRenderer(renderer.current);
+      }
     };
   }, []);
 
   useEffect(() => {
+    const sceneInstance = scene.current;
+
+    if (!sceneInstance) {
+      return undefined;
+    }
+
     const dirLight = new DirectionalLight(0xffffff, theme === 'light' ? 1.8 : 2.0);
     const ambientLight = new AmbientLight(0xffffff, theme === 'light' ? 2.7 : 0.4);
 
@@ -102,7 +140,9 @@ export const DisplacementSphere = props => {
     dirLight.position.y = 100;
 
     lights.current = [dirLight, ambientLight];
-    lights.current.forEach(light => scene.current.add(light));
+    for (const light of lights.current) {
+      sceneInstance.add(light);
+    }
 
     return () => {
       removeLights(lights.current);
@@ -113,29 +153,38 @@ export const DisplacementSphere = props => {
     const { width, height } = windowSize;
 
     const adjustedHeight = height + height * 0.3;
-    renderer.current.setSize(width, adjustedHeight);
-    camera.current.aspect = width / adjustedHeight;
-    camera.current.updateProjectionMatrix();
+    const rendererInstance = renderer.current;
+    const cameraInstance = camera.current;
+    const sceneInstance = scene.current;
+    const sphereInstance = sphere.current;
+
+    if (!rendererInstance || !cameraInstance || !sceneInstance || !sphereInstance) {
+      return;
+    }
+
+    rendererInstance.setSize(width, adjustedHeight);
+    cameraInstance.aspect = width / adjustedHeight;
+    cameraInstance.updateProjectionMatrix();
 
     // Render a single frame on resize when not animating
     if (reduceMotion) {
-      renderer.current.render(scene.current, camera.current);
+      rendererInstance.render(sceneInstance, cameraInstance);
     }
 
     if (width <= media.mobile) {
-      sphere.current.position.x = 14;
-      sphere.current.position.y = 10;
+      sphereInstance.position.x = 14;
+      sphereInstance.position.y = 10;
     } else if (width <= media.tablet) {
-      sphere.current.position.x = 18;
-      sphere.current.position.y = 14;
+      sphereInstance.position.x = 18;
+      sphereInstance.position.y = 14;
     } else {
-      sphere.current.position.x = 22;
-      sphere.current.position.y = 16;
+      sphereInstance.position.x = 22;
+      sphereInstance.position.y = 16;
     }
   }, [reduceMotion, windowSize]);
 
   useEffect(() => {
-    const onMouseMove = throttle(event => {
+    const onMouseMove = throttle((event: MouseEvent) => {
       const position = {
         x: event.clientX / window.innerWidth,
         y: event.clientY / window.innerHeight,
@@ -155,44 +204,62 @@ export const DisplacementSphere = props => {
   }, [isInViewport, reduceMotion, rotationX, rotationY]);
 
   useEffect(() => {
-    let animation;
+    const rendererInstance = renderer.current;
+    const sceneInstance = scene.current;
+    const cameraInstance = camera.current;
+    const sphereInstance = sphere.current;
+
+    if (!rendererInstance || !sceneInstance || !cameraInstance || !sphereInstance) {
+      return undefined;
+    }
+
+    let animation: number | undefined;
 
     const animate = () => {
       animation = requestAnimationFrame(animate);
 
-      if (uniforms.current !== undefined) {
+      if (uniforms.current) {
         uniforms.current.time.value = 0.00005 * (Date.now() - start.current);
       }
 
-      sphere.current.rotation.z += 0.001;
-      sphere.current.rotation.x = rotationX.get();
-      sphere.current.rotation.y = rotationY.get();
+      sphereInstance.rotation.z += 0.001;
+      sphereInstance.rotation.x = rotationX.get();
+      sphereInstance.rotation.y = rotationY.get();
 
-      renderer.current.render(scene.current, camera.current);
+      rendererInstance.render(sceneInstance, cameraInstance);
     };
 
     if (!reduceMotion && isInViewport) {
       animate();
     } else {
-      renderer.current.render(scene.current, camera.current);
+      rendererInstance.render(sceneInstance, cameraInstance);
     }
 
     return () => {
-      cancelAnimationFrame(animation);
+      if (animation !== undefined) {
+        cancelAnimationFrame(animation);
+      }
     };
   }, [isInViewport, reduceMotion, rotationX, rotationY]);
 
   return (
     <Transition in timeout={3000} nodeRef={canvasRef}>
-      {({ visible, nodeRef }) => (
-        <canvas
-          aria-hidden
-          className={styles.canvas}
-          data-visible={visible}
-          ref={nodeRef}
-          {...props}
-        />
-      )}
+      {({ visible, nodeRef }) => {
+        const assignRefs = (node: HTMLCanvasElement | null) => {
+          canvasRef.current = node;
+          nodeRef.current = node;
+        };
+
+        return (
+          <canvas
+            aria-hidden
+            className={styles.canvas}
+            data-visible={visible}
+            ref={assignRefs}
+            {...props}
+          />
+        );
+      }}
     </Transition>
   );
 };

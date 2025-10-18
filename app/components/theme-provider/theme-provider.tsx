@@ -6,21 +6,40 @@ import GothamMediumItalic from '~/assets/fonts/gotham-medium-italic.woff2';
 import GothamMedium from '~/assets/fonts/gotham-medium.woff2';
 import IPAGothic from '~/assets/fonts/ipa-gothic.woff2';
 import { createContext, useContext } from 'react';
+import type { ComponentPropsWithoutRef, ElementType, ReactNode } from 'react';
 import { classes, media } from '~/utils/style';
 import { themes, tokens } from './theme';
 
-export const ThemeContext = createContext({});
+type ThemeName = keyof typeof themes;
 
-export const ThemeProvider = ({
-  theme = 'dark',
-  children,
-  className,
-  as: Component = 'div',
-  toggleTheme,
-  ...rest
-}) => {
+type ThemeContextValue = {
+  theme?: ThemeName;
+  toggleTheme?: () => void;
+};
+
+export const ThemeContext = createContext<ThemeContextValue>({});
+
+type ThemeProviderProps<T extends ElementType> = {
+  theme?: ThemeName;
+  children?: ReactNode;
+  className?: string;
+  as?: T;
+  toggleTheme?: () => void;
+} & Omit<ComponentPropsWithoutRef<T>, 'children' | 'className' | 'as' | 'theme'>;
+
+export const ThemeProvider = <T extends ElementType = 'div'>(
+  {
+    theme = 'dark',
+    children,
+    className,
+    as,
+    toggleTheme,
+    ...rest
+  }: ThemeProviderProps<T>
+) => {
   const parentTheme = useTheme();
-  const isRootProvider = !parentTheme.theme;
+  const isRootProvider = parentTheme.theme === undefined;
+  const Component = (as ?? 'div') as ElementType;
 
   return (
     <ThemeContext.Provider
@@ -32,7 +51,11 @@ export const ThemeProvider = ({
       {isRootProvider && children}
       {/* Nested providers need a div to override theme tokens */}
       {!isRootProvider && (
-        <Component className={classes(className)} data-theme={theme} {...rest}>
+        <Component
+          className={classes(className)}
+          data-theme={theme}
+          {...(rest as ComponentPropsWithoutRef<T>)}
+        >
           {children}
         </Component>
       )}
@@ -48,14 +71,14 @@ export function useTheme() {
 /**
  * Squeeze out spaces and newlines
  */
-export function squish(styles) {
+export function squish(styles: string): string {
   return styles.replace(/\s\s+/g, ' ');
 }
 
 /**
  * Transform theme token objects into CSS custom property strings
  */
-export function createThemeProperties(theme) {
+export function createThemeProperties(theme: Record<string, string>): string {
   return squish(
     Object.keys(theme)
       .map(key => `--${key}: ${theme[key]};`)
@@ -66,8 +89,8 @@ export function createThemeProperties(theme) {
 /**
  * Transform theme tokens into a React CSSProperties object
  */
-export function createThemeStyleObject(theme) {
-  let style = {};
+export function createThemeStyleObject(theme: Record<string, string>): Record<string, string> {
+  const style: Record<string, string> = {};
 
   for (const key of Object.keys(theme)) {
     style[`--${key}`] = theme[key];
@@ -79,7 +102,7 @@ export function createThemeStyleObject(theme) {
 /**
  * Generate media queries for tokens
  */
-export function createMediaTokenProperties() {
+export function createMediaTokenProperties(): string {
   return squish(
     Object.keys(media)
       .map(key => {
