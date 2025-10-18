@@ -7,14 +7,22 @@ import { Image } from '~/components/image';
 import { Section } from '~/components/section';
 import { Text } from '~/components/text';
 import { useReducedMotion } from 'framer-motion';
+import { useState } from 'react';
 import { useWindowSize } from '~/hooks';
 import { Link as RouterLink, useLoaderData } from 'react-router';
-import { useState, useEffect } from 'react';
 // import { formatDate } from '~/utils/date';
 import { classes, cssProps } from '~/utils/style';
+import { type ArticlePost } from './posts.server';
 import styles from './articles.module.css';
 
-function ArticlesPost({ slug, frontmatter, timecode, index }) {
+interface ArticlesPostProps {
+  readonly slug: string;
+  readonly frontmatter: ArticlePost['frontmatter'];
+  readonly timecode: string;
+  readonly index?: number;
+}
+
+function ArticlesPost({ slug, frontmatter, timecode, index }: ArticlesPostProps) {
   const [hovered, setHovered] = useState(false);
   // const [dateTime, setDateTime] = useState(null);
   const reduceMotion = useReducedMotion();
@@ -32,10 +40,12 @@ function ArticlesPost({ slug, frontmatter, timecode, index }) {
     setHovered(false);
   };
 
+  const placeholder = banner ? `${banner.split('.')[0]}-placeholder.jpg` : undefined;
+
   return (
     <article
       className={styles.post}
-      data-featured={!!featured}
+      data-featured={Boolean(featured)}
       style={index !== undefined ? cssProps({ delay: index * 100 + 200 }) : undefined}
     >
       {featured && (
@@ -43,13 +53,13 @@ function ArticlesPost({ slug, frontmatter, timecode, index }) {
           Featured
         </Text>
       )}
-      {featured && !!banner && (
+      {featured && banner && (
         <div className={styles.postImage}>
           <Image
             noPauseButton
             play={!reduceMotion ? hovered : undefined}
             src={banner}
-            placeholder={`${banner.split('.')[0]}-placeholder.jpg`}
+            placeholder={placeholder}
             alt=""
             role="presentation"
           />
@@ -93,7 +103,11 @@ function ArticlesPost({ slug, frontmatter, timecode, index }) {
   );
 }
 
-function SkeletonPost({ index }) {
+interface SkeletonPostProps {
+  readonly index?: number;
+}
+
+function SkeletonPost({ index }: SkeletonPostProps) {
   return (
     <article
       aria-hidden="true"
@@ -133,8 +147,13 @@ function SkeletonPost({ index }) {
   );
 }
 
+interface LoaderData {
+  readonly posts: ArticlePost[];
+  readonly featured: ArticlePost;
+}
+
 export function Articles() {
-  const { posts, featured } = useLoaderData();
+  const { posts, featured } = useLoaderData<LoaderData>();
   const { width } = useWindowSize();
   const singleColumnWidth = 1190;
   const isSingleColumn = width <= singleColumnWidth;
@@ -154,11 +173,9 @@ export function Articles() {
       {posts.map(({ slug, ...post }, index) => (
         <ArticlesPost key={slug} slug={slug} index={index} {...post} />
       ))}
-      {Array(Math.max(0, 3 - posts.length))
-        .fill()
-        .map((skeleton, index) => (
-          <SkeletonPost key={index} index={index} />
-        ))}
+      {Array.from({ length: Math.max(0, 3 - posts.length) }, (_, index) => (
+        <SkeletonPost key={index} index={index} />
+      ))}
     </div>
   );
 
@@ -186,7 +203,11 @@ export function Articles() {
   );
 }
 
-function Barcode({ className }) {
+interface BarcodeProps {
+  readonly className?: string;
+}
+
+function Barcode({ className }: BarcodeProps) {
   return (
     <svg
       className={className}
