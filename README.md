@@ -52,6 +52,12 @@ npm run dev:storybook
 
 # format codebase
 npm run format
+
+# lint
+npm run lint
+
+# lint fix
+npm run lint:fix
 ```
 
 ## Deployment
