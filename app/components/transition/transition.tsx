@@ -104,15 +104,12 @@ const TransitionContent = ({
   const [status, setStatus] = useState<TransitionStatus>(initial ? 'exited' : 'entered');
   const [isPresent, safeToRemove] = usePresence();
   const [hasEntered, setHasEntered] = useState(!initial);
-  const splitTimeout = typeof timeout === 'object';
   const internalNodeRef = useRef<HTMLElement | null>(null);
   const nodeRef = defaultNodeRef ?? internalNodeRef;
   const visible = hasEntered && show ? isPresent : false;
 
   useEffect(() => {
     if (hasEntered || !show) return;
-
-    const actualTimeout = splitTimeout ? timeout.enter : timeout;
 
     if (enterTimeout.current !== undefined) {
       window.clearTimeout(enterTimeout.current);
@@ -128,19 +125,27 @@ const TransitionContent = ({
     // Force reflow
     void nodeRef.current?.offsetHeight;
 
+    const actualTimeout =
+      typeof timeout === 'object' ? timeout.enter : timeout;
     const delay = typeof actualTimeout === 'number' ? actualTimeout : 0;
 
     enterTimeout.current = window.setTimeout(() => {
       setStatus('entered');
       onEntered?.();
     }, delay);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onEnter, onEntered, timeout, status, show]);
+  }, [
+    enterTimeout,
+    exitTimeout,
+    hasEntered,
+    onEnter,
+    onEntered,
+    show,
+    timeout,
+    nodeRef,
+  ]);
 
   useEffect(() => {
     if (isPresent && show) return;
-
-    const actualTimeout = splitTimeout ? timeout.exit : timeout;
 
     if (enterTimeout.current !== undefined) {
       window.clearTimeout(enterTimeout.current);
@@ -155,6 +160,8 @@ const TransitionContent = ({
     // Force reflow
     void nodeRef.current?.offsetHeight;
 
+    const actualTimeout =
+      typeof timeout === 'object' ? timeout.exit : timeout;
     const delay = typeof actualTimeout === 'number' ? actualTimeout : 0;
 
     exitTimeout.current = window.setTimeout(() => {
@@ -162,8 +169,17 @@ const TransitionContent = ({
       safeToRemove?.();
       onExited?.();
     }, delay);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPresent, onExit, safeToRemove, timeout, onExited, show]);
+  }, [
+    enterTimeout,
+    exitTimeout,
+    isPresent,
+    onExit,
+    safeToRemove,
+    timeout,
+    onExited,
+    show,
+    nodeRef,
+  ]);
 
   return children({ visible, status, nodeRef });
 };
