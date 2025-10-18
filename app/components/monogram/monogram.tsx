@@ -17,7 +17,7 @@ export const Monogram = forwardRef<SVGSVGElement, MonogramProps>(function Monogr
   return (
     <svg
       aria-hidden
-      className={classes(styles.monogram, className)}
+      className={classes(styles['monogram'], className)}
       width="50"
       height="50"
       viewBox="0 0 50 50"
@@ -36,7 +36,7 @@ export const Monogram = forwardRef<SVGSVGElement, MonogramProps>(function Monogr
       <rect clipPath={`url(#${clipId})`} width="100%" height="100%" />
       {highlight && (
         <g clipPath={`url(#${clipId})`}>
-          <rect className={styles.highlight} width="100%" height="100%" />
+          <rect className={styles['highlight']} width="100%" height="100%" />
         </g>
       )}
     </svg>

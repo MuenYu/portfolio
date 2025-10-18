@@ -76,7 +76,7 @@ export const TextArea = ({
 
   return (
     <textarea
-      className={classes(styles.textarea, className)}
+      className={classes(styles['textarea'], className)}
       ref={textareaRef}
       onChange={handleChange}
       style={cssProps({ resize })}

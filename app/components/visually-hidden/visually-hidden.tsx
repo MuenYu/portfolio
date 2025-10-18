@@ -30,7 +30,7 @@ const VisuallyHiddenBase = <E extends ElementType = 'span'>(
 
   return (
     <Component
-      className={classes(styles.hidden, className)}
+      className={classes(styles['hidden'], className)}
       data-hidden={!visible && !showOnFocus}
       data-show-on-focus={showOnFocus}
       ref={ref}

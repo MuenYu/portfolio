@@ -15,7 +15,7 @@ export const Icon = forwardRef<SVGSVGElement, IconProps>(
       <svg
         aria-hidden
         ref={ref}
-        className={classes(styles.icon, className)}
+        className={classes(styles['icon'], className)}
         width={size}
         height={size}
         {...rest}

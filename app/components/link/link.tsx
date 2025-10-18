@@ -37,7 +37,7 @@ export const Link = forwardRef<HTMLAnchorElement, AppLinkProps>(
 
     const sharedProps: AnchorProps = {
       ...rest,
-      className: classes(styles.link, className),
+      className: classes(styles['link'], className),
       'data-secondary': secondary,
       rel: relValue,
       target: targetValue,

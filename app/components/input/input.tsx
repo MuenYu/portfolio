@@ -63,7 +63,7 @@ export const Input = ({
   };
 
   const sharedInputProps = {
-    className: styles.input,
+    className: styles['input'],
     id: inputId,
     'aria-labelledby': labelId,
     'aria-describedby': error ? errorId : undefined,
@@ -112,14 +112,14 @@ export const Input = ({
 
   return (
     <div
-      className={classes(styles.container, className)}
+      className={classes(styles['container'], className)}
       data-error={!!error}
       style={style}
       {...containerProps}
     >
-      <div className={styles.content}>
+      <div className={styles['content']}>
         <label
-          className={styles.label}
+          className={styles['label']}
           data-focused={focused}
           data-filled={!!value}
           id={labelId}
@@ -144,13 +144,13 @@ export const Input = ({
             >)}
           />
         )}
-        <div className={styles.underline} data-focused={focused} />
+        <div className={styles['underline']} data-focused={focused} />
       </div>
       <Transition unmount in={error} timeout={msToNum(tokens.base.durationM)}>
         {({ visible, nodeRef }) => (
           <div
             ref={nodeRef}
-            className={styles.error}
+            className={styles['error']}
             data-visible={visible}
             id={errorId}
             role="alert"
@@ -158,7 +158,7 @@ export const Input = ({
               height: visible ? errorRef.current?.getBoundingClientRect().height : 0,
             })}
           >
-            <div className={styles.errorMessage} ref={errorRef}>
+            <div className={styles['errorMessage']} ref={errorRef}>
               <Icon icon="error" />
               {error}
             </div>

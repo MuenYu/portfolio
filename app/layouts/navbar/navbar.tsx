@@ -146,21 +146,21 @@ export const Navbar = () => {
   };
 
   return (
-    <header className={styles.navbar} ref={headerRef}>
+    <header className={styles['navbar']} ref={headerRef}>
       <RouterLink
         unstable_viewtransition="true"
         prefetch="intent"
         to={location.pathname === '/' ? '/#intro' : '/'}
         data-navbar-item
-        className={styles.logo}
+        className={styles['logo']}
         aria-label={`${config.name}, ${config.role}`}
         onClick={handleMobileNavClick}
       >
         <Monogram highlight />
       </RouterLink>
       <NavToggle onClick={() => setMenuOpen(!menuOpen)} menuOpen={menuOpen} />
-      <nav className={styles.nav}>
-        <div className={styles.navList}>
+      <nav className={styles['nav']}>
+        <div className={styles['navList']}>
           {navLinks.map(({ label, pathname }) => (
             <RouterLink
               unstable_viewtransition="true"
@@ -168,7 +168,7 @@ export const Navbar = () => {
               to={pathname}
               key={label}
               data-navbar-item
-              className={styles.navLink}
+              className={styles['navLink']}
               aria-current={getCurrent(pathname)}
               onClick={handleNavItemClick}
             >
@@ -180,14 +180,14 @@ export const Navbar = () => {
       </nav>
       <Transition unmount in={menuOpen} timeout={msToNum(tokens.base.durationL)}>
         {({ visible, nodeRef }) => (
-          <nav className={styles.mobileNav} data-visible={visible} ref={nodeRef}>
+          <nav className={styles['mobileNav']} data-visible={visible} ref={nodeRef}>
             {navLinks.map(({ label, pathname }, index) => (
               <RouterLink
                 unstable_viewtransition="true"
                 prefetch="intent"
                 to={pathname}
                 key={label}
-                className={styles.mobileNavLink}
+                className={styles['mobileNavLink']}
                 data-visible={visible}
                 aria-current={getCurrent(pathname)}
                 onClick={handleMobileNavClick}
@@ -215,18 +215,18 @@ interface NavbarIconsProps {
 }
 
 const NavbarIcons = ({ desktop }: NavbarIconsProps) => (
-  <div className={styles.navIcons}>
+  <div className={styles['navIcons']}>
     {socialLinks.map(({ label, url, icon }) => (
       <a
         key={label}
         data-navbar-item={desktop ? true : undefined}
-        className={styles.navIconLink}
+        className={styles['navIconLink']}
         aria-label={label}
         href={url}
         target="_blank"
         rel="noopener noreferrer"
       >
-        <Icon className={styles.navIcon} icon={icon} />
+        <Icon className={styles['navIcon']} icon={icon} />
       </a>
     ))}
   </div>

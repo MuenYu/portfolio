@@ -75,7 +75,7 @@ export function Intro({
 
   return (
     <Section
-      className={styles.intro}
+      className={styles['intro']}
       as="section"
       ref={sectionRef}
       id={id}
@@ -91,25 +91,25 @@ export function Intro({
                 <DisplacementSphere />
               </Suspense>
             )}
-            <header className={styles.text}>
-              <h1 className={styles.name} data-visible={visible} id={titleId}>
+            <header className={styles['text']}>
+              <h1 className={styles['name']} data-visible={visible} id={titleId}>
                 <DecoderText text={config.name} delay={500} />
               </h1>
-              <Heading level={0} as="h2" className={styles.title}>
-                <VisuallyHidden className={styles.label}>
+              <Heading level={0} as="h2" className={styles['title']}>
+                <VisuallyHidden className={styles['label']}>
                   {`${config.role} + ${introLabel}`}
                 </VisuallyHidden>
-                <span aria-hidden className={styles.row}>
+                <span aria-hidden className={styles['row']}>
                   <span
-                    className={styles.word}
+                    className={styles['word']}
                     data-status={status}
                     style={cssProps({ delay: tokens.base.durationXS })}
                   >
                     {config.role}
                   </span>
-                  <span className={styles.line} data-status={status} />
+                  <span className={styles['line']} data-status={status} />
                 </span>
-                <div className={styles.row}>
+                <div className={styles['row']}>
                   {disciplines.map(item => (
                     <Transition
                       unmount
@@ -121,7 +121,7 @@ export function Intro({
                         <span
                           aria-hidden
                           ref={nodeRef}
-                          className={styles.word}
+                          className={styles['word']}
                           data-plus={true}
                           data-status={status}
                           style={cssProps({ delay: tokens.base.durationL })}
@@ -136,7 +136,7 @@ export function Intro({
             </header>
             <RouterLink
               to="/#project-1"
-              className={styles.scrollIndicator}
+              className={styles['scrollIndicator']}
               data-status={status}
               data-hidden={scrollIndicatorHidden}
               onClick={handleScrollClick}
@@ -145,7 +145,7 @@ export function Intro({
             </RouterLink>
             <RouterLink
               to="/#project-1"
-              className={styles.mobileScrollIndicator}
+              className={styles['mobileScrollIndicator']}
               data-status={status}
               data-hidden={scrollIndicatorHidden}
               onClick={handleScrollClick}

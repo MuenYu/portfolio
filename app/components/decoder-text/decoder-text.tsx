@@ -118,9 +118,9 @@ const DecoderTextComponent = memo(function DecoderTextComponent({
   }, [decoderSpring, reduceMotion, start, startDelay, text]);
 
   return (
-    <span className={classes(styles.text, className)} {...rest}>
-      <VisuallyHidden className={styles.label}>{text}</VisuallyHidden>
-      <span aria-hidden className={styles.content} ref={container} />
+    <span className={classes(styles['text'], className)} {...rest}>
+      <VisuallyHidden className={styles['label']}>{text}</VisuallyHidden>
+      <span aria-hidden className={styles['content']} ref={container} />
     </span>
   );
 });

@@ -91,17 +91,19 @@ export async function resolveSrcFromSrcSet({
 }): Promise<string> {
   const sources = await Promise.all(
     srcSet.split(', ').map(async srcString => {
-      const [src, width] = srcString.split(' ');
-      const size = Number(width.replace('w', ''));
-      const image = await generateImage(size);
-      return { src, image, width };
+      const [rawSrc = '', rawWidth = '0w'] = srcString.split(' ');
+      const size = Number(rawWidth.replace('w', ''));
+      const image = await generateImage(Number.isFinite(size) ? size : 0);
+      return { src: rawSrc, image, width: rawWidth };
     })
   );
 
   const fakeSrcSet = sources.map(({ image, width }) => `${image} ${width}`).join(', ');
-  const fakeSrc = await loadImageFromSrcSet({ srcSet: fakeSrcSet, sizes });
+  const fakeSrc = await loadImageFromSrcSet(
+    sizes ? { srcSet: fakeSrcSet, sizes } : { srcSet: fakeSrcSet }
+  );
 
-  const output = sources.find(src => src.image === fakeSrc);
+  const output = sources.find(candidate => candidate.image === fakeSrc);
   if (!output) {
     throw new Error('Unable to resolve source from srcSet');
   }

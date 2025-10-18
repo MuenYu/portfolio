@@ -236,7 +236,7 @@ export const DisplacementSphere = (
       {({ visible, nodeRef }) => (
         <canvas
           aria-hidden
-          className={styles.canvas}
+          className={styles['canvas']}
           data-visible={visible}
           ref={nodeRef}
           {...props}

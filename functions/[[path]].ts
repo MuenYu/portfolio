@@ -1,6 +1,7 @@
 import { createPagesFunctionHandler } from '@react-router/cloudflare';
 import type { ServerBuild } from 'react-router';
 
+// @ts-expect-error -- Build output is generated at runtime
 import * as build from '../build/server';
 
 export const onRequest = createPagesFunctionHandler({

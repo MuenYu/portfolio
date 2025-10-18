@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, type MutableRefObject } from 'react';
 import type { ActionFunctionArgs } from 'react-router';
 import { Form, useActionData, useNavigation } from 'react-router';
 import { Button } from '~/components/button';
@@ -48,30 +48,36 @@ export async function action({ context, request }: ActionFunctionArgs<PortfolioC
   const isBot = typeof rawName === 'string' ? rawName : '';
   const email = typeof rawEmail === 'string' ? rawEmail : '';
   const message = typeof rawMessage === 'string' ? rawMessage : '';
-  const errors: ContactErrors = {};
+  let errors: ContactErrors = {};
 
   // Return without sending if a bot trips the honeypot
-  if (isBot) return Response.json<ContactActionData>({ success: true });
+  if (isBot) return Response.json({ success: true });
 
   // Handle input validation on the server
   if (!email || !EMAIL_PATTERN.test(email)) {
-    errors.email = 'Please enter a valid email address.';
+    errors = { ...errors, email: 'Please enter a valid email address.' };
   }
 
   if (!message) {
-    errors.message = 'Please enter a message.';
+    errors = { ...errors, message: 'Please enter a message.' };
   }
 
   if (email.length > MAX_EMAIL_LENGTH) {
-    errors.email = `Email address must be shorter than ${MAX_EMAIL_LENGTH} characters.`;
+    errors = {
+      ...errors,
+      email: `Email address must be shorter than ${MAX_EMAIL_LENGTH} characters.`,
+    };
   }
 
   if (message.length > MAX_MESSAGE_LENGTH) {
-    errors.message = `Message must be shorter than ${MAX_MESSAGE_LENGTH} characters.`;
+    errors = {
+      ...errors,
+      message: `Message must be shorter than ${MAX_MESSAGE_LENGTH} characters.`,
+    };
   }
 
   if (Object.keys(errors).length > 0) {
-    return Response.json<ContactActionData>({ errors });
+    return Response.json({ errors });
   }
 
   const resp = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
@@ -92,11 +98,11 @@ export async function action({ context, request }: ActionFunctionArgs<PortfolioC
   });
 
   if (!resp.ok) {
-    errors.message = await resp.text();
-    return Response.json<ContactActionData>({ errors });
+    errors = { ...errors, message: await resp.text() };
+    return Response.json({ errors });
   }
 
-  return Response.json<ContactActionData>({ success: true });
+  return Response.json({ success: true });
 }
 
 export const Contact = () => {
@@ -109,17 +115,17 @@ export const Contact = () => {
   const sending = state === 'submitting';
 
   return (
-    <Section className={styles.contact}>
+    <Section className={styles['contact']}>
       <Transition unmount in={!actionData?.success} timeout={1600}>
         {({ status, nodeRef }) => (
           <Form
             unstable_viewtransition="true"
-            className={styles.form}
+            className={styles['form']}
             method="post"
-            ref={nodeRef}
+            ref={nodeRef as MutableRefObject<HTMLFormElement | null>}
           >
             <Heading
-              className={styles.title}
+              className={styles['title']}
               data-status={status}
               level={3}
               as="h1"
@@ -128,20 +134,20 @@ export const Contact = () => {
               <DecoderText text="Say hello" start={status !== 'exited'} delay={300} />
             </Heading>
             <Divider
-              className={styles.divider}
+              className={styles['divider']}
               data-status={status}
               style={getDelay(tokens.base.durationXS, initDelay, 0.4)}
             />
             {/* Hidden honeypot field to identify bots */}
             <Input
-              className={styles.botkiller}
+              className={styles['botkiller']}
               label="Name"
               name="name"
               maxLength={MAX_EMAIL_LENGTH}
             />
             <Input
               required
-              className={styles.input}
+              className={styles['input']}
               data-status={status}
               style={getDelay(tokens.base.durationXS, initDelay)}
               autoComplete="email"
@@ -154,7 +160,7 @@ export const Contact = () => {
             <Input
               required
               multiline
-              className={styles.input}
+              className={styles['input']}
               data-status={status}
               style={getDelay(tokens.base.durationS, initDelay)}
               autoComplete="off"
@@ -170,16 +176,16 @@ export const Contact = () => {
             >
               {({ status: errorStatus, nodeRef }) => (
                 <div
-                  className={styles.formError}
+                  className={styles['formError']}
                   ref={nodeRef}
                   data-status={errorStatus}
                   style={cssProps({
                     height: errorStatus ? (errorRef.current?.offsetHeight ?? 0) : 0,
                   })}
                 >
-                  <div className={styles.formErrorContent} ref={errorRef}>
-                    <div className={styles.formErrorMessage}>
-                      <Icon className={styles.formErrorIcon} icon="error" />
+                  <div className={styles['formErrorContent']} ref={errorRef}>
+                    <div className={styles['formErrorMessage']}>
+                      <Icon className={styles['formErrorIcon']} icon="error" />
                       {actionData?.errors?.email}
                       {actionData?.errors?.message}
                     </div>
@@ -188,7 +194,7 @@ export const Contact = () => {
               )}
             </Transition>
             <Button
-              className={styles.button}
+              className={styles['button']}
               data-status={status}
               data-sending={sending}
               style={getDelay(tokens.base.durationM, initDelay)}
@@ -205,11 +211,11 @@ export const Contact = () => {
       </Transition>
       <Transition unmount in={actionData?.success}>
         {({ status, nodeRef }) => (
-          <div className={styles.complete} aria-live="polite" ref={nodeRef}>
+          <div className={styles['complete']} aria-live="polite" ref={nodeRef}>
             <Heading
               level={3}
               as="h3"
-              className={styles.completeTitle}
+              className={styles['completeTitle']}
               data-status={status}
             >
               Message Sent
@@ -217,7 +223,7 @@ export const Contact = () => {
             <Text
               size="l"
               as="p"
-              className={styles.completeText}
+              className={styles['completeText']}
               data-status={status}
               style={getDelay(tokens.base.durationXS)}
             >
@@ -226,7 +232,7 @@ export const Contact = () => {
             <Button
               secondary
               iconHoverShift
-              className={styles.completeButton}
+              className={styles['completeButton']}
               data-status={status}
               style={getDelay(tokens.base.durationM)}
               href="/"
@@ -237,7 +243,7 @@ export const Contact = () => {
           </div>
         )}
       </Transition>
-      <Footer className={styles.footer} />
+      <Footer className={styles['footer']} />
     </Section>
   );
 };

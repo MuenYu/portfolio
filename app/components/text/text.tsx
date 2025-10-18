@@ -39,7 +39,7 @@ const TextBase = <E extends ElementType = 'span'>(
   return (
     <Component
       ref={ref}
-      className={classes(styles.text, className)}
+      className={classes(styles['text'], className)}
       data-align={align}
       data-size={size}
       data-weight={weight}

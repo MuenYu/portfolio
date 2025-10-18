@@ -1,5 +1,7 @@
 import config from '~/config.json';
 
+const socialValue = (key: string) => config.social[key] ?? '';
+
 export const navLinks = [
   {
     label: 'Projects',
@@ -22,51 +24,51 @@ export const navLinks = [
 export const socialLinks = [
   {
     label: 'Blog',
-    url: `${config.social.blog}`,
+    url: `${socialValue('blog')}`,
     icon: 'home',
   },
   {
     label: 'Github',
-    url: `https://github.com/${config.social.github}`,
+    url: `https://github.com/${socialValue('github')}`,
     icon: 'github',
   },
   {
     label: 'Telegram',
-    url: `https://t.me/${config.social.telegram}`,
+    url: `https://t.me/${socialValue('telegram')}`,
     icon: 'telegram',
   },
   {
     label: 'LinkedIn',
-    url: `https://www.linkedin.com/in/${config.social.linkedin}/`,
+    url: `https://www.linkedin.com/in/${socialValue('linkedin')}/`,
     icon: 'linkedin',
   },
   {
     label: 'X',
-    url: `https://x.com/${config.social.x}`,
+    url: `https://x.com/${socialValue('x')}`,
     icon: 'x',
   },
   {
     label: 'LeetCode',
-    url: `https://leetcode.com/u/${config.social.leetcode}`,
+    url: `https://leetcode.com/u/${socialValue('leetcode')}`,
     icon: 'leetcode',
   },
   {
     label: 'YouTube',
-    url: `https://www.youtube.com/${config.social.youtube}`,
+    url: `https://www.youtube.com/${socialValue('youtube')}`,
     icon: 'youtube',
   },
   {
     label: 'Bluesky',
-    url: `https://bsky.app/profile/${config.social.bluesky}`,
+    url: `https://bsky.app/profile/${socialValue('bluesky')}`,
     icon: 'bluesky',
   },
   {
     label: 'Figma',
-    url: `https://www.figma.com/${config.social.figma}`,
+    url: `https://www.figma.com/${socialValue('figma')}`,
     icon: 'figma',
   },
 ].filter(x => {
-  const flag = config.social[x.label.toLowerCase()];
+  const flag = socialValue(x.label.toLowerCase());
   // Filter out social links that are not in config.json
   return flag !== undefined && flag.length > 0;
 });

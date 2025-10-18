@@ -25,7 +25,7 @@ export const List = ({
   const Element = ordered ? 'ol' : 'ul';
 
   return (
-    <Element className={classes(styles.list, className)} {...rest}>
+    <Element className={classes(styles['list'], className)} {...rest}>
       {children}
     </Element>
   );
@@ -35,7 +35,7 @@ type ListItemProps = ComponentPropsWithoutRef<'li'>;
 
 export const ListItem = ({ children, ...rest }: ListItemProps): JSX.Element => {
   return (
-    <li className={styles.item} {...rest}>
+    <li className={styles['item']} {...rest}>
       {children}
     </li>
   );

@@ -9,9 +9,9 @@ type FooterProps = Omit<HTMLAttributes<HTMLElement>, 'className' | 'children'> &
 };
 
 export const Footer = ({ className, ...rest }: FooterProps): JSX.Element => (
-  <footer className={classes(styles.footer, className)} {...rest}>
+  <footer className={classes(styles['footer'], className)} {...rest}>
     <Text size="s" align="center">
-      <span className={styles.date}>
+      <span className={styles['date']}>
         {`© ${new Date().getFullYear()} ${config.name} | Hosted by Cloudflare`}
       </span>
     </Text>

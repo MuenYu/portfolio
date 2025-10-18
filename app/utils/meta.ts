@@ -1,7 +1,10 @@
 import type { MetaDescriptor } from 'react-router';
 import config from '~/config.json';
 
-const { name, url, twitter } = config;
+const { name, url, social } = config;
+const twitterKey = 'twitter';
+const xKey = 'x';
+const twitter = social[twitterKey] ?? social[xKey] ?? '';
 const defaultOgImage = `${url}/preview.png`;
 
 interface BaseMetaArgs {

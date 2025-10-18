@@ -104,7 +104,7 @@ const ButtonContent = forwardRef<ButtonElement, ButtonProps>(
         {...(href ? { href } : {})}
         {...(computedRel ? { rel: computedRel } : {})}
         {...(computedTarget ? { target: computedTarget } : {})}
-        className={classes(styles.button, className)}
+        className={classes(styles['button'], className)}
         data-loading={loading}
         data-icon-only={iconOnly}
         data-secondary={secondary}
@@ -113,16 +113,16 @@ const ButtonContent = forwardRef<ButtonElement, ButtonProps>(
       >
         {!!icon && (
           <Icon
-            className={styles.icon}
+            className={styles['icon']}
             data-start={!iconOnly}
             data-shift={iconHoverShift}
             icon={icon}
           />
         )}
-        {!!children && <span className={styles.text}>{children}</span>}
+        {!!children && <span className={styles['text']}>{children}</span>}
         {!!iconEnd && (
           <Icon
-            className={styles.icon}
+            className={styles['icon']}
             data-end={!iconOnly}
             data-shift={iconHoverShift}
             icon={iconEnd}
@@ -132,7 +132,7 @@ const ButtonContent = forwardRef<ButtonElement, ButtonProps>(
           {({ visible, nodeRef }) => (
             <Loader
               ref={nodeRef}
-              className={styles.loader}
+              className={styles['loader']}
               size={32}
               text={loadingText}
               data-visible={visible}
