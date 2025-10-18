@@ -127,4 +127,6 @@ const DecoderTextComponent = memo(
   }
 );
 
+DecoderTextComponent.displayName = 'DecoderText';
+
 export const DecoderText = DecoderTextComponent;

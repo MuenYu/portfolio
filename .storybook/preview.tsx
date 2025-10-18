@@ -1,13 +1,14 @@
 import type { Decorator, Preview } from '@storybook/react';
+import type { PropsWithChildren } from 'react';
 import { useEffect } from 'react';
 import { ThemeProvider, themeStyles } from '../app/components/theme-provider';
 import '../app/reset.css';
 import '../app/global.css';
 import './preview.css';
 
-const themeDecorator: Decorator = (Story, context) => {
-  const theme = context.globals.theme as string;
+type ThemeWrapperProps = PropsWithChildren<{ theme: string }>;
 
+const ThemeWrapper = ({ theme, children }: ThemeWrapperProps) => {
   useEffect(() => {
     document.body.dataset.theme = theme;
   }, [theme]);
@@ -16,9 +17,19 @@ const themeDecorator: Decorator = (Story, context) => {
     <ThemeProvider theme={theme}>
       <style>{themeStyles}</style>
       <div id="story-root" className="storyRoot">
-        <Story />
+        {children}
       </div>
     </ThemeProvider>
+  );
+};
+
+const themeDecorator: Decorator = (Story, context) => {
+  const theme = context.globals.theme as string;
+
+  return (
+    <ThemeWrapper theme={theme}>
+      <Story />
+    </ThemeWrapper>
   );
 };
 

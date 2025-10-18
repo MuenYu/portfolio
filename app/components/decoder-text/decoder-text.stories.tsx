@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { DecoderText } from '~/components/decoder-text';
 import { Heading } from '~/components/heading';
 import { StoryContainer } from '../../../.storybook/story-container';

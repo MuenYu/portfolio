@@ -9,7 +9,6 @@ import { Text } from '~/components/text';
 import { Transition } from '~/components/transition';
 import { Fragment, useState } from 'react';
 import { media } from '~/utils/style';
-import katakana from './katakana.svg';
 import styles from './profile.module.css';
 import config from '~/config.json';
 
@@ -18,7 +17,7 @@ const renderTextWithLinks = text => {
   return parts.map((part, index) => {
     const linkMatch = part.match(/\[(.*?)\]\((.*?)\)/);
     if (linkMatch) {
-      const [_, title, link] = linkMatch;
+      const [, title, link] = linkMatch;
       return (
         <Link key={index} href={link}>
           {title}
@@ -104,9 +103,6 @@ export const Profile = ({ id, visible, sectionRef }) => {
                   sizes={`(max-width: ${media.mobile}px) 100vw, 480px`}
                   alt="My profile picture"
                 />
-                {/* <svg className={styles.svg} data-visible={visible} viewBox="0 0 136 766">
-                  <use href={`${katakana}#katakana-profile`} />
-                </svg> */}
               </div>
             </div>
           </div>

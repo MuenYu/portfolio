@@ -9,3 +9,5 @@ export const Section = forwardRef(
     </Component>
   )
 );
+
+Section.displayName = 'Section';

@@ -103,6 +103,8 @@ export const ProjectSection = forwardRef(
   )
 );
 
+ProjectSection.displayName = 'ProjectSection';
+
 export const ProjectBackground = ({ opacity = 0.7, className, ...rest }) => {
   const imageRef = useRef();
 

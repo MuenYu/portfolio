@@ -3,7 +3,7 @@ import { baseMeta } from '~/utils/meta';
 import { Intro } from './intro';
 import { Profile } from './profile';
 import { ProjectSummary } from './project-summary';
-import { useEffect, useRef, useState } from 'react';
+import { createRef, useEffect, useMemo, useRef, useState } from 'react';
 import config from '~/config.json';
 import styles from './home.module.css';
 
@@ -35,11 +35,14 @@ export const meta = () => {
 };
 
 export const Home = () => {
-  const [visibleSections, setVisibleSections] = useState([]);
+  const [visibleSections, setVisibleSections] = useState<HTMLElement[]>([]);
   const [scrollIndicatorHidden, setScrollIndicatorHidden] = useState(false);
-  const intro = useRef();
-  const projects = new Array(config.projects.length).fill().map(() => useRef());
-  const about = useRef();
+  const intro = useRef<HTMLElement | null>(null);
+  const projects = useMemo(
+    () => config.projects.map(() => createRef<HTMLElement>()),
+    []
+  );
+  const about = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     const sections = [intro, ...projects, about];
@@ -66,16 +69,20 @@ export const Home = () => {
     );
 
     sections.forEach(section => {
-      sectionObserver.observe(section.current);
+      if (section.current) {
+        sectionObserver.observe(section.current);
+      }
     });
 
-    indicatorObserver.observe(intro.current);
+    if (intro.current) {
+      indicatorObserver.observe(intro.current);
+    }
 
     return () => {
       sectionObserver.disconnect();
       indicatorObserver.disconnect();
     };
-  }, [visibleSections]);
+  }, [projects, visibleSections]);
 
   return (
     <div className={styles.home}>

@@ -10,7 +10,7 @@ function isExternalLink(href) {
   return href?.includes('://');
 }
 
-export const Button = forwardRef(({ href, ...rest }, ref) => {
+export const Button = forwardRef(function Button({ href, ...rest }, ref) {
   if (isExternalLink(href) || !href) {
     return <ButtonContent href={href} ref={ref} {...rest} />;
   }
@@ -98,3 +98,6 @@ const ButtonContent = forwardRef(
     );
   }
 );
+
+Button.displayName = 'Button';
+ButtonContent.displayName = 'ButtonContent';

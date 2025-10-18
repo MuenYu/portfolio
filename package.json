@@ -17,7 +17,7 @@
     "build:storybook": "storybook build",
     "deploy:storybook": "wrangler pages deploy ./storybook-static --project-name portfolio-storybook --branch main",
     "format": "prettier --write .",
-    "lint:ox": "oxlint --max-warnings=0 .",
+    "lint:ox": "node ./scripts/run-oxlint.mjs",
     "lint:ox:fix": "oxlint --fix .",
     "lint:eslint": "eslint --max-warnings=0 .",
     "lint:eslint:fix": "eslint --max-warnings=0 --fix .",

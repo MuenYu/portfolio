@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Monogram } from '~/components/monogram';
 import { StoryContainer } from '../../../.storybook/story-container';
 

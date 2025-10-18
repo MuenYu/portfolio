@@ -41,3 +41,5 @@ export const Monogram = forwardRef<SVGSVGElement, MonogramProps>(
     );
   }
 );
+
+Monogram.displayName = 'Monogram';

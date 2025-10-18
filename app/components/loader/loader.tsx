@@ -32,3 +32,5 @@ export const Loader = forwardRef(
     );
   }
 );
+
+Loader.displayName = 'Loader';

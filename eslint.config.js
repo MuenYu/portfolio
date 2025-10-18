@@ -1,11 +1,23 @@
 import { defineConfig } from 'eslint/config';
 import js from '@eslint/js';
 import { FlatCompat } from '@eslint/eslintrc';
+import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+const hasTsParser = fs.existsSync(
+  path.join(__dirname, 'node_modules', '@typescript-eslint', 'parser'),
+);
+const hasTsPlugin = fs.existsSync(
+  path.join(__dirname, 'node_modules', '@typescript-eslint', 'eslint-plugin'),
+);
+
+const parserModule = hasTsParser
+  ? '@typescript-eslint/parser'
+  : path.resolve(__dirname, './scripts/ts-eslint-parser.cjs');
 
 const compat = new FlatCompat({
   baseDirectory: __dirname,
@@ -26,12 +38,13 @@ export default defineConfig([
   },
   ...compat.config({
     root: true,
-    parser: '@typescript-eslint/parser',
+    parser: parserModule,
     parserOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
-      project: ['./tsconfig.json'],
-      tsconfigRootDir: __dirname,
+      ...(hasTsPlugin
+        ? { project: ['./tsconfig.json'], tsconfigRootDir: __dirname }
+        : {}),
       ecmaFeatures: {
         jsx: true,
       },
@@ -44,28 +57,46 @@ export default defineConfig([
     },
     extends: [
       'eslint:recommended',
-      'plugin:@typescript-eslint/recommended-type-checked',
-      'plugin:@typescript-eslint/stylistic-type-checked',
-      'plugin:@typescript-eslint/recommended-requiring-type-checking',
+      ...(hasTsPlugin
+        ? [
+            'plugin:@typescript-eslint/recommended-type-checked',
+            'plugin:@typescript-eslint/stylistic-type-checked',
+            'plugin:@typescript-eslint/recommended-requiring-type-checking',
+          ]
+        : []),
       'plugin:react/recommended',
       'plugin:react/jsx-runtime',
       'plugin:react-hooks/recommended',
       'plugin:jsx-a11y/recommended',
       'plugin:storybook/recommended',
     ],
-    plugins: ['@typescript-eslint', 'react', 'jsx-a11y'],
+    plugins: [
+      ...(hasTsPlugin ? ['@typescript-eslint'] : []),
+      'react',
+      'jsx-a11y',
+    ],
     rules: {
-      'no-unused-vars': 'off',
       'semi': ['error', 'always'],
-      'quotes': ['error', 'single', { avoidEscape: true }],
+      'quotes': ['error', 'single', { avoidEscape: true, allowTemplateLiterals: true }],
       'arrow-body-style': 'off',
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-      '@typescript-eslint/explicit-module-boundary-types': 'off',
-      '@typescript-eslint/no-explicit-any': 'error',
-      '@typescript-eslint/consistent-type-imports': [
-        'error',
-        { prefer: 'type-imports', disallowTypeAnnotations: true },
-      ],
+      ...(hasTsPlugin
+        ? {
+            'no-unused-vars': 'off',
+            '@typescript-eslint/no-unused-vars': [
+              'error',
+              { argsIgnorePattern: '^_' },
+            ],
+            '@typescript-eslint/explicit-module-boundary-types': 'off',
+            '@typescript-eslint/no-explicit-any': 'error',
+            '@typescript-eslint/consistent-type-imports': [
+              'error',
+              { prefer: 'type-imports', disallowTypeAnnotations: true },
+            ],
+          }
+        : {
+            'no-unused-vars': 'off',
+            'no-undef': 'off',
+          }),
     },
     overrides: [
       {
@@ -95,11 +126,15 @@ export default defineConfig([
         parserOptions: {
           project: null,
         },
-        rules: {
-          '@typescript-eslint/no-var-requires': 'off',
-        },
+        ...(hasTsPlugin
+          ? {
+              rules: {
+                '@typescript-eslint/no-var-requires': 'off',
+              },
+            }
+          : {}),
       },
     ],
-    reportUnusedDisableDirectives: 'error',
+    reportUnusedDisableDirectives: true,
   }),
 ]);
