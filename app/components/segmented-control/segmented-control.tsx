@@ -1,3 +1,9 @@
+import type {
+  ComponentPropsWithoutRef,
+  KeyboardEvent,
+  MutableRefObject,
+  ReactNode,
+} from 'react';
 import { VisuallyHidden } from '~/components/visually-hidden';
 import {
   createContext,
@@ -5,13 +11,34 @@ import {
   useContext,
   useEffect,
   useId,
+  useMemo,
   useRef,
   useState,
 } from 'react';
 import { cssProps } from '~/utils/style';
 import styles from './segmented-control.module.css';
 
-const SegmentedControlContext = createContext({});
+interface IndicatorStyle {
+  left?: number;
+  width?: number;
+}
+
+interface SegmentedControlContextValue {
+  optionRefs: MutableRefObject<MutableRefObject<HTMLButtonElement | null>[]>;
+  currentIndex: number;
+  onChange: (index: number) => void;
+  registerOption: (optionRef: MutableRefObject<HTMLButtonElement | null>) => void;
+  unregisterOption: (optionRef: MutableRefObject<HTMLButtonElement | null>) => void;
+}
+
+const SegmentedControlContext = createContext<SegmentedControlContextValue | null>(null);
+
+interface SegmentedControlProps extends ComponentPropsWithoutRef<'div'> {
+  children: ReactNode;
+  currentIndex: number;
+  label: string;
+  onChange: (index: number) => void;
+}
 
 export const SegmentedControl = ({
   children,
@@ -19,43 +46,63 @@ export const SegmentedControl = ({
   onChange,
   label,
   ...props
-}) => {
+}: SegmentedControlProps) => {
   const id = useId();
   const labelId = `${id}segmented-control-label`;
-  const optionRefs = useRef([]);
-  const [indicator, setIndicator] = useState();
+  const optionRefs = useRef<MutableRefObject<HTMLButtonElement | null>[]>([]);
+  const [indicator, setIndicator] = useState<IndicatorStyle | null>(null);
 
-  const handleKeyDown = event => {
-    const { length } = optionRefs.current;
-    const prevIndex = (currentIndex - 1 + length) % length;
-    const nextIndex = (currentIndex + 1) % length;
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      const { length } = optionRefs.current;
+      if (length === 0) return;
 
-    if (['ArrowLeft', 'ArrowUp'].includes(event.key)) {
-      onChange(prevIndex);
-      optionRefs.current[prevIndex].current.focus();
-    } else if (['ArrowRight', 'ArrowDown'].includes(event.key)) {
-      onChange(nextIndex);
-      optionRefs.current[nextIndex].current.focus();
-    }
-  };
+      const prevIndex = (currentIndex - 1 + length) % length;
+      const nextIndex = (currentIndex + 1) % length;
 
-  const registerOption = useCallback(optionRef => {
-    optionRefs.current = [...optionRefs.current, optionRef];
-  }, []);
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+        onChange(prevIndex);
+        optionRefs.current[prevIndex]?.current?.focus?.();
+      } else if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+        onChange(nextIndex);
+        optionRefs.current[nextIndex]?.current?.focus?.();
+      }
+    },
+    [currentIndex, onChange]
+  );
 
-  const unRegisterOption = useCallback(optionRef => {
-    optionRefs.current = optionRefs.current.filter(ref => ref !== optionRef);
-  }, []);
+  const registerOption = useCallback(
+    (optionRef: MutableRefObject<HTMLButtonElement | null>) => {
+      if (!optionRefs.current.includes(optionRef)) {
+        optionRefs.current = [...optionRefs.current, optionRef];
+      }
+    },
+    []
+  );
+
+  const unregisterOption = useCallback(
+    (optionRef: MutableRefObject<HTMLButtonElement | null>) => {
+      optionRefs.current = optionRefs.current.filter(ref => ref !== optionRef);
+    },
+    []
+  );
 
   useEffect(() => {
     const currentOption = optionRefs.current[currentIndex]?.current;
 
-    const resizeObserver = new ResizeObserver(() => {
-      const rect = currentOption?.getBoundingClientRect();
-      const left = currentOption?.offsetLeft;
-      setIndicator({ width: rect?.width, left });
-    });
+    if (!currentOption || typeof ResizeObserver === 'undefined') {
+      setIndicator(null);
+      return;
+    }
 
+    const updateIndicator = () => {
+      const rect = currentOption.getBoundingClientRect();
+      setIndicator({ width: rect.width, left: currentOption.offsetLeft });
+    };
+
+    updateIndicator();
+
+    const resizeObserver = new ResizeObserver(updateIndicator);
     resizeObserver.observe(currentOption);
 
     return () => {
@@ -63,14 +110,17 @@ export const SegmentedControl = ({
     };
   }, [currentIndex]);
 
+  const contextValue = useMemo(
+    () => ({ optionRefs, currentIndex, onChange, registerOption, unregisterOption }),
+    [currentIndex, onChange, registerOption, unregisterOption]
+  );
+
   return (
-    <SegmentedControlContext.Provider
-      value={{ optionRefs, currentIndex, onChange, registerOption, unRegisterOption }}
-    >
+    <SegmentedControlContext.Provider value={contextValue}>
       <div
         className={styles.container}
         role="radiogroup"
-        tabIndex="0"
+        tabIndex={0}
         aria-labelledby={labelId}
         onKeyDown={handleKeyDown}
         {...props}
@@ -79,7 +129,7 @@ export const SegmentedControl = ({
           {label}
         </VisuallyHidden>
         <div className={styles.options}>
-          {!!indicator && (
+          {indicator && (
             <div
               className={styles.indicator}
               data-last={currentIndex === optionRefs.current.length - 1}
@@ -93,10 +143,19 @@ export const SegmentedControl = ({
   );
 };
 
-export const SegmentedControlOption = ({ children, ...props }) => {
-  const { optionRefs, currentIndex, onChange, registerOption, unRegisterOption } =
-    useContext(SegmentedControlContext);
-  const optionRef = useRef();
+interface SegmentedControlOptionProps extends ComponentPropsWithoutRef<'button'> {
+  children: ReactNode;
+}
+
+export const SegmentedControlOption = ({ children, ...props }: SegmentedControlOptionProps) => {
+  const context = useContext(SegmentedControlContext);
+
+  if (!context) {
+    throw new Error('SegmentedControlOption must be used within a SegmentedControl');
+  }
+
+  const { optionRefs, currentIndex, onChange, registerOption, unregisterOption } = context;
+  const optionRef = useRef<HTMLButtonElement | null>(null);
   const index = optionRefs.current.indexOf(optionRef);
   const isSelected = currentIndex === index;
 
@@ -104,9 +163,9 @@ export const SegmentedControlOption = ({ children, ...props }) => {
     registerOption(optionRef);
 
     return () => {
-      unRegisterOption(optionRef);
+      unregisterOption(optionRef);
     };
-  }, [registerOption, unRegisterOption]);
+  }, [registerOption, unregisterOption]);
 
   return (
     <button
@@ -114,7 +173,11 @@ export const SegmentedControlOption = ({ children, ...props }) => {
       tabIndex={isSelected ? 0 : -1}
       role="radio"
       aria-checked={isSelected}
-      onClick={() => onChange(index)}
+      onClick={() => {
+        if (index >= 0) {
+          onChange(index);
+        }
+      }}
       ref={optionRef}
       {...props}
     >

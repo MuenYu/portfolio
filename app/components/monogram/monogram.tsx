@@ -3,12 +3,14 @@ import { forwardRef, useId } from 'react';
 import { classes } from '~/utils/style';
 import styles from './monogram.module.css';
 
-type MonogramProps = ComponentPropsWithoutRef<'svg'> & {
+interface MonogramProps extends ComponentPropsWithoutRef<'svg'> {
   highlight?: boolean;
-};
+}
 
-export const Monogram = forwardRef<SVGSVGElement, MonogramProps>(
-  ({ highlight, className, ...props }, ref) => {
+export const Monogram = forwardRef<SVGSVGElement, MonogramProps>(function Monogram(
+  { highlight, className, ...props },
+  ref
+) {
     const id = useId();
     const clipId = `${id}monogram-clip`;
 
@@ -39,5 +41,4 @@ export const Monogram = forwardRef<SVGSVGElement, MonogramProps>(
         )}
       </svg>
     );
-  }
-);
+});

@@ -1,17 +1,15 @@
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Monogram } from '~/components/monogram';
 import { StoryContainer } from '../../../.storybook/story-container';
-
-type StorybookMeta<T> = import('@storybook/react').Meta<T>;
-type StorybookStory<T> = import('@storybook/react').StoryObj<T>;
 
 const meta = {
   title: 'Monogram',
   component: Monogram,
-} satisfies StorybookMeta<typeof Monogram>;
+} satisfies Meta<typeof Monogram>;
 
 export default meta;
 
-type Story = StorybookStory<typeof meta>;
+type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: () => (
