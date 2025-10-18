@@ -1,8 +1,8 @@
 import { useRouteError } from 'react-router';
 import { Error } from '~/layouts/error';
 
-export async function loader() {
-  throw new Response(null, { status: 404, statusText: 'Not found' });
+export function loader() {
+  throw (new Response(null, { status: 404, statusText: 'Not found' }) as unknown as Error);
 }
 
 export const meta = () => {

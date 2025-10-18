@@ -1,8 +1,18 @@
 import { createCookieSessionStorage } from 'react-router';
+import type { ActionFunctionArgs } from 'react-router';
+import type { PortfolioContext } from '~/types/context';
 
-export async function action({ request, context }) {
+interface ThemeActionData {
+  readonly status: 'success';
+}
+
+export async function action({ request, context }: ActionFunctionArgs<PortfolioContext>) {
   const formData = await request.formData();
-  const theme = formData.get('theme');
+  const themeValue = formData.get('theme');
+
+  if (typeof themeValue !== 'string') {
+    return Response.json({ status: 'success' } satisfies ThemeActionData);
+  }
 
   const { getSession, commitSession } = createCookieSessionStorage({
     cookie: {
@@ -11,15 +21,15 @@ export async function action({ request, context }) {
       maxAge: 604_800,
       path: '/',
       sameSite: 'lax',
-      secrets: [context.cloudflare.env.SESSION_SECRET || ' '],
+      secrets: [context.cloudflare.env.SESSION_SECRET ?? ' '],
       secure: true,
     },
   });
 
   const session = await getSession(request.headers.get('Cookie'));
-  session.set('theme', theme);
+  session.set('theme', themeValue);
 
-  return Response.json(
+  return Response.json<ThemeActionData>(
     { status: 'success' },
     {
       headers: {
