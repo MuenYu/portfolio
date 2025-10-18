@@ -4,12 +4,12 @@ import { classes } from '~/utils/style';
 import type { PolymorphicProps, PolymorphicRef } from '~/types/polymorphic';
 import styles from './visually-hidden.module.css';
 
-type VisuallyHiddenOwnProps = {
+interface VisuallyHiddenOwnProps {
   className?: string;
   showOnFocus?: boolean;
   visible?: boolean;
   children?: ReactNode;
-};
+}
 
 type VisuallyHiddenComponent = <E extends ElementType = 'span'>(
   props: PolymorphicProps<E, VisuallyHiddenOwnProps>
@@ -26,7 +26,7 @@ const VisuallyHiddenBase = <E extends ElementType = 'span'>(
   }: PolymorphicProps<E, VisuallyHiddenOwnProps>,
   ref: PolymorphicRef<E>
 ) => {
-  const Component = (as ?? 'span') as ElementType;
+  const Component: ElementType = as ?? 'span';
 
   return (
     <Component

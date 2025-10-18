@@ -6,13 +6,13 @@ type TransitionStatus = 'entering' | 'entered' | 'exiting' | 'exited';
 
 type TransitionTimeout = number | { enter: number; exit: number };
 
-type TransitionRenderProps = {
+interface TransitionRenderProps {
   visible: boolean;
   status: TransitionStatus;
   nodeRef: MutableRefObject<HTMLElement | null>;
-};
+}
 
-type TransitionSharedProps = {
+interface TransitionSharedProps {
   timeout?: TransitionTimeout;
   nodeRef?: MutableRefObject<HTMLElement | null>;
   onEnter?: () => void;
@@ -20,13 +20,13 @@ type TransitionSharedProps = {
   onExit?: () => void;
   onExited?: () => void;
   initial?: boolean;
-};
+}
 
-export type TransitionProps = TransitionSharedProps & {
+export interface TransitionProps extends TransitionSharedProps {
   in?: boolean;
   unmount?: boolean;
   children: (props: TransitionRenderProps) => ReactNode;
-};
+}
 
 /**
  * A lightweight Framer Motion `AnimatePresence` implementation of
@@ -79,13 +79,14 @@ export const Transition = ({
   );
 };
 
-type TransitionContentProps = Required<Pick<TransitionProps, 'initial'>> &
-  TransitionSharedProps & {
-    children: TransitionProps['children'];
-    enterTimeout: MutableRefObject<number | undefined>;
-    exitTimeout: MutableRefObject<number | undefined>;
-    in: boolean;
-  };
+interface TransitionContentProps
+  extends Required<Pick<TransitionProps, 'initial'>>,
+    TransitionSharedProps {
+  children: TransitionProps['children'];
+  enterTimeout: MutableRefObject<number | undefined>;
+  exitTimeout: MutableRefObject<number | undefined>;
+  in: boolean;
+}
 
 const TransitionContent = ({
   children,
@@ -105,7 +106,7 @@ const TransitionContent = ({
   const [hasEntered, setHasEntered] = useState(!initial);
   const splitTimeout = typeof timeout === 'object';
   const internalNodeRef = useRef<HTMLElement | null>(null);
-  const nodeRef = defaultNodeRef || internalNodeRef;
+  const nodeRef = defaultNodeRef ?? internalNodeRef;
   const visible = hasEntered && show ? isPresent : false;
 
   useEffect(() => {
@@ -114,10 +115,10 @@ const TransitionContent = ({
     const actualTimeout = splitTimeout ? timeout.enter : timeout;
 
     if (enterTimeout.current !== undefined) {
-      clearTimeout(enterTimeout.current);
+      window.clearTimeout(enterTimeout.current);
     }
     if (exitTimeout.current !== undefined) {
-      clearTimeout(exitTimeout.current);
+      window.clearTimeout(exitTimeout.current);
     }
 
     setHasEntered(true);
@@ -125,7 +126,7 @@ const TransitionContent = ({
     onEnter?.();
 
     // Force reflow
-    nodeRef.current?.offsetHeight;
+    void nodeRef.current?.offsetHeight;
 
     const delay = typeof actualTimeout === 'number' ? actualTimeout : 0;
 
@@ -142,17 +143,17 @@ const TransitionContent = ({
     const actualTimeout = splitTimeout ? timeout.exit : timeout;
 
     if (enterTimeout.current !== undefined) {
-      clearTimeout(enterTimeout.current);
+      window.clearTimeout(enterTimeout.current);
     }
     if (exitTimeout.current !== undefined) {
-      clearTimeout(exitTimeout.current);
+      window.clearTimeout(exitTimeout.current);
     }
 
     setStatus('exiting');
     onExit?.();
 
     // Force reflow
-    nodeRef.current?.offsetHeight;
+    void nodeRef.current?.offsetHeight;
 
     const delay = typeof actualTimeout === 'number' ? actualTimeout : 0;
 

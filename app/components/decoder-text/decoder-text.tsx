@@ -33,10 +33,10 @@ const CharType = {
 
 type CharTypeValue = (typeof CharType)[keyof typeof CharType];
 
-type CharOutput = {
+interface CharOutput {
   type: CharTypeValue;
   value: string;
-};
+}
 
 function shuffle(
   content: string[],
@@ -58,20 +58,19 @@ function shuffle(
   });
 }
 
-type DecoderTextProps = Omit<ComponentPropsWithoutRef<'span'>, 'children'> & {
+interface DecoderTextProps extends Omit<ComponentPropsWithoutRef<'span'>, 'children'> {
   text: string;
   start?: boolean;
   delay?: number;
-};
+}
 
-const DecoderTextComponent = memo(
-  ({
-    text,
-    start = true,
-    delay: startDelay = 0,
-    className,
-    ...rest
-  }: DecoderTextProps) => {
+const DecoderTextComponent = memo(function DecoderTextComponent({
+  text,
+  start = true,
+  delay: startDelay = 0,
+  className,
+  ...rest
+}: DecoderTextProps) {
     const output = useRef<CharOutput[]>([{ type: CharType.Glyph, value: '' }]);
     const container = useRef<HTMLSpanElement | null>(null);
     const reduceMotion = useReducedMotion();
@@ -102,7 +101,7 @@ const DecoderTextComponent = memo(
       };
 
       if (start && !reduceMotion) {
-        startSpring();
+        void startSpring();
       }
 
       if (reduceMotion) {
@@ -114,7 +113,7 @@ const DecoderTextComponent = memo(
       }
 
       return () => {
-        unsubscribeSpring?.();
+        unsubscribeSpring();
       };
     }, [decoderSpring, reduceMotion, start, startDelay, text]);
 
@@ -124,7 +123,8 @@ const DecoderTextComponent = memo(
         <span aria-hidden className={styles.content} ref={container} />
       </span>
     );
-  }
-);
+});
+
+DecoderTextComponent.displayName = 'DecoderText';
 
 export const DecoderText = DecoderTextComponent;

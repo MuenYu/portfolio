@@ -6,37 +6,47 @@ export function Progress() {
   const [animationComplete, setAnimationComplete] = useState(false);
   const [visible, setVisible] = useState(false);
   const { state } = useNavigation();
-  const progressRef = useRef();
-  const timeout = useRef(0);
+  const progressRef = useRef<HTMLDivElement | null>(null);
+  const timeout = useRef<number | null>(null);
 
   useEffect(() => {
-    clearTimeout(timeout.current);
+    if (timeout.current !== null) {
+      window.clearTimeout(timeout.current);
+    }
 
     if (state !== 'idle') {
-      timeout.current = setTimeout(() => {
+      timeout.current = window.setTimeout(() => {
         setVisible(true);
       }, 500);
     } else if (animationComplete) {
-      timeout.current = setTimeout(() => {
+      timeout.current = window.setTimeout(() => {
         setVisible(false);
       }, 300);
     }
+
+    return () => {
+      if (timeout.current !== null) {
+        window.clearTimeout(timeout.current);
+        timeout.current = null;
+      }
+    };
   }, [state, animationComplete]);
 
   useEffect(() => {
-    if (!progressRef.current) return;
+    const element = progressRef.current;
+    if (!element) return;
 
     const controller = new AbortController();
 
     if (state !== 'idle') {
-      return setAnimationComplete(false);
+      setAnimationComplete(false);
+      return () => {
+        controller.abort();
+      };
     }
 
-    Promise.all(
-      progressRef.current
-        .getAnimations({ subtree: true })
-        .map(animation => animation.finished)
-    ).then(() => {
+    const animations = element.getAnimations({ subtree: true });
+    void Promise.all(animations.map(animation => animation.finished)).then(() => {
       if (controller.signal.aborted) return;
       setAnimationComplete(true);
     });

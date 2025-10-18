@@ -37,6 +37,15 @@ declare module '*.glsl' {
   export default src;
 }
 
+declare module '*.glsl?raw' {
+  const src: string;
+  export default src;
+}
+
+declare module '@storybook/react-vite' {
+  export type { Meta, StoryObj, StoryFn, Args, StoryContext } from '@storybook/react';
+}
+
 declare module '*.woff2' {
   const src: string;
   export default src;

@@ -20,7 +20,7 @@ import {
   ShaderMaterial,
   WebGLRenderer,
 } from 'three';
-import type { Texture } from 'three';
+import type { ShaderMaterialParameters, Texture } from 'three';
 import { resolveSrcFromSrcSet } from '~/utils/image';
 import { cssProps } from '~/utils/style';
 import { cleanRenderer, cleanScene, textureLoader } from '~/utils/three';
@@ -28,10 +28,10 @@ import styles from './carousel.module.css';
 import fragment from './carousel-fragment.glsl?raw';
 import vertex from './carousel-vertex.glsl?raw';
 
-type IndexableCollection<T> = {
+interface IndexableCollection<T> {
   readonly length: number;
   readonly [key: number]: T;
-};
+}
 
 function determineIndex<T>(
   imageIndex: number,
@@ -62,12 +62,48 @@ interface CarouselProps
   width: number;
 }
 
-type CarouselUniforms = {
-  currentImage: { type: 't'; value: Texture };
-  direction: { type: 'f'; value: number };
-  dispFactor: { type: 'f'; value: number };
-  nextImage: { type: 't'; value: Texture };
-  reduceMotion: { type: 'b'; value: boolean };
+interface CarouselUniform<TValue> {
+  type: 'f' | 't' | 'b';
+  value: TValue;
+}
+
+interface CarouselUniforms {
+  currentImage: CarouselUniform<Texture>;
+  direction: CarouselUniform<number>;
+  dispFactor: CarouselUniform<number>;
+  nextImage: CarouselUniform<Texture>;
+  reduceMotion: CarouselUniform<boolean>;
+}
+
+type CarouselShaderMaterial = ShaderMaterial & { uniforms: CarouselUniforms };
+
+const createCarouselMaterial = (
+  initialTextures: Texture[],
+  reduceMotionValue: boolean
+): CarouselShaderMaterial | null => {
+  const firstTexture = initialTextures[0];
+  if (!firstTexture) {
+    return null;
+  }
+
+  const secondTexture = initialTextures[1] ?? firstTexture;
+  const uniforms: CarouselUniforms = {
+    dispFactor: { type: 'f', value: 0 },
+    direction: { type: 'f', value: 1 },
+    currentImage: { type: 't', value: firstTexture },
+    nextImage: { type: 't', value: secondTexture },
+    reduceMotion: { type: 'b', value: reduceMotionValue },
+  };
+
+  const shaderMaterial = new ShaderMaterial({
+    uniforms: uniforms as unknown as ShaderMaterialParameters['uniforms'],
+    vertexShader: vertex,
+    fragmentShader: fragment,
+    transparent: false,
+    opacity: 1,
+  });
+
+  return Object.assign(shaderMaterial, { uniforms });
 };
 
 export const Carousel = ({ width, height, images, placeholder, ...rest }: CarouselProps) => {
@@ -75,19 +111,19 @@ export const Carousel = ({ width, height, images, placeholder, ...rest }: Carous
   const [imageIndex, setImageIndex] = useState(0);
   const [loaded, setLoaded] = useState(false);
   const [showPlaceholder, setShowPlaceholder] = useState(true);
-  const [textures, setTextures] = useState<Texture[]>();
+  const [textures, setTextures] = useState<Texture[] | null>(null);
   const [canvasRect, setCanvasRect] = useState<DOMRect | null>(null);
   const canvas = useRef<HTMLCanvasElement | null>(null);
   const imagePlane = useRef<Mesh | null>(null);
   const geometry = useRef<PlaneGeometry | null>(null);
-  const material = useRef<(ShaderMaterial & { uniforms: CarouselUniforms }) | null>(null);
+  const material = useRef<CarouselShaderMaterial | null>(null);
   const scene = useRef<Scene | null>(null);
   const camera = useRef<OrthographicCamera | null>(null);
   const renderer = useRef<WebGLRenderer | null>(null);
   const animating = useRef(false);
   const swipeDirection = useRef(1);
   const lastSwipePosition = useRef(0);
-  const scheduledAnimationFrame = useRef<number>();
+  const scheduledAnimationFrame = useRef<number | null>(null);
   const reduceMotion = useReducedMotion();
   const inViewport = useInViewport(canvas, true);
   const placeholderRef = useRef<HTMLImageElement | null>(null);
@@ -166,7 +202,7 @@ export const Carousel = ({ width, height, images, placeholder, ...rest }: Carous
 
       const anisotropy = rendererInstance.capabilities.getMaxAnisotropy();
 
-      const texturePromises = images.map(async image => {
+      const texturePromises = images.map(async (image): Promise<Texture> => {
         const imageSrc = image.srcSet ? await resolveSrcFromSrcSet(image) : image.src;
         const imageTexture = await textureLoader.loadAsync(imageSrc);
         await rendererInstance.initTexture(imageTexture);
@@ -178,24 +214,17 @@ export const Carousel = ({ width, height, images, placeholder, ...rest }: Carous
         return imageTexture;
       });
 
-      const textures = await Promise.all(texturePromises);
+      const loadedTextures = await Promise.all(texturePromises);
 
       // Cancel if the component has unmounted during async code
       if (!mounted) return;
 
-      material.current = new ShaderMaterial({
-        uniforms: {
-          dispFactor: { type: 'f', value: 0 },
-          direction: { type: 'f', value: 1 },
-          currentImage: { type: 't', value: textures[0] },
-          nextImage: { type: 't', value: textures[1] },
-          reduceMotion: { type: 'b', value: reduceMotion },
-        },
-        vertexShader: vertex,
-        fragmentShader: fragment,
-        transparent: false,
-        opacity: 1,
-      });
+      const materialInstance = createCarouselMaterial(loadedTextures, reduceMotion);
+      if (!materialInstance) {
+        return;
+      }
+
+      material.current = materialInstance;
 
       geometry.current = new PlaneGeometry(width, height, 1);
       imagePlane.current = new Mesh(geometry.current, material.current);
@@ -203,15 +232,15 @@ export const Carousel = ({ width, height, images, placeholder, ...rest }: Carous
       sceneInstance.add(imagePlane.current);
 
       setLoaded(true);
-      setTextures(textures);
+      setTextures(loadedTextures);
 
-      requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
         rendererInstance.render(sceneInstance, cameraInstance);
       });
     };
 
     if (inViewport && !loaded) {
-      loadImages();
+      void loadImages();
     }
 
     return () => {
@@ -222,13 +251,17 @@ export const Carousel = ({ width, height, images, placeholder, ...rest }: Carous
   const goToIndex = useCallback(
     ({ index, direction = 1 }: { direction?: number; index: number }) => {
       if (!textures || !material.current) return;
+      const targetTexture = textures[index];
+      if (!targetTexture) {
+        return;
+      }
       setImageIndex(index);
       const { uniforms } = material.current;
-      uniforms.nextImage.value = textures[index];
+      uniforms.nextImage.value = targetTexture;
       uniforms.direction.value = direction;
 
       const onComplete = () => {
-        uniforms.currentImage.value = textures[index];
+        uniforms.currentImage.value = targetTexture;
         uniforms.dispFactor.value = 0;
         animating.current = false;
       };
@@ -257,12 +290,14 @@ export const Carousel = ({ width, height, images, placeholder, ...rest }: Carous
       if (!loaded || !textures) return;
 
       if (animating.current) {
-        if (scheduledAnimationFrame.current) {
+        if (scheduledAnimationFrame.current !== null) {
           cancelAnimationFrame(scheduledAnimationFrame.current);
+          scheduledAnimationFrame.current = null;
         }
-        scheduledAnimationFrame.current = requestAnimationFrame(() =>
-          navigate({ direction, index })
-        );
+        scheduledAnimationFrame.current = window.requestAnimationFrame(() => {
+          scheduledAnimationFrame.current = null;
+          navigate({ direction, index });
+        });
         return;
       }
 
@@ -300,13 +335,13 @@ export const Carousel = ({ width, height, images, placeholder, ...rest }: Carous
   useEffect(() => {
     let animation: number | undefined;
     const renderLoop = () => {
-      animation = requestAnimationFrame(renderLoop);
+      animation = window.requestAnimationFrame(renderLoop);
       if (animating.current && renderer.current && scene.current && camera.current) {
         renderer.current.render(scene.current, camera.current);
       }
     };
 
-    animation = requestAnimationFrame(renderLoop);
+    animation = window.requestAnimationFrame(renderLoop);
 
     return () => {
       cancelAnimationFrame(animation);
@@ -341,14 +376,20 @@ export const Carousel = ({ width, height, images, placeholder, ...rest }: Carous
       const nextIndex = determineIndex(imageIndex, null, images, swipeDirection.current);
       const uniforms = material.current.uniforms;
       const displacementClamp = Math.min(Math.max(swipePercentage, 0), 1);
+      const currentTexture = textures[imageIndex];
+      const nextTexture = textures[nextIndex];
 
-      uniforms.currentImage.value = textures[imageIndex];
-      uniforms.nextImage.value = textures[nextIndex];
+      if (!currentTexture || !nextTexture) {
+        return;
+      }
+
+      uniforms.currentImage.value = currentTexture;
+      uniforms.nextImage.value = nextTexture;
       uniforms.direction.value = swipeDirection.current;
 
       uniforms.dispFactor.value = displacementClamp;
 
-      requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
         if (renderer.current && scene.current && camera.current) {
           renderer.current.render(scene.current, camera.current);
         }
@@ -360,7 +401,6 @@ export const Carousel = ({ width, height, images, placeholder, ...rest }: Carous
   const onSwipeEnd = useCallback(() => {
     if (!material.current || !canvasRect) return;
     const uniforms = material.current.uniforms;
-    const duration = (1 - uniforms.dispFactor.value) * 1000;
     const position = Math.abs(lastSwipePosition.current);
     const minSwipeDistance = canvasRect.width * 0.2;
     lastSwipePosition.current = 0;
@@ -370,12 +410,13 @@ export const Carousel = ({ width, height, images, placeholder, ...rest }: Carous
 
     if (position > minSwipeDistance) {
       navigate({
-        duration,
         direction: swipeDirection.current,
       });
     } else {
-      uniforms.currentImage.value = uniforms.nextImage.value;
-      uniforms.nextImage.value = uniforms.currentImage.value;
+      const previousCurrent = uniforms.currentImage.value;
+      const previousNext = uniforms.nextImage.value;
+      uniforms.currentImage.value = previousNext;
+      uniforms.nextImage.value = previousCurrent;
       uniforms.dispFactor.value = 1 - uniforms.dispFactor.value;
 
       navigate({

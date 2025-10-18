@@ -8,14 +8,14 @@ type TextSize = 's' | 'm' | 'l' | 'xl';
 type TextAlign = 'auto' | 'start' | 'center';
 type TextWeight = 'auto' | 'regular' | 'medium' | 'bold';
 
-type TextOwnProps = {
+interface TextOwnProps {
   children?: ReactNode;
   size?: TextSize;
   align?: TextAlign;
   weight?: TextWeight;
   secondary?: boolean;
   className?: string;
-};
+}
 
 type TextComponent = <E extends ElementType = 'span'>(
   props: PolymorphicProps<E, TextOwnProps>
@@ -34,7 +34,7 @@ const TextBase = <E extends ElementType = 'span'>(
   }: PolymorphicProps<E, TextOwnProps>,
   ref: PolymorphicRef<E>
 ) => {
-  const Component = (as ?? 'span') as ElementType;
+  const Component: ElementType = as ?? 'span';
 
   return (
     <Component
