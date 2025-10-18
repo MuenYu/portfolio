@@ -1,4 +1,13 @@
-import { Children } from 'react';
+import {
+  Children,
+  isValidElement,
+  type ComponentPropsWithoutRef,
+  type DetailedHTMLProps,
+  type HTMLAttributes,
+  type ImgHTMLAttributes,
+  type PropsWithChildren,
+  type ReactNode,
+} from 'react';
 import { Link as RouterLink } from 'react-router';
 import { Code } from '~/components/code';
 import { Heading } from '~/components/heading';
@@ -8,7 +17,11 @@ import { List, ListItem } from '~/components/list';
 import { Text } from '~/components/text';
 import styles from './post-markdown.module.css';
 
-const PostHeadingLink = ({ id }) => {
+interface PostHeadingLinkProps {
+  id?: string;
+}
+
+const PostHeadingLink = ({ id }: PostHeadingLinkProps): JSX.Element => {
   return (
     <RouterLink className={styles.headingLink} to={`#${id}`} aria-label="Link to heading">
       <Icon icon="link" />
@@ -16,41 +29,45 @@ const PostHeadingLink = ({ id }) => {
   );
 };
 
-const PostH1 = ({ children, id, ...rest }) => (
+type PostHeadingProps = Omit<ComponentPropsWithoutRef<typeof Heading>, 'level' | 'as'>;
+
+const PostH1 = ({ children, id, ...rest }: PostHeadingProps): JSX.Element => (
   <Heading className={styles.heading} id={id} level={2} as="h1" {...rest}>
     <PostHeadingLink id={id} />
     {children}
   </Heading>
 );
 
-const PostH2 = ({ children, id, ...rest }) => (
+const PostH2 = ({ children, id, ...rest }: PostHeadingProps): JSX.Element => (
   <Heading className={styles.heading} id={id} level={3} as="h2" {...rest}>
     <PostHeadingLink id={id} />
     {children}
   </Heading>
 );
 
-const PostH3 = ({ children, id, ...rest }) => (
+const PostH3 = ({ children, id, ...rest }: PostHeadingProps): JSX.Element => (
   <Heading className={styles.heading} id={id} level={4} as="h3" {...rest}>
     <PostHeadingLink id={id} />
     {children}
   </Heading>
 );
 
-const PostH4 = ({ children, id, ...rest }) => (
+const PostH4 = ({ children, id, ...rest }: PostHeadingProps): JSX.Element => (
   <Heading className={styles.heading} id={id} level={5} as="h4" {...rest}>
     <PostHeadingLink id={id} />
     {children}
   </Heading>
 );
 
-const PostParagraph = ({ children, ...rest }) => {
+type ParagraphProps = PropsWithChildren<HTMLAttributes<HTMLParagraphElement>>;
+
+const PostParagraph = ({ children, ...rest }: ParagraphProps): ReactNode => {
   const hasSingleChild = Children.count(children) === 1;
-  const firstChild = Children.toArray(children)[0];
+  const firstChild = Children.toArray(children)[0] ?? null;
 
   // Prevent `img` being wrapped in `p`
-  if (hasSingleChild && firstChild.type === PostImage) {
-    return children;
+  if (hasSingleChild && isValidElement(firstChild) && firstChild.type === PostImage) {
+    return firstChild;
   }
 
   return (
@@ -60,27 +77,39 @@ const PostParagraph = ({ children, ...rest }) => {
   );
 };
 
-const PostLink = ({ ...props }) => <Link {...props} />;
+type PostLinkProps = ComponentPropsWithoutRef<typeof Link>;
 
-const PostUl = props => {
+const PostLink = (props: PostLinkProps): JSX.Element => <Link {...props} />;
+
+type UnorderedListProps = PropsWithChildren<HTMLAttributes<HTMLUListElement>>;
+
+const PostUl = (props: UnorderedListProps): JSX.Element => {
   return <List className={styles.list} {...props} />;
 };
 
-const PostOl = props => {
+type OrderedListProps = PropsWithChildren<HTMLAttributes<HTMLOListElement>>;
+
+const PostOl = (props: OrderedListProps): JSX.Element => {
   return <List className={styles.list} ordered {...props} />;
 };
 
-const PostLi = ({ children, ...props }) => {
+type ListItemProps = PropsWithChildren<HTMLAttributes<HTMLLIElement>>;
+
+const PostLi = ({ children, ...props }: ListItemProps): JSX.Element => {
   return <ListItem {...props}>{children}</ListItem>;
 };
 
-const PostCode = ({ children, ...rest }) => (
+type CodeProps = ComponentPropsWithoutRef<'code'>;
+
+const PostCode = ({ children, ...rest }: CodeProps): JSX.Element => (
   <code className={styles.code} {...rest}>
     {children}
   </code>
 );
 
-const PostPre = props => {
+type PreProps = DetailedHTMLProps<HTMLAttributes<HTMLPreElement>, HTMLPreElement>;
+
+const PostPre = (props: PreProps): JSX.Element => {
   return (
     <div className={styles.pre}>
       <Code {...props} />
@@ -88,19 +117,27 @@ const PostPre = props => {
   );
 };
 
-const PostBlockquote = props => {
+type BlockquoteProps = DetailedHTMLProps<HTMLAttributes<HTMLQuoteElement>, HTMLQuoteElement>;
+
+const PostBlockquote = (props: BlockquoteProps): JSX.Element => {
   return <blockquote className={styles.blockquote} {...props} />;
 };
 
-const PostHr = props => {
+type HrProps = DetailedHTMLProps<HTMLAttributes<HTMLHRElement>, HTMLHRElement>;
+
+const PostHr = (props: HrProps): JSX.Element => {
   return <hr className={styles.hr} {...props} />;
 };
 
-const PostStrong = props => {
+type StrongProps = DetailedHTMLProps<HTMLAttributes<HTMLElement>, HTMLElement>;
+
+const PostStrong = (props: StrongProps): JSX.Element => {
   return <strong className={styles.strong} {...props} />;
 };
 
-const PostImage = ({ src, alt, width, height, ...rest }) => {
+type ImageProps = ImgHTMLAttributes<HTMLImageElement>;
+
+const PostImage = ({ src, alt, width, height, ...rest }: ImageProps): JSX.Element => {
   return (
     <img
       className={styles.image}
@@ -114,7 +151,11 @@ const PostImage = ({ src, alt, width, height, ...rest }) => {
   );
 };
 
-const Embed = ({ src }) => {
+interface EmbedProps {
+  src: string;
+}
+
+const Embed = ({ src }: EmbedProps): JSX.Element => {
   return (
     <div className={styles.embed}>
       <iframe src={src} loading="lazy" title="Embed" />

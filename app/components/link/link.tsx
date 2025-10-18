@@ -1,4 +1,9 @@
-import { forwardRef } from 'react';
+import {
+  forwardRef,
+  type AnchorHTMLAttributes,
+  type ComponentPropsWithoutRef,
+  type ReactNode,
+} from 'react';
 import { Link as RouterLink } from 'react-router';
 import { classes } from '~/utils/style';
 import styles from './link.module.css';
@@ -6,44 +11,60 @@ import styles from './link.module.css';
 // File extensions that can be linked to
 const VALID_EXT = ['txt', 'png', 'jpg'];
 
-function isAnchor(href) {
+function isAnchor(href: string | undefined): boolean {
   const isValidExtension = VALID_EXT.includes(href?.split('.').pop());
-  return href?.includes('://') || href?.[0] === '#' || isValidExtension;
+  const hasProtocol = href?.includes('://') ?? false;
+  const startsWithHash = href?.startsWith('#') ?? false;
+  return hasProtocol || startsWithHash || isValidExtension;
 }
 
-export const Link = forwardRef(
+type AnchorProps = AnchorHTMLAttributes<HTMLAnchorElement>;
+
+type RouterLinkComponentProps = ComponentPropsWithoutRef<typeof RouterLink>;
+
+interface AppLinkProps
+  extends Omit<AnchorProps, 'href' | 'className' | 'children'> {
+  children?: ReactNode;
+  className?: string;
+  href?: string;
+  secondary?: boolean;
+}
+
+export const Link = forwardRef<HTMLAnchorElement, AppLinkProps>(
   ({ rel, target, children, secondary, className, href, ...rest }, ref) => {
     const isExternal = href?.includes('://');
-    const relValue = rel || (isExternal ? 'noreferrer noopener' : undefined);
-    const targetValue = target || (isExternal ? '_blank' : undefined);
+    const relValue = rel ?? (isExternal ? 'noreferrer noopener' : undefined);
+    const targetValue = target ?? (isExternal ? '_blank' : undefined);
 
-    const linkProps = {
-      className: classes(styles.link, className),
-      ['data-secondary']: secondary,
-      rel: relValue,
-      href: href,
-      target: targetValue,
-      ref: ref,
+    const sharedProps: AnchorProps = {
       ...rest,
+      className: classes(styles.link, className),
+      'data-secondary': secondary,
+      rel: relValue,
+      target: targetValue,
     };
 
     if (isAnchor(href)) {
       return (
-        <a {...linkProps} href={href}>
+        <a {...sharedProps} href={href} ref={ref}>
           {children}
         </a>
       );
     }
 
+    const routerLinkProps: RouterLinkComponentProps = {
+      ...(sharedProps as unknown as RouterLinkComponentProps),
+      to: href ?? '#',
+      unstable_viewtransition: 'true',
+      prefetch: 'intent',
+    };
+
     return (
-      <RouterLink
-        unstable_viewtransition="true"
-        prefetch="intent"
-        {...linkProps}
-        to={href}
-      >
+      <RouterLink {...routerLinkProps} ref={ref}>
         {children}
       </RouterLink>
     );
   }
 );
+
+Link.displayName = 'Link';
