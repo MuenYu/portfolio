@@ -11,25 +11,33 @@ export function useInViewport(
   const [isUnobserved, setIsUnobserved] = useState(false);
 
   useEffect(() => {
-    if (!elementRef?.current) return;
+    const target = elementRef.current;
 
-    const observer = new IntersectionObserver(([entry]) => {
-      const { isIntersecting, target } = entry;
+    if (!target) return undefined;
 
-      setIntersect(isIntersecting);
+    const observer = new IntersectionObserver(
+      (entries: IntersectionObserverEntry[]) => {
+        const [entry] = entries;
+        if (!entry) return;
 
-      if (isIntersecting && unobserveOnIntersect) {
-        observer.unobserve(target);
-        setIsUnobserved(true);
-      }
-    }, options);
+        const { isIntersecting } = entry;
+
+        setIntersect(isIntersecting);
+
+        if (isIntersecting && unobserveOnIntersect) {
+          observer.unobserve(entry.target);
+          setIsUnobserved(true);
+        }
+      },
+      options
+    );
 
     if (!isUnobserved && shouldObserve) {
-      observer.observe(elementRef.current);
+      observer.observe(target);
     }
 
     return () => observer.disconnect();
-  }, [elementRef, unobserveOnIntersect, options, isUnobserved, shouldObserve]);
+  }, [elementRef, isUnobserved, options, shouldObserve, unobserveOnIntersect]);
 
   return intersect;
 }

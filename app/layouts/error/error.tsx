@@ -1,3 +1,4 @@
+import { isRouteErrorResponse } from 'react-router';
 import notFoundPoster from '~/assets/notfound.jpg';
 import notFoundVideo from '~/assets/notfound.mp4';
 import flatlinePoster from '~/assets/flatline.png';
@@ -11,11 +12,71 @@ import styles from './error.module.css';
 import { Image } from '~/components/image';
 import flatlineSkull from './error-flatline.svg';
 
-export function Error({ error }) {
-  const flatlined = !error.status;
+interface ErrorProps {
+  error: unknown;
+}
 
-  const getMessage = () => {
-    switch (error.status) {
+interface ParsedError {
+  data?: unknown;
+  message: string;
+  status?: number;
+  statusText?: string;
+}
+
+interface ErrorMessageResult {
+  message: string;
+}
+
+const toErrorMessage = (value: unknown): string | undefined => {
+  if (typeof value === 'string') {
+    return value;
+  }
+
+  if (value instanceof Error) {
+    return String(value.message);
+  }
+
+  return undefined;
+};
+
+const parseError = (error: unknown): ParsedError => {
+  if (isRouteErrorResponse(error)) {
+    return {
+      status: error.status,
+      statusText: error.statusText,
+      data: error.data,
+      message: toErrorMessage(error.data) ?? error.statusText ?? 'Unknown error',
+    };
+  }
+
+  if (error instanceof Response) {
+    return {
+      status: error.status,
+      statusText: error.statusText,
+      message: error.statusText,
+    };
+  }
+
+  if (error instanceof Error) {
+    return {
+      message: String(error.message),
+      statusText: String(error.name),
+    };
+  }
+
+  if (typeof error === 'string') {
+    return { message: error };
+  }
+
+  return { message: 'Unknown error' };
+};
+
+export function Error({ error }: ErrorProps) {
+  const parsedError = parseError(error);
+  const flatlined = !parsedError.status;
+
+  const getMessage = (): ErrorMessageResult & { summary: string } => {
+    switch (parsedError.status) {
       case 404:
         return {
           summary: 'Error: redacted',
@@ -25,12 +86,15 @@ export function Error({ error }) {
       case 405:
         return {
           summary: 'Error: method denied',
-          message: error.data,
+          message: toErrorMessage(parsedError.data) ?? parsedError.message,
         };
       default:
         return {
           summary: 'Error: anomaly',
-          message: error.statusText || error.data || error.toString(),
+          message:
+            parsedError.statusText ??
+            toErrorMessage(parsedError.data) ??
+            parsedError.message,
         };
     }
   };
@@ -67,7 +131,7 @@ export function Error({ error }) {
                     level={0}
                     weight="bold"
                   >
-                    {error.status}
+                    {parsedError.status}
                   </Heading>
                 )}
                 {flatlined && (

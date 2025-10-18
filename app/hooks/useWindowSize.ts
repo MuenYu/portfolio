@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-type Dimensions = {
+interface Dimensions {
   width: number;
   height: number;
-};
+}
 
 export function useWindowSize(): Dimensions {
   const dimensions = useRef<Dimensions>({ width: 1280, height: 800 });
@@ -29,7 +29,8 @@ export function useWindowSize(): Dimensions {
 
   // Get the actual height on iOS Safari
   const getHeight = useCallback(() => {
-    const isIOS = navigator?.userAgent.match(/iphone|ipod|ipad/i);
+    const userAgent = navigator?.userAgent ?? '';
+    const isIOS = Boolean(/iphone|ipod|ipad/i.exec(userAgent));
 
     if (isIOS) {
       createRuler();

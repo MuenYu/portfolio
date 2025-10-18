@@ -1,8 +1,15 @@
+import type { ComponentPropsWithoutRef } from 'react';
 import { Button } from '~/components/button';
 import { Icon } from '~/components/icon';
 import styles from './nav-toggle.module.css';
 
-export const NavToggle = ({ menuOpen, ...rest }) => {
+type ButtonProps = ComponentPropsWithoutRef<typeof Button>;
+
+interface NavToggleProps extends Omit<ButtonProps, 'iconOnly'> {
+  menuOpen: boolean;
+}
+
+export const NavToggle = ({ menuOpen, ...rest }: NavToggleProps) => {
   return (
     <Button
       iconOnly

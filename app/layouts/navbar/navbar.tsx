@@ -1,4 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import {
+  type MouseEvent as ReactMouseEvent,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { Link as RouterLink, useLocation } from 'react-router';
 import { Icon } from '~/components/icon';
 import { Monogram } from '~/components/monogram';
@@ -13,14 +18,20 @@ import { navLinks, socialLinks } from './nav-data';
 import config from '~/config.json';
 import styles from './navbar.module.css';
 
+interface Measurement {
+  bottom: number;
+  element: HTMLElement;
+  top: number;
+}
+
 export const Navbar = () => {
-  const [current, setCurrent] = useState();
+  const [current, setCurrent] = useState<string>();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [target, setTarget] = useState();
+  const [target, setTarget] = useState<string | null>(null);
   const { theme } = useTheme();
   const location = useLocation();
   const windowSize = useWindowSize();
-  const headerRef = useRef();
+  const headerRef = useRef<HTMLElement | null>(null);
   const isMobile = windowSize.width <= media.mobile || windowSize.height <= 696;
   const scrollToHash = useScrollToHash();
 
@@ -38,14 +49,14 @@ export const Navbar = () => {
 
   // Handle swapping the theme when intersecting with inverse themed elements
   useEffect(() => {
-    const navItems = document.querySelectorAll('[data-navbar-item]');
+    const navItems = document.querySelectorAll<HTMLElement>('[data-navbar-item]');
     const inverseTheme = theme === 'dark' ? 'light' : 'dark';
     const { innerHeight } = window;
 
-    let inverseMeasurements = [];
-    let navItemMeasurements = [];
+    let inverseMeasurements: Measurement[] = [];
+    let navItemMeasurements: Measurement[] = [];
 
-    const isOverlap = (rect1, rect2, scrollY) => {
+    const isOverlap = (rect1: Measurement, rect2: Measurement, scrollY: number) => {
       return !(rect1.bottom - scrollY < rect2.top || rect1.top - scrollY > rect2.bottom);
     };
 
@@ -56,13 +67,13 @@ export const Navbar = () => {
     };
 
     const handleInversion = () => {
-      const invertedElements = document.querySelectorAll(
+      const invertedElements = document.querySelectorAll<HTMLElement>(
         `[data-theme='${inverseTheme}'][data-invert]`
       );
 
       if (!invertedElements) return;
 
-      inverseMeasurements = Array.from(invertedElements).map(item => ({
+      inverseMeasurements = Array.from(invertedElements).map<Measurement>(item => ({
         element: item,
         top: item.offsetTop,
         bottom: item.offsetTop + item.offsetHeight,
@@ -92,7 +103,7 @@ export const Navbar = () => {
 
     // Currently only the light theme has dark full-width elements
     if (theme === 'light') {
-      navItemMeasurements = Array.from(navItems).map(item => {
+      navItemMeasurements = Array.from(navItems).map<Measurement>(item => {
         const rect = item.getBoundingClientRect();
 
         return {
@@ -113,18 +124,18 @@ export const Navbar = () => {
   }, [theme, windowSize, location.key]);
 
   // Check if a nav item should be active
-  const getCurrent = (url = '') => {
+  const getCurrent = (url = ''): 'page' | undefined => {
     const nonTrailing = current?.endsWith('/') ? current?.slice(0, -1) : current;
 
     if (url === nonTrailing) {
       return 'page';
     }
 
-    return '';
+    return undefined;
   };
 
   // Store the current hash to scroll to
-  const handleNavItemClick = event => {
+  const handleNavItemClick = (event: ReactMouseEvent<HTMLAnchorElement>) => {
     const hash = event.currentTarget.href.split('#')[1];
     setTarget(null);
 
@@ -134,7 +145,7 @@ export const Navbar = () => {
     }
   };
 
-  const handleMobileNavClick = event => {
+  const handleMobileNavClick = (event: ReactMouseEvent<HTMLAnchorElement>) => {
     handleNavItemClick(event);
     if (menuOpen) setMenuOpen(false);
   };
@@ -204,12 +215,16 @@ export const Navbar = () => {
   );
 };
 
-const NavbarIcons = ({ desktop }) => (
+interface NavbarIconsProps {
+  desktop?: boolean;
+}
+
+const NavbarIcons = ({ desktop }: NavbarIconsProps) => (
   <div className={styles.navIcons}>
     {socialLinks.map(({ label, url, icon }) => (
       <a
         key={label}
-        data-navbar-item={desktop || undefined}
+        data-navbar-item={desktop ? true : undefined}
         className={styles.navIconLink}
         aria-label={label}
         href={url}

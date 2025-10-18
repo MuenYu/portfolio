@@ -1,6 +1,14 @@
 import { animate, useReducedMotion } from 'framer-motion';
 import { useInViewport } from '~/hooks';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  type KeyboardEvent as ReactKeyboardEvent,
+  type PointerEvent as ReactPointerEvent,
+  type HTMLAttributes,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import {
   Color,
   LinearFilter,
@@ -12,6 +20,7 @@ import {
   ShaderMaterial,
   WebGLRenderer,
 } from 'three';
+import type { Texture } from 'three';
 import { resolveSrcFromSrcSet } from '~/utils/image';
 import { cssProps } from '~/utils/style';
 import { cleanRenderer, cleanScene, textureLoader } from '~/utils/three';
@@ -19,7 +28,17 @@ import styles from './carousel.module.css';
 import fragment from './carousel-fragment.glsl?raw';
 import vertex from './carousel-vertex.glsl?raw';
 
-function determineIndex(imageIndex, index, images, direction) {
+type IndexableCollection<T> = {
+  readonly length: number;
+  readonly [key: number]: T;
+};
+
+function determineIndex<T>(
+  imageIndex: number,
+  index: number | null,
+  images: IndexableCollection<T>,
+  direction: number
+): number {
   if (index !== null) return index;
   const length = images.length;
   const prevIndex = (imageIndex - 1 + length) % length;
@@ -28,31 +47,55 @@ function determineIndex(imageIndex, index, images, direction) {
   return finalIndex;
 }
 
-export const Carousel = ({ width, height, images, placeholder, ...rest }) => {
+interface CarouselImage {
+  alt: string;
+  src: string;
+  sizes?: string;
+  srcSet?: string;
+}
+
+interface CarouselProps
+  extends Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'onPointerDown'> {
+  height: number;
+  images: CarouselImage[];
+  placeholder?: string;
+  width: number;
+}
+
+type CarouselUniforms = {
+  currentImage: { type: 't'; value: Texture };
+  direction: { type: 'f'; value: number };
+  dispFactor: { type: 'f'; value: number };
+  nextImage: { type: 't'; value: Texture };
+  reduceMotion: { type: 'b'; value: boolean };
+};
+
+export const Carousel = ({ width, height, images, placeholder, ...rest }: CarouselProps) => {
   const [dragging, setDragging] = useState(false);
   const [imageIndex, setImageIndex] = useState(0);
   const [loaded, setLoaded] = useState(false);
   const [showPlaceholder, setShowPlaceholder] = useState(true);
-  const [textures, setTextures] = useState();
-  const [canvasRect, setCanvasRect] = useState();
-  const canvas = useRef();
-  const imagePlane = useRef();
-  const geometry = useRef();
-  const material = useRef();
-  const scene = useRef();
-  const camera = useRef();
-  const renderer = useRef();
+  const [textures, setTextures] = useState<Texture[]>();
+  const [canvasRect, setCanvasRect] = useState<DOMRect | null>(null);
+  const canvas = useRef<HTMLCanvasElement | null>(null);
+  const imagePlane = useRef<Mesh | null>(null);
+  const geometry = useRef<PlaneGeometry | null>(null);
+  const material = useRef<(ShaderMaterial & { uniforms: CarouselUniforms }) | null>(null);
+  const scene = useRef<Scene | null>(null);
+  const camera = useRef<OrthographicCamera | null>(null);
+  const renderer = useRef<WebGLRenderer | null>(null);
   const animating = useRef(false);
-  const swipeDirection = useRef();
-  const lastSwipePosition = useRef();
-  const scheduledAnimationFrame = useRef();
+  const swipeDirection = useRef(1);
+  const lastSwipePosition = useRef(0);
+  const scheduledAnimationFrame = useRef<number>();
   const reduceMotion = useReducedMotion();
   const inViewport = useInViewport(canvas, true);
-  const placeholderRef = useRef();
-  const initSwipeX = useRef();
+  const placeholderRef = useRef<HTMLImageElement | null>(null);
+  const initSwipeX = useRef(0);
 
+  const currentImage = images[imageIndex] ?? images[0];
   const currentImageAlt = `Slide ${imageIndex + 1} of ${images.length}. ${
-    images[imageIndex].alt
+    currentImage?.alt ?? ''
   }`;
 
   useEffect(() => {
@@ -66,9 +109,21 @@ export const Carousel = ({ width, height, images, placeholder, ...rest }) => {
   }, [dragging]);
 
   useEffect(() => {
-    const cameraOptions = [width / -2, width / 2, height / 2, height / -2, 1, 1000];
+    const cameraOptions: [number, number, number, number, number, number] = [
+      width / -2,
+      width / 2,
+      height / 2,
+      height / -2,
+      1,
+      1000,
+    ];
+    const canvasElement = canvas.current;
+    if (!canvasElement) {
+      return;
+    }
+
     renderer.current = new WebGLRenderer({
-      canvas: canvas.current,
+      canvas: canvasElement,
       antialias: false,
       alpha: true,
       powerPreference: 'high-performance',
@@ -76,18 +131,24 @@ export const Carousel = ({ width, height, images, placeholder, ...rest }) => {
     });
     camera.current = new OrthographicCamera(...cameraOptions);
     scene.current = new Scene();
-    renderer.current.setPixelRatio(2);
-    renderer.current.setClearColor(0x111111, 1.0);
-    renderer.current.setSize(width, height);
-    renderer.current.domElement.style.width = '100%';
-    renderer.current.domElement.style.height = 'auto';
-    scene.current.background = new Color(0x111111);
-    camera.current.position.z = 1;
+    const rendererInstance = renderer.current;
+    const sceneInstance = scene.current;
+    const cameraInstance = camera.current;
+
+    rendererInstance.setPixelRatio(2);
+    rendererInstance.setClearColor(0x111111, 1.0);
+    rendererInstance.setSize(width, height);
+    rendererInstance.domElement.style.width = '100%';
+    rendererInstance.domElement.style.height = 'auto';
+    sceneInstance.background = new Color(0x111111);
+    cameraInstance.position.z = 1;
 
     return () => {
       animating.current = false;
-      cleanScene(scene.current);
-      cleanRenderer(renderer.current);
+      cleanScene(sceneInstance);
+      if (rendererInstance) {
+        cleanRenderer(rendererInstance);
+      }
     };
   }, [height, width]);
 
@@ -95,12 +156,20 @@ export const Carousel = ({ width, height, images, placeholder, ...rest }) => {
     let mounted = true;
 
     const loadImages = async () => {
-      const anisotropy = renderer.current.capabilities.getMaxAnisotropy();
+      const rendererInstance = renderer.current;
+      const sceneInstance = scene.current;
+      const cameraInstance = camera.current;
+
+      if (!rendererInstance || !sceneInstance || !cameraInstance) {
+        return;
+      }
+
+      const anisotropy = rendererInstance.capabilities.getMaxAnisotropy();
 
       const texturePromises = images.map(async image => {
         const imageSrc = image.srcSet ? await resolveSrcFromSrcSet(image) : image.src;
         const imageTexture = await textureLoader.loadAsync(imageSrc);
-        await renderer.current.initTexture(imageTexture);
+        await rendererInstance.initTexture(imageTexture);
         imageTexture.colorSpace = LinearSRGBColorSpace;
         imageTexture.minFilter = LinearFilter;
         imageTexture.magFilter = LinearFilter;
@@ -131,13 +200,13 @@ export const Carousel = ({ width, height, images, placeholder, ...rest }) => {
       geometry.current = new PlaneGeometry(width, height, 1);
       imagePlane.current = new Mesh(geometry.current, material.current);
       imagePlane.current.position.set(0, 0, 0);
-      scene.current.add(imagePlane.current);
+      sceneInstance.add(imagePlane.current);
 
       setLoaded(true);
       setTextures(textures);
 
       requestAnimationFrame(() => {
-        renderer.current.render(scene.current, camera.current);
+        rendererInstance.render(sceneInstance, cameraInstance);
       });
     };
 
@@ -151,8 +220,8 @@ export const Carousel = ({ width, height, images, placeholder, ...rest }) => {
   }, [height, images, inViewport, loaded, reduceMotion, width]);
 
   const goToIndex = useCallback(
-    ({ index, direction = 1 }) => {
-      if (!textures) return;
+    ({ index, direction = 1 }: { direction?: number; index: number }) => {
+      if (!textures || !material.current) return;
       setImageIndex(index);
       const { uniforms } = material.current;
       uniforms.nextImage.value = textures[index];
@@ -184,25 +253,27 @@ export const Carousel = ({ width, height, images, placeholder, ...rest }) => {
   );
 
   const navigate = useCallback(
-    ({ direction, index = null, ...rest }) => {
-      if (!loaded) return;
+    ({ direction, index = null }: { direction: number; index?: number | null }) => {
+      if (!loaded || !textures) return;
 
       if (animating.current) {
-        cancelAnimationFrame(scheduledAnimationFrame.current);
+        if (scheduledAnimationFrame.current) {
+          cancelAnimationFrame(scheduledAnimationFrame.current);
+        }
         scheduledAnimationFrame.current = requestAnimationFrame(() =>
-          navigate({ direction, index, ...rest })
+          navigate({ direction, index })
         );
         return;
       }
 
       const finalIndex = determineIndex(imageIndex, index, textures, direction);
-      goToIndex({ index: finalIndex, direction: direction, ...rest });
+      goToIndex({ index: finalIndex, direction });
     },
     [goToIndex, imageIndex, loaded, textures]
   );
 
   const onNavClick = useCallback(
-    index => {
+    (index: number) => {
       if (index === imageIndex) return;
       const direction = index > imageIndex ? 1 : -1;
       navigate({ direction, index });
@@ -212,8 +283,10 @@ export const Carousel = ({ width, height, images, placeholder, ...rest }) => {
 
   useEffect(() => {
     const handleResize = () => {
-      const rect = canvas.current.getBoundingClientRect();
-      setCanvasRect(rect);
+      const rect = canvas.current?.getBoundingClientRect();
+      if (rect) {
+        setCanvasRect(rect);
+      }
     };
 
     window.addEventListener('resize', handleResize);
@@ -225,16 +298,15 @@ export const Carousel = ({ width, height, images, placeholder, ...rest }) => {
   }, []);
 
   useEffect(() => {
-    let animation;
-
-    const animate = () => {
-      animation = requestAnimationFrame(animate);
-      if (animating.current) {
+    let animation: number | undefined;
+    const renderLoop = () => {
+      animation = requestAnimationFrame(renderLoop);
+      if (animating.current && renderer.current && scene.current && camera.current) {
         renderer.current.render(scene.current, camera.current);
       }
     };
 
-    animation = requestAnimationFrame(animate);
+    animation = requestAnimationFrame(renderLoop);
 
     return () => {
       cancelAnimationFrame(animation);
@@ -248,7 +320,7 @@ export const Carousel = ({ width, height, images, placeholder, ...rest }) => {
       };
 
       const placeholderElement = placeholderRef.current;
-      placeholderElement.addEventListener('transitionend', purgePlaceholder);
+      placeholderElement?.addEventListener('transitionend', purgePlaceholder);
 
       return () => {
         if (placeholderElement) {
@@ -259,8 +331,8 @@ export const Carousel = ({ width, height, images, placeholder, ...rest }) => {
   }, [placeholder]);
 
   const onSwipeMove = useCallback(
-    x => {
-      if (animating.current || !material.current || !textures) return;
+    (x: number) => {
+      if (animating.current || !material.current || !textures || !canvasRect) return;
       lastSwipePosition.current = x;
       const absoluteX = Math.abs(x);
       const containerWidth = canvasRect.width;
@@ -277,14 +349,16 @@ export const Carousel = ({ width, height, images, placeholder, ...rest }) => {
       uniforms.dispFactor.value = displacementClamp;
 
       requestAnimationFrame(() => {
-        renderer.current.render(scene.current, camera.current);
+        if (renderer.current && scene.current && camera.current) {
+          renderer.current.render(scene.current, camera.current);
+        }
       });
     },
     [canvasRect, imageIndex, images, textures]
   );
 
   const onSwipeEnd = useCallback(() => {
-    if (!material.current) return;
+    if (!material.current || !canvasRect) return;
     const uniforms = material.current.uniforms;
     const duration = (1 - uniforms.dispFactor.value) * 1000;
     const position = Math.abs(lastSwipePosition.current);
@@ -312,7 +386,7 @@ export const Carousel = ({ width, height, images, placeholder, ...rest }) => {
   }, [canvasRect, imageIndex, navigate]);
 
   const handlePointerMove = useCallback(
-    event => {
+    (event: PointerEvent) => {
       onSwipeMove(event.clientX - initSwipeX.current);
     },
     [onSwipeMove]
@@ -327,7 +401,7 @@ export const Carousel = ({ width, height, images, placeholder, ...rest }) => {
   }, [handlePointerMove, onSwipeEnd]);
 
   const handlePointerDown = useCallback(
-    event => {
+    (event: ReactPointerEvent<HTMLDivElement>) => {
       initSwipeX.current = event.clientX;
       setDragging(true);
 
@@ -337,7 +411,7 @@ export const Carousel = ({ width, height, images, placeholder, ...rest }) => {
     [handlePointerMove, handlePointerUp]
   );
 
-  const handleKeyDown = event => {
+  const handleKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
     switch (event.key) {
       case 'ArrowRight':
         navigate({ direction: 1 });
