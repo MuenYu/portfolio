@@ -1,12 +1,24 @@
 import { baseMeta } from '~/utils/meta';
-import { getPosts } from './posts.server';
+import { getPosts, type ArticlePost } from './posts.server';
 
-export async function loader() {
+interface LoaderData {
+  readonly posts: ArticlePost[];
+  readonly featured: ArticlePost;
+}
+
+export async function loader(): Promise<Response> {
   const allPosts = await getPosts();
-  const featured = allPosts.filter(post => post.frontmatter.featured)[0];
-  const posts = allPosts.filter(post => featured?.slug !== post.slug);
+  const featured = allPosts.find(post => post.frontmatter.featured);
 
-  return Response.json({ posts, featured });
+  if (!featured) {
+    throw new Error('Unable to find featured article.');
+  }
+
+  const posts = allPosts.filter(post => featured.slug !== post.slug);
+
+  const responseBody = { posts, featured } satisfies LoaderData;
+
+  return Response.json(responseBody);
 }
 
 export function meta() {

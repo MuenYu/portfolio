@@ -1,4 +1,5 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef } from 'react';
+import type { MouseEvent, ReactNode } from 'react';
 import { Link as RouterLink } from 'react-router';
 import { Divider } from '~/components/divider';
 import { Footer } from '~/components/footer';
@@ -14,9 +15,17 @@ import { clamp } from '~/utils/clamp';
 import { cssProps, msToNum, numToMs } from '~/utils/style';
 import styles from './post.module.css';
 
-export const Post = ({ children, title, date, banner, timecode }) => {
+export interface PostProps {
+  readonly children: ReactNode;
+  readonly title: string;
+  readonly date: string;
+  readonly banner?: string;
+  readonly timecode: string;
+}
+
+export const Post = ({ children, title, date, banner, timecode }: PostProps) => {
   const scrollToHash = useScrollToHash();
-  const imageRef = useRef();
+  const imageRef = useRef<HTMLDivElement | null>(null);
   // const [dateTime, setDateTime] = useState(null);
 
   // useEffect(() => {
@@ -24,16 +33,18 @@ export const Post = ({ children, title, date, banner, timecode }) => {
   // }, [date, dateTime]);
 
   useParallax(0.004, value => {
-    if (!imageRef.current) return;
-    imageRef.current.style.setProperty('--blurOpacity', clamp(value, 0, 1));
+    const imageElement = imageRef.current;
+    if (!imageElement) return;
+    imageElement.style.setProperty('--blurOpacity', clamp(value, 0, 1).toString());
   });
 
-  const handleScrollIndicatorClick = event => {
+  const handleScrollIndicatorClick = (event: MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
     scrollToHash(event.currentTarget.href);
   };
 
-  const placeholder = `${banner?.split('.')[0]}-placeholder.jpg`;
+  const placeholder = banner ? `${banner.split('.')[0]}-placeholder.jpg` : undefined;
+  const titleWords = title.split(' ');
 
   return (
     <article className={styles.post}>
@@ -46,7 +57,7 @@ export const Post = ({ children, title, date, banner, timecode }) => {
             <div className={styles.bannerImageBlur}>
               <Image
                 role="presentation"
-                src={placeholder}
+                src={placeholder ?? banner}
                 placeholder={placeholder}
                 alt=""
               />
@@ -66,14 +77,14 @@ export const Post = ({ children, title, date, banner, timecode }) => {
               )}
             </Transition>
             <Heading level={2} as="h1" className={styles.title} aria-label={title}>
-              {title.split(' ').map((word, index) => (
+              {titleWords.map((word, index) => (
                 <span className={styles.titleWordWrapper} key={`${word}-${index}`}>
                   <span
                     className={styles.titleWord}
                     style={cssProps({ delay: numToMs(index * 100 + 100) })}
                   >
                     {word}
-                    {index !== title.split(' ').length - 1 ? ' ' : ''}
+                    {index !== titleWords.length - 1 ? ' ' : ''}
                   </span>
                 </span>
               ))}
