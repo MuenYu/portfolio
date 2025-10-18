@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import type { ActionFunctionArgs } from 'react-router';
 import { Form, useActionData, useNavigation } from 'react-router';
 import { Button } from '~/components/button';
 import { DecoderText } from '~/components/decoder-text';
@@ -14,6 +15,7 @@ import { Transition } from '~/components/transition';
 import { useFormInput } from '~/hooks';
 import { cssProps, msToNum, numToMs } from '~/utils/style';
 import { baseMeta } from '~/utils/meta';
+import type { PortfolioContext } from '~/types/context';
 import styles from './contact.module.css';
 
 export const meta = () => {
@@ -28,15 +30,28 @@ const MAX_EMAIL_LENGTH = 512;
 const MAX_MESSAGE_LENGTH = 4096;
 const EMAIL_PATTERN = /(.+)@(.+){2,}\.(.+){2,}/;
 
-export async function action({ context, request }) {
+interface ContactErrors {
+  readonly email?: string;
+  readonly message?: string;
+}
+
+interface ContactActionData {
+  readonly success?: boolean;
+  readonly errors?: ContactErrors;
+}
+
+export async function action({ context, request }: ActionFunctionArgs<PortfolioContext>) {
   const formData = await request.formData();
-  const isBot = String(formData.get('name'));
-  const email = String(formData.get('email'));
-  const message = String(formData.get('message'));
-  const errors = {};
+  const rawName = formData.get('name');
+  const rawEmail = formData.get('email');
+  const rawMessage = formData.get('message');
+  const isBot = typeof rawName === 'string' ? rawName : '';
+  const email = typeof rawEmail === 'string' ? rawEmail : '';
+  const message = typeof rawMessage === 'string' ? rawMessage : '';
+  const errors: ContactErrors = {};
 
   // Return without sending if a bot trips the honeypot
-  if (isBot) return Response.json({ success: true });
+  if (isBot) return Response.json<ContactActionData>({ success: true });
 
   // Handle input validation on the server
   if (!email || !EMAIL_PATTERN.test(email)) {
@@ -56,7 +71,7 @@ export async function action({ context, request }) {
   }
 
   if (Object.keys(errors).length > 0) {
-    return Response.json({ errors });
+    return Response.json<ContactActionData>({ errors });
   }
 
   const resp = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
@@ -70,24 +85,26 @@ export async function action({ context, request }) {
       user_id: context.cloudflare.env.USER_ID,
       accessToken: context.cloudflare.env.ACCESSTOKEN,
       template_params: {
-        email: email,
-        message: message,
+        email,
+        message,
       },
     }),
   });
+
   if (!resp.ok) {
     errors.message = await resp.text();
-    return Response.json({ errors });
+    return Response.json<ContactActionData>({ errors });
   }
-  return Response.json({ success: true });
+
+  return Response.json<ContactActionData>({ success: true });
 }
 
 export const Contact = () => {
-  const errorRef = useRef();
+  const errorRef = useRef<HTMLDivElement>(null);
   const email = useFormInput('');
   const message = useFormInput('');
   const initDelay = tokens.base.durationS;
-  const actionData = useActionData();
+  const actionData = useActionData<ContactActionData>();
   const { state } = useNavigation();
   const sending = state === 'submitting';
 
@@ -157,7 +174,7 @@ export const Contact = () => {
                   ref={nodeRef}
                   data-status={errorStatus}
                   style={cssProps({
-                    height: errorStatus ? errorRef.current?.offsetHeight : 0,
+                    height: errorStatus ? errorRef.current?.offsetHeight ?? 0 : 0,
                   })}
                 >
                   <div className={styles.formErrorContent} ref={errorRef}>
@@ -225,7 +242,7 @@ export const Contact = () => {
   );
 };
 
-function getDelay(delayMs, offset = numToMs(0), multiplier = 1) {
+function getDelay(delayMs: string, offset = numToMs(0), multiplier = 1) {
   const numDelay = msToNum(delayMs) * multiplier;
   return cssProps({ delay: numToMs((msToNum(offset) + numDelay).toFixed(0)) });
 }

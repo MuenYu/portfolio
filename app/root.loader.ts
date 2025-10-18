@@ -1,8 +1,15 @@
 import { createCookieSessionStorage } from 'react-router';
+import type { LoaderFunctionArgs } from 'react-router';
 import config from '~/config.json';
 import { buildCanonicalUrl } from '~/utils/url';
+import type { PortfolioContext } from '~/types/context';
 
-export const loader = async ({ request, context }) => {
+interface RootLoaderData {
+  readonly canonicalUrl: string;
+  readonly theme: string;
+}
+
+export const loader = async ({ request, context }: LoaderFunctionArgs<PortfolioContext>) => {
   const { url } = request;
   const { pathname } = new URL(url);
   const canonicalUrl = buildCanonicalUrl(pathname, config.url);
@@ -14,15 +21,15 @@ export const loader = async ({ request, context }) => {
       maxAge: 604_800,
       path: '/',
       sameSite: 'lax',
-      secrets: [context.cloudflare.env.SESSION_SECRET || ' '],
+      secrets: [context.cloudflare.env.SESSION_SECRET ?? ' '],
       secure: true,
     },
   });
 
   const session = await getSession(request.headers.get('Cookie'));
-  const theme = session.get('theme') || 'dark';
+  const theme = (session.get('theme') as string | undefined) ?? 'dark';
 
-  return Response.json(
+  return Response.json<RootLoaderData>(
     { canonicalUrl, theme },
     {
       headers: {
