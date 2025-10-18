@@ -5,13 +5,13 @@ import styles from './list.module.css';
 type UnorderedListProps = {
   ordered?: false;
   children?: ReactNode;
-  className?: string;
+  className?: string | undefined;
 } & Omit<ComponentPropsWithoutRef<'ul'>, 'children' | 'className'>;
 
 type OrderedListProps = {
   ordered: true;
   children?: ReactNode;
-  className?: string;
+  className?: string | undefined;
 } & Omit<ComponentPropsWithoutRef<'ol'>, 'children' | 'className'>;
 
 type ListProps = UnorderedListProps | OrderedListProps;

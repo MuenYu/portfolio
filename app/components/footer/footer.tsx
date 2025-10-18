@@ -5,7 +5,7 @@ import config from '~/config.json';
 import styles from './footer.module.css';
 
 type FooterProps = Omit<HTMLAttributes<HTMLElement>, 'className' | 'children'> & {
-  className?: string | null | false;
+  className?: string | null | false | undefined;
 };
 
 export const Footer = ({ className, ...rest }: FooterProps): JSX.Element => (

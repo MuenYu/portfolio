@@ -14,7 +14,7 @@ interface TextOwnProps {
   align?: TextAlign;
   weight?: TextWeight;
   secondary?: boolean;
-  className?: string;
+  className?: string | undefined;
 }
 
 type TextComponent = <E extends ElementType = 'span'>(

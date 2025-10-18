@@ -66,7 +66,7 @@ function ArticlesPost({ slug, frontmatter, timecode, index }: ArticlesPostProps)
         </div>
       )}
       <RouterLink
-        unstable_viewtransition="true"
+        unstable_viewTransition
         prefetch="intent"
         to={`/articles/${slug}`}
         className={styles['postLink']}
@@ -204,7 +204,7 @@ export function Articles() {
 }
 
 interface BarcodeProps {
-  readonly className?: string;
+  readonly className?: string | undefined;
 }
 
 function Barcode({ className }: BarcodeProps) {

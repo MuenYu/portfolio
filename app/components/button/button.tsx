@@ -18,7 +18,7 @@ type LinkOnlyProps = Partial<Omit<LinkProps, 'children'>>;
 
 interface CommonButtonProps {
   as?: ElementType;
-  className?: string;
+  className?: string | undefined;
   secondary?: boolean;
   loading?: boolean;
   loadingText?: string;
@@ -30,7 +30,7 @@ interface CommonButtonProps {
   rel?: string;
   target?: string;
   children?: ReactNode;
-  unstable_viewtransition?: string;
+  unstable_viewTransition?: boolean;
 }
 
 type NativeButtonProps = Omit<
@@ -58,7 +58,7 @@ const ButtonComponent = ({ href, ...rest }: ButtonProps, ref: Ref<ButtonElement>
 
   return (
     <ButtonContent
-      unstable_viewtransition="true"
+      unstable_viewTransition
       as={Link}
       prefetch="intent"
       to={href}

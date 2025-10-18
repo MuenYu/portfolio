@@ -5,7 +5,7 @@ import type { PolymorphicProps, PolymorphicRef } from '~/types/polymorphic';
 import styles from './visually-hidden.module.css';
 
 interface VisuallyHiddenOwnProps {
-  className?: string;
+  className?: string | undefined;
   showOnFocus?: boolean;
   visible?: boolean;
   children?: ReactNode;
