@@ -106,7 +106,16 @@ const createCarouselMaterial = (
   return Object.assign(shaderMaterial, { uniforms });
 };
 
-export const Carousel = ({ width, height, images, placeholder, ...rest }: CarouselProps) => {
+export const Carousel = ({
+  width,
+  height,
+  images,
+  placeholder,
+  role = 'region',
+  tabIndex = 0,
+  'aria-roledescription': ariaRoledescription = 'carousel',
+  ...rest
+}: CarouselProps) => {
   const [dragging, setDragging] = useState(false);
   const [imageIndex, setImageIndex] = useState(0);
   const [loaded, setLoaded] = useState(false);
@@ -468,8 +477,14 @@ export const Carousel = ({ width, height, images, placeholder, ...rest }: Carous
   };
 
   return (
-    // eslint-disable-next-line jsx-a11y/no-static-element-interactions
-    <div className={styles.carousel} onKeyDown={handleKeyDown} {...rest}>
+    <div
+      {...rest}
+      aria-roledescription={ariaRoledescription}
+      className={styles.carousel}
+      onKeyDown={handleKeyDown}
+      role={role}
+      tabIndex={tabIndex}
+    >
       <div className={styles.content}>
         <div
           className={styles.imageWrapper}

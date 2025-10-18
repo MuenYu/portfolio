@@ -5,14 +5,7 @@ import {
   useSpring,
 } from 'framer-motion';
 import { useInViewport } from '~/hooks';
-import {
-  createRef,
-  startTransition,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { startTransition, useCallback, useEffect, useRef, useState } from 'react';
 import type { HTMLAttributes, MutableRefObject } from 'react';
 import {
   AmbientLight,
@@ -320,8 +313,14 @@ export const Model = ({
       unsubscribeX();
       unsubscribeY();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cameraPosition.x, cameraPosition.y, cameraPosition.z]);
+  }, [
+    cameraPosition.x,
+    cameraPosition.y,
+    cameraPosition.z,
+    renderFrame,
+    rotationX,
+    rotationY,
+  ]);
 
   const blurShadow = useCallback((amount: number) => {
     const rendererInstance = renderer.current;
@@ -517,10 +516,6 @@ interface LoadDeviceResult {
   playAnimation: () => AnimationPlaybackControls | void;
 }
 
-interface LoadDeviceState {
-  start: () => Promise<LoadDeviceResult>;
-}
-
 const Device = ({
   renderer,
   model,
@@ -532,11 +527,10 @@ const Device = ({
   onLoad,
   show,
 }: DeviceProps) => {
-  const [loadDevice, setLoadDevice] = useState<LoadDeviceState | null>(null);
   const reduceMotion = useReducedMotion();
-  const placeholderScreen = createRef<Mesh | null>();
+  const placeholderScreen = useRef<Mesh | null>(null);
 
-  useEffect(() => {
+  const startLoadDevice = useCallback(async (): Promise<LoadDeviceResult> => {
     const applyScreenTexture = (texture: Texture, node: Mesh) => {
       const rendererInstance = renderer.current;
       if (!rendererInstance) {
@@ -572,195 +566,195 @@ const Device = ({
       renderFrame();
     };
 
-    const load = async (): Promise<LoadDeviceResult> => {
-      const { texture, position, url } = model;
-      const rendererInstance = renderer.current;
-      const modelGroupInstance = modelGroup.current;
+    const { texture, position, url, animation } = model;
+    const rendererInstance = renderer.current;
+    const modelGroupInstance = modelGroup.current;
 
-      if (!rendererInstance || !modelGroupInstance) {
-        return {
-          loadFullResTexture: () => Promise.resolve(),
-          playAnimation: () => undefined,
-        };
+    if (!rendererInstance || !modelGroupInstance) {
+      return {
+        loadFullResTexture: () => Promise.resolve(),
+        playAnimation: () => undefined,
+      };
+    }
+
+    placeholderScreen.current = null;
+
+    let loadFullResTexture: (() => Promise<void>) | undefined;
+    let playAnimation: (() => AnimationPlaybackControls | void) | undefined;
+
+    const [placeholder, gltf] = await Promise.all([
+      textureLoader.loadAsync(texture.placeholder),
+      modelLoader.loadAsync(url),
+    ]);
+
+    modelGroupInstance.add(gltf.scene);
+
+    gltf.scene.traverse(node => {
+      if (!isMeshObject(node)) {
+        return;
       }
 
-      let loadFullResTexture: (() => Promise<void>) | undefined;
-      let playAnimation: (() => AnimationPlaybackControls | void) | undefined;
+      const material = getPrimaryMaterial(node);
 
-      const [placeholder, gltf] = await Promise.all([
-        textureLoader.loadAsync(texture.placeholder),
-        modelLoader.loadAsync(url),
-      ]);
+      if (material && 'color' in material) {
+        (material as Material & { color: Color }).color.set(0x1f2025);
+      }
 
-      modelGroupInstance.add(gltf.scene);
-
-      gltf.scene.traverse(node => {
-        if (!isMeshObject(node)) {
+      if (node.name === MeshType.Screen) {
+        const screenMaterial = material;
+        if (!screenMaterial) {
           return;
         }
 
-        const material = getPrimaryMaterial(node);
+        const screenClone = node.clone();
+        const parent = node.parent;
 
-        if (material && 'color' in material) {
-          (material as Material & { color: Color }).color.set(0x1f2025);
+        if (!screenClone || !parent) {
+          return;
         }
 
-        if (node.name === MeshType.Screen) {
-          const screenMaterial = material;
-          if (!screenMaterial) {
-            return;
-          }
+        screenClone.material = screenMaterial.clone();
+        parent.add(screenClone);
+        screenClone.position.z += 0.001;
 
-          const screenClone = node.clone();
-          const parent = node.parent;
+        const placeholderMaterial = getPrimaryMaterial(screenClone);
 
-          if (!screenClone || !parent) {
-            return;
-          }
+        if (!placeholderMaterial) {
+          return;
+        }
 
-          screenClone.material = screenMaterial.clone();
-          parent.add(screenClone);
-          screenClone.position.z += 0.001;
+        placeholderMaterial.opacity = 1;
+        placeholderScreen.current = screenClone;
 
-          const placeholderMaterial = getPrimaryMaterial(screenClone);
+        applyScreenTexture(placeholder, screenClone);
 
-          if (!placeholderMaterial) {
-            return;
-          }
+        loadFullResTexture = async () => {
+          const image = await resolveSrcFromSrcSet({
+            srcSet: texture.srcSet,
+            sizes: texture.sizes,
+          });
+          const fullSize = await textureLoader.loadAsync(image);
+          applyScreenTexture(fullSize, node);
 
-          placeholderMaterial.opacity = 1;
-          placeholderScreen.current = screenClone;
+          animate(1, 0, {
+            onUpdate: value => {
+              const screen = placeholderScreen.current;
+              if (screen) {
+                const cloneMaterial = Array.isArray(screen.material)
+                  ? screen.material[0]
+                  : screen.material;
 
-          applyScreenTexture(placeholder, screenClone);
-
-          loadFullResTexture = async () => {
-            const image = await resolveSrcFromSrcSet({
-              srcSet: texture.srcSet,
-              sizes: texture.sizes,
-            });
-            const fullSize = await textureLoader.loadAsync(image);
-            applyScreenTexture(fullSize, node);
-
-            animate(1, 0, {
-              onUpdate: value => {
-                const screen = placeholderScreen.current;
-                if (screen) {
-                  const cloneMaterial = Array.isArray(screen.material)
-                    ? screen.material[0]
-                    : screen.material;
-
-                  if (cloneMaterial) {
-                    cloneMaterial.opacity = value;
-                  }
+                if (cloneMaterial) {
+                  cloneMaterial.opacity = value;
                 }
+              }
 
-                renderFrame();
-              },
-            });
-          };
+              renderFrame();
+            },
+          });
+        };
+      }
+    });
+
+    const targetPosition = new Vector3(
+      position.x,
+      position.y,
+      position.z
+    );
+
+    if (reduceMotion) {
+      gltf.scene.position.set(...targetPosition.toArray());
+    }
+
+    if (animation === ModelAnimationType.SpringUp) {
+      playAnimation = () => {
+        const frameNode = gltf.scene.children.find(
+          (child): child is Mesh =>
+            child.name === MeshType.Frame && isMeshObject(child)
+        );
+
+        if (!frameNode) {
+          return undefined;
         }
-      });
 
-      const targetPosition = new Vector3(
-        position.x,
-        position.y,
-        position.z
-      );
+        const startPosition = new Vector3(
+          targetPosition.x,
+          targetPosition.y - 1,
+          targetPosition.z
+        );
 
-      if (reduceMotion) {
-        gltf.scene.position.set(...targetPosition.toArray());
-      }
+        gltf.scene.position.set(...startPosition.toArray());
 
-      if (model.animation === ModelAnimationType.SpringUp) {
-        playAnimation = () => {
-          const frameNode = gltf.scene.children.find(
-            (child): child is Mesh =>
-              child.name === MeshType.Frame && isMeshObject(child)
-          );
-
-          if (!frameNode) {
-            return undefined;
-          }
-
-          const startPosition = new Vector3(
-            targetPosition.x,
-            targetPosition.y - 1,
-            targetPosition.z
-          );
-
-          gltf.scene.position.set(...startPosition.toArray());
-
-          return animate(startPosition.y, targetPosition.y, {
-            type: 'spring',
-            delay: (300 * index + showDelay) / 1000,
-            stiffness: 60,
-            damping: 20,
-            mass: 1,
-            restSpeed: 0.0001,
-            restDelta: 0.0001,
-            onUpdate: value => {
-              gltf.scene.position.y = value;
-              renderFrame();
-            },
-          });
-        };
-      }
-
-      if (model.animation === ModelAnimationType.LaptopOpen) {
-        playAnimation = () => {
-          const frameNode = gltf.scene.children.find(
-            (child): child is Mesh =>
-              child.name === MeshType.Frame && isMeshObject(child)
-          );
-
-          if (!frameNode) {
-            return undefined;
-          }
-
-          const startRotation = new Vector3(MathUtils.degToRad(90), 0, 0);
-          const endRotation = new Vector3(0, 0, 0);
-
-          gltf.scene.position.set(...targetPosition.toArray());
-          frameNode.rotation.set(...startRotation.toArray());
-
-          return animate(startRotation.x, endRotation.x, {
-            type: 'spring',
-            delay: (300 * index + showDelay + 300) / 1000,
-            stiffness: 80,
-            damping: 20,
-            restSpeed: 0.0001,
-            restDelta: 0.0001,
-            onUpdate: value => {
-              frameNode.rotation.x = value;
-              renderFrame();
-            },
-          });
-        };
-      }
-
-        const defaultLoadFullResTexture = () => Promise.resolve();
-
-        return {
-          loadFullResTexture:
-            loadFullResTexture ?? defaultLoadFullResTexture,
-          playAnimation: playAnimation ?? (() => undefined),
-        };
+        return animate(startPosition.y, targetPosition.y, {
+          type: 'spring',
+          delay: (300 * index + showDelay) / 1000,
+          stiffness: 60,
+          damping: 20,
+          mass: 1,
+          restSpeed: 0.0001,
+          restDelta: 0.0001,
+          onUpdate: value => {
+            gltf.scene.position.y = value;
+            renderFrame();
+          },
+        });
       };
+    }
 
-    setLoadDevice({ start: load });
+    if (animation === ModelAnimationType.LaptopOpen) {
+      playAnimation = () => {
+        const frameNode = gltf.scene.children.find(
+          (child): child is Mesh =>
+            child.name === MeshType.Frame && isMeshObject(child)
+        );
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+        if (!frameNode) {
+          return undefined;
+        }
+
+        const startRotation = new Vector3(MathUtils.degToRad(90), 0, 0);
+        const endRotation = new Vector3(0, 0, 0);
+
+        gltf.scene.position.set(...targetPosition.toArray());
+        frameNode.rotation.set(...startRotation.toArray());
+
+        return animate(startRotation.x, endRotation.x, {
+          type: 'spring',
+          delay: (300 * index + showDelay + 300) / 1000,
+          stiffness: 80,
+          damping: 20,
+          restSpeed: 0.0001,
+          restDelta: 0.0001,
+          onUpdate: value => {
+            frameNode.rotation.x = value;
+            renderFrame();
+          },
+        });
+      };
+    }
+
+    const defaultLoadFullResTexture = () => Promise.resolve();
+
+    return {
+      loadFullResTexture: loadFullResTexture ?? defaultLoadFullResTexture,
+      playAnimation: playAnimation ?? (() => undefined),
+    };
+  }, [index, model, modelGroup, reduceMotion, renderFrame, renderer, showDelay]);
 
   useEffect(() => {
-    if (!loadDevice || !show) {
+    if (!show) {
       return;
     }
 
     let animation: AnimationPlaybackControls | undefined;
+    let cancelled = false;
 
     const onModelLoad = async () => {
-      const { loadFullResTexture, playAnimation } = await loadDevice.start();
+      const { loadFullResTexture, playAnimation } = await startLoadDevice();
+
+      if (cancelled) {
+        return;
+      }
 
       setLoaded(true);
       onLoad?.();
@@ -774,6 +768,10 @@ const Device = ({
 
       await loadFullResTexture();
 
+      if (cancelled) {
+        return;
+      }
+
       if (reduceMotion) {
         renderFrame();
       }
@@ -784,10 +782,10 @@ const Device = ({
     });
 
     return () => {
+      cancelled = true;
       animation?.stop();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadDevice, show]);
+  }, [onLoad, reduceMotion, renderFrame, setLoaded, show, startLoadDevice]);
 };
 
 export default Model;
