@@ -40,7 +40,7 @@ export const numToMs = (num: number): string => `${num}ms`;
  * to values that can be spread into a ThreeJS Color class
  */
 export const rgbToThreeColor = (rgb?: string): number[] =>
-  rgb?.split(' ').map(value => Number(value) / 255) || [];
+  rgb?.split(' ').map(value => Number(value) / 255) ?? [];
 
 /**
  * Convert a JS object into `--` prefixed css custom properties.
@@ -78,6 +78,8 @@ export function cssProps(
 /**
  * Concatenate classNames together
  */
-export function classes(...classNames: Array<string | false | null | undefined>): string {
+export function classes(
+  ...classNames: (string | false | null | undefined)[]
+): string {
   return classNames.filter(Boolean).join(' ');
 }
