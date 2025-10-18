@@ -19,8 +19,8 @@ import {
   SphereGeometry,
   UniformsUtils,
   WebGLRenderer,
-  type Shader,
-  type ShaderUniform,
+  type WebGLProgramParametersWithUniforms,
+  type IUniform,
 } from 'three';
 import { media } from '~/utils/style';
 import { throttle } from '~/utils/throttle';
@@ -29,7 +29,7 @@ import fragmentShader from './displacement-sphere-fragment.glsl?raw';
 import vertexShader from './displacement-sphere-vertex.glsl?raw';
 import styles from './displacement-sphere.module.css';
 
-type ShaderUniforms = Record<string, ShaderUniform>;
+type ShaderUniforms = Record<string, IUniform>;
 
 type DisplacementSphereMesh = Mesh<SphereGeometry, MeshPhongMaterial> & {
   modifier?: number;
@@ -93,11 +93,13 @@ export const DisplacementSphere = (
     scene.current = sceneInstance;
 
     const materialInstance = new MeshPhongMaterial();
-    materialInstance.onBeforeCompile = (shader: Shader) => {
+    materialInstance.onBeforeCompile = (
+      shader: WebGLProgramParametersWithUniforms
+    ) => {
       uniforms.current = UniformsUtils.merge([
         shader.uniforms,
-        { time: { type: 'f', value: 0 } },
-      ]);
+        { time: { value: 0 } },
+      ]) as ShaderUniforms;
 
       shader.uniforms = uniforms.current;
       shader.vertexShader = vertexShader;

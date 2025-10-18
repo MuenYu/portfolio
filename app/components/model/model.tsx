@@ -16,7 +16,6 @@ import {
 import type { HTMLAttributes, MutableRefObject } from 'react';
 import {
   AmbientLight,
-  Color,
   DirectionalLight,
   Group,
   MathUtils,
@@ -35,9 +34,10 @@ import {
   type Light,
   type Material,
   type Object3D,
-  type ShaderUniform,
+  type IUniform,
   type Texture,
 } from 'three';
+import type { Color } from 'three';
 import { HorizontalBlurShader, VerticalBlurShader } from 'three-stdlib';
 import { resolveSrcFromSrcSet } from '~/utils/image';
 import { classes, cssProps, numToMs } from '~/utils/style';
@@ -89,7 +89,7 @@ interface ModelProps extends Omit<HTMLAttributes<HTMLDivElement>, 'style' | 'chi
   readonly style?: Record<string, string | number | undefined>;
 }
 
-type BlurUniforms = Record<string, ShaderUniform>;
+type BlurUniforms = Record<string, IUniform>;
 
 type BlurPlaneMesh = Mesh<PlaneGeometry, ShaderMaterial>;
 
@@ -103,11 +103,10 @@ const rotationSpringConfig = {
 };
 
 const isMeshObject = (object: Object3D | null | undefined): object is Mesh =>
-  Boolean(object && (object as Mesh).isMesh);
+  object instanceof Mesh;
 
-const isShaderUniform = (
-  uniform: ShaderUniform | undefined
-): uniform is ShaderUniform => Boolean(uniform);
+const isUniform = (uniform: IUniform | undefined): uniform is IUniform =>
+  typeof uniform === 'object' && uniform !== null && 'value' in uniform;
 
 const getPrimaryMaterial = (mesh: Mesh): Material | undefined => {
   const { material } = mesh;
@@ -264,13 +263,14 @@ export const Model = ({
     shadowGroupInstance.add(shadowCameraInstance);
 
     const depthMaterialInstance = new MeshDepthMaterial();
-    const darknessUniforms = depthMaterialInstance.userData as Record<
-      string,
-      ShaderUniform<number>
-    >;
+    const darknessUniforms = depthMaterialInstance.userData as typeof depthMaterialInstance.userData & {
+      darkness?: IUniform<number>;
+    };
     darknessUniforms.darkness = { value: shadowDarkness };
     depthMaterialInstance.onBeforeCompile = shader => {
-      shader.uniforms.darkness = darknessUniforms.darkness;
+      if (darknessUniforms.darkness) {
+        shader.uniforms.darkness = darknessUniforms.darkness;
+      }
       shader.fragmentShader = `
         uniform float darkness;
         ${shader.fragmentShader.replace(
@@ -350,11 +350,11 @@ export const Model = ({
 
     const horizontalUniforms = horizontalMaterial.uniforms as BlurUniforms;
     const horizontalTextureUniform = horizontalUniforms.tDiffuse;
-    if (isShaderUniform(horizontalTextureUniform)) {
+    if (isUniform(horizontalTextureUniform)) {
       horizontalTextureUniform.value = renderTargetInstance.texture;
     }
     const horizontalValueUniform = horizontalUniforms.h;
-    if (isShaderUniform(horizontalValueUniform)) {
+    if (isUniform(horizontalValueUniform)) {
       horizontalValueUniform.value = amount * (1 / 256);
     }
 
@@ -365,11 +365,11 @@ export const Model = ({
 
     const verticalUniforms = verticalMaterial.uniforms as BlurUniforms;
     const verticalTextureUniform = verticalUniforms.tDiffuse;
-    if (isShaderUniform(verticalTextureUniform)) {
+    if (isUniform(verticalTextureUniform)) {
       verticalTextureUniform.value = renderTargetBlurInstance.texture;
     }
     const verticalValueUniform = verticalUniforms.v;
-    if (isShaderUniform(verticalValueUniform)) {
+    if (isUniform(verticalValueUniform)) {
       verticalValueUniform.value = amount * (1 / 256);
     }
 
@@ -537,28 +537,39 @@ const Device = ({
   const placeholderScreen = createRef<Mesh | null>();
 
   useEffect(() => {
-      const applyScreenTexture = async (texture: Texture, node: Mesh) => {
-        const rendererInstance = renderer.current;
-        if (!rendererInstance) {
-          return;
-        }
+    const applyScreenTexture = (texture: Texture, node: Mesh) => {
+      const rendererInstance = renderer.current;
+      if (!rendererInstance) {
+        return;
+      }
 
-        texture.colorSpace = SRGBColorSpace;
-        texture.flipY = false;
-        texture.anisotropy = rendererInstance.capabilities.getMaxAnisotropy();
-        texture.generateMipmaps = false;
+      texture.colorSpace = SRGBColorSpace;
+      texture.flipY = false;
+      texture.anisotropy = rendererInstance.capabilities.getMaxAnisotropy();
+      texture.generateMipmaps = false;
+      texture.needsUpdate = true;
 
-        await rendererInstance.initTexture(texture);
+      const material = getPrimaryMaterial(node);
 
-        const material = getPrimaryMaterial(node);
+      if (!material || !('map' in material)) {
+        return;
+      }
 
-        if (!material) {
-          return;
-        }
+      const texturedMaterial = material as Material & {
+        map: Texture | null;
+        needsUpdate: boolean;
+        color?: Color;
+      };
 
-      material.color = new Color(0xffffff);
-      material.transparent = true;
-      material.map = texture;
+      if (texturedMaterial.color) {
+        texturedMaterial.color.set(0xffffff);
+      }
+
+      texturedMaterial.transparent = true;
+      texturedMaterial.map = texture;
+      texturedMaterial.needsUpdate = true;
+
+      renderFrame();
     };
 
     const load = async (): Promise<LoadDeviceResult> => {
@@ -566,15 +577,15 @@ const Device = ({
       const rendererInstance = renderer.current;
       const modelGroupInstance = modelGroup.current;
 
-        if (!rendererInstance || !modelGroupInstance) {
-          return {
-            loadFullResTexture: () => Promise.resolve(),
-            playAnimation: () => undefined,
-          };
-        }
+      if (!rendererInstance || !modelGroupInstance) {
+        return {
+          loadFullResTexture: () => Promise.resolve(),
+          playAnimation: () => undefined,
+        };
+      }
 
-        let loadFullResTexture: (() => Promise<void>) | undefined;
-        let playAnimation: (() => AnimationPlaybackControls | void) | undefined;
+      let loadFullResTexture: (() => Promise<void>) | undefined;
+      let playAnimation: (() => AnimationPlaybackControls | void) | undefined;
 
       const [placeholder, gltf] = await Promise.all([
         textureLoader.loadAsync(texture.placeholder),
@@ -583,44 +594,44 @@ const Device = ({
 
       modelGroupInstance.add(gltf.scene);
 
-        gltf.scene.traverse(async node => {
-          if (!isMeshObject(node)) {
+      gltf.scene.traverse(node => {
+        if (!isMeshObject(node)) {
+          return;
+        }
+
+        const material = getPrimaryMaterial(node);
+
+        if (material && 'color' in material) {
+          (material as Material & { color: Color }).color.set(0x1f2025);
+        }
+
+        if (node.name === MeshType.Screen) {
+          const screenMaterial = material;
+          if (!screenMaterial) {
             return;
           }
 
-          const material = getPrimaryMaterial(node);
+          const screenClone = node.clone();
+          const parent = node.parent;
 
-          if (material) {
-            material.color = new Color(0x1f2025);
+          if (!screenClone || !parent) {
+            return;
           }
 
-          if (node.name === MeshType.Screen) {
-            const screenMaterial = material;
-            if (!screenMaterial) {
-              return;
-            }
+          screenClone.material = screenMaterial.clone();
+          parent.add(screenClone);
+          screenClone.position.z += 0.001;
 
-            const screenClone = node.clone();
-            const parent = node.parent;
+          const placeholderMaterial = getPrimaryMaterial(screenClone);
 
-            if (!screenClone || !parent) {
-              return;
-            }
-
-            screenClone.material = screenMaterial.clone();
-            parent.add(screenClone);
-            screenClone.position.z += 0.001;
-
-            const placeholderMaterial = getPrimaryMaterial(screenClone);
-
-            if (!placeholderMaterial) {
-              return;
-            }
+          if (!placeholderMaterial) {
+            return;
+          }
 
           placeholderMaterial.opacity = 1;
           placeholderScreen.current = screenClone;
 
-          await applyScreenTexture(placeholder, screenClone);
+          applyScreenTexture(placeholder, screenClone);
 
           loadFullResTexture = async () => {
             const image = await resolveSrcFromSrcSet({
@@ -628,7 +639,7 @@ const Device = ({
               sizes: texture.sizes,
             });
             const fullSize = await textureLoader.loadAsync(image);
-            await applyScreenTexture(fullSize, node);
+            applyScreenTexture(fullSize, node);
 
             animate(1, 0, {
               onUpdate: value => {

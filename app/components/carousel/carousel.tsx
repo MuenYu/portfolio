@@ -203,14 +203,18 @@ export const Carousel = ({ width, height, images, placeholder, ...rest }: Carous
       const anisotropy = rendererInstance.capabilities.getMaxAnisotropy();
 
       const texturePromises = images.map(async (image): Promise<Texture> => {
-        const imageSrc = image.srcSet ? await resolveSrcFromSrcSet(image) : image.src;
+        let imageSrc = image.src;
+        if (image.srcSet) {
+          imageSrc = await resolveSrcFromSrcSet(image);
+        }
+
         const imageTexture = await textureLoader.loadAsync(imageSrc);
-        await rendererInstance.initTexture(imageTexture);
         imageTexture.colorSpace = LinearSRGBColorSpace;
         imageTexture.minFilter = LinearFilter;
         imageTexture.magFilter = LinearFilter;
         imageTexture.anisotropy = anisotropy;
         imageTexture.generateMipmaps = false;
+        imageTexture.needsUpdate = true;
         return imageTexture;
       });
 
