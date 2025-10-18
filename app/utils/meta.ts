@@ -4,12 +4,12 @@ import config from '~/config.json';
 const { name, url, twitter } = config;
 const defaultOgImage = `${url}/preview.png`;
 
-type BaseMetaArgs = {
+interface BaseMetaArgs {
   title?: string;
   description?: string;
   prefix?: string;
   ogImage?: string;
-};
+}
 
 export function baseMeta({
   title,

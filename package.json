@@ -10,7 +10,7 @@
     "build": "react-router build",
     "dev": "react-router dev",
     "start": "wrangler pages dev ./build/client",
-    "test": "npm run build && npm run start",
+    "test": "npm run clean && npm i && npm run build && npm run start",
     "postinstall": "node ./scripts/draco.cjs",
     "deploy": "npm run build && wrangler pages deploy ./build/client --project-name portfolio",
     "dev:storybook": "storybook dev -p 6006",
