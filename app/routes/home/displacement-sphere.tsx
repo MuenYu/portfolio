@@ -18,9 +18,9 @@ import {
   Scene,
   SphereGeometry,
   UniformsUtils,
-  Vector2,
   WebGLRenderer,
-  type Shader,
+  type WebGLProgramParametersWithUniforms,
+  type IUniform,
 } from 'three';
 import { media } from '~/utils/style';
 import { throttle } from '~/utils/throttle';
@@ -29,13 +29,7 @@ import fragmentShader from './displacement-sphere-fragment.glsl?raw';
 import vertexShader from './displacement-sphere-vertex.glsl?raw';
 import styles from './displacement-sphere.module.css';
 
-interface ShaderUniform {
-  value: unknown;
-  type?: string;
-  [key: string]: unknown;
-}
-
-type ShaderUniforms = Record<string, ShaderUniform>;
+type ShaderUniforms = Record<string, IUniform>;
 
 type DisplacementSphereMesh = Mesh<SphereGeometry, MeshPhongMaterial> & {
   modifier?: number;
@@ -53,7 +47,6 @@ export const DisplacementSphere = (
   const { theme } = useTheme();
   const start = useRef<number>(Date.now());
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const mouse = useRef<Vector2 | null>(null);
   const renderer = useRef<WebGLRenderer | null>(null);
   const camera = useRef<PerspectiveCamera | null>(null);
   const scene = useRef<Scene | null>(null);
@@ -75,8 +68,6 @@ export const DisplacementSphere = (
     }
 
     const { innerWidth, innerHeight } = window;
-    mouse.current = new Vector2(0.8, 0.5);
-
     const rendererInstance = new WebGLRenderer({
       canvas,
       antialias: false,
@@ -102,13 +93,15 @@ export const DisplacementSphere = (
     scene.current = sceneInstance;
 
     const materialInstance = new MeshPhongMaterial();
-    materialInstance.onBeforeCompile = (shader: Shader) => {
+    materialInstance.onBeforeCompile = (
+      shader: WebGLProgramParametersWithUniforms
+    ) => {
       uniforms.current = UniformsUtils.merge([
         shader.uniforms,
-        { time: { type: 'f', value: 0 } },
+        { time: { value: 0 } },
       ]) as ShaderUniforms;
 
-      shader.uniforms = uniforms.current as Shader['uniforms'];
+      shader.uniforms = uniforms.current;
       shader.vertexShader = vertexShader;
       shader.fragmentShader = fragmentShader;
     };
@@ -118,28 +111,20 @@ export const DisplacementSphere = (
       const geometryInstance = new SphereGeometry(32, 128, 128);
       geometry.current = geometryInstance;
 
-      if (!material.current) {
-        return;
-      }
-
-      const sphereMesh = new Mesh(
+      const sphereMesh = new Mesh<SphereGeometry, MeshPhongMaterial>(
         geometryInstance,
-        material.current
-      ) as DisplacementSphereMesh;
-      sphereMesh.position.z = 0;
-      sphereMesh.modifier = Math.random();
-      sphere.current = sphereMesh;
-      sceneInstance.add(sphereMesh);
+        materialInstance
+      );
+      const displacementSphere = sphereMesh as DisplacementSphereMesh;
+      displacementSphere.position.z = 0;
+      displacementSphere.modifier = Math.random();
+      sphere.current = displacementSphere;
+      sceneInstance.add(displacementSphere);
     });
 
     return () => {
-      if (scene.current) {
-        cleanScene(scene.current);
-      }
-
-      if (renderer.current) {
-        cleanRenderer(renderer.current);
-      }
+      cleanScene(sceneInstance);
+      cleanRenderer(rendererInstance);
     };
   }, []);
 

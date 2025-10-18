@@ -1,58 +1,28 @@
-import { Cache, TextureLoader } from 'three';
+import { Cache, TextureLoader, Mesh } from 'three';
+import type {
+  Material,
+  Object3D,
+  Scene,
+  Texture,
+  WebGLRenderer,
+  Light,
+} from 'three';
 import { DRACOLoader, GLTFLoader } from 'three-stdlib';
 
-interface Disposable {
-  dispose(): void;
-}
-
-interface Object3DLike {
-  name: string;
-  traverse(callback: (object: Object3DLike) => void): void;
-  parent: Object3DLike | null;
-  remove?(child: Object3DLike): void;
-}
-
-interface MeshLike extends Object3DLike {
-  geometry: Disposable;
-  material: MaterialLike | MaterialLike[];
-  isMesh?: boolean;
-}
-
-interface SceneLike {
-  traverse(callback: (object: Object3DLike) => void): void;
-}
-
-type MaterialLike = Disposable & Record<string, unknown>;
-
-interface TextureLike {
-  dispose?: () => void;
-  source?: { data?: { close?: () => void } };
-  minFilter?: unknown;
-}
-
-interface WebGLRendererLike {
-  dispose(): void;
-}
-
-interface LightLike {
-  parent: Object3DLike | null;
-}
-
-const isMeshObject = (object: Object3DLike): object is MeshLike =>
-  Boolean((object as MeshLike).isMesh);
+const isMeshObject = (object: Object3D): object is Mesh => object instanceof Mesh;
 
 const isRemovableParent = (
-  parent: Object3DLike | null
-): parent is Object3DLike & { remove(child: Object3DLike): void } =>
+  parent: Object3D | null
+): parent is Object3D & { remove(child: Object3D): void } =>
   typeof parent?.remove === 'function';
 
-const isDisposableMaterialProp = (value: unknown): value is TextureLike =>
+const isDisposableMaterialProp = (value: unknown): value is Texture =>
   typeof value === 'object' &&
   value !== null &&
-  'minFilter' in (value as Record<string, unknown>);
+  'isTexture' in (value as Record<string, unknown>);
 
 // Enable caching for all loaders
-(Cache as unknown as { enabled: boolean }).enabled = true;
+Cache.enabled = true;
 
 const dracoLoader = new DRACOLoader();
 const gltfLoader = new GLTFLoader();
@@ -68,7 +38,7 @@ export const textureLoader = new TextureLoader();
 /**
  * Clean up a scene's materials and geometry
  */
-export const cleanScene = (scene?: SceneLike): void => {
+export const cleanScene = (scene?: Scene | null): void => {
   scene?.traverse(object => {
     if (!isMeshObject(object)) {
       return;
@@ -90,34 +60,37 @@ export const cleanScene = (scene?: SceneLike): void => {
 /**
  * Clean up and dispose of a material
  */
-export const cleanMaterial = (material: MaterialLike): void => {
+export const cleanMaterial = (material: Material): void => {
   material.dispose();
 
   const entries = Object.entries(
-    material as MaterialLike & Record<string, unknown>
+    material as Material & Record<string, unknown>
   );
 
   for (const [, value] of entries) {
     if (!isDisposableMaterialProp(value)) continue;
 
-    value.dispose?.();
+    value.dispose();
 
     // Close GLTF bitmap textures
-    value.source?.data?.close?.();
+    const source = value.source as
+      | { data?: { close?: () => void } }
+      | undefined;
+    source?.data?.close?.();
   }
 };
 
 /**
  * Clean up and dispose of a renderer
  */
-export const cleanRenderer = (renderer: WebGLRendererLike): void => {
+export const cleanRenderer = (renderer: WebGLRenderer): void => {
   renderer.dispose();
 };
 
 /**
  * Clean up lights by removing them from their parent
  */
-export const removeLights = (lights: LightLike[]): void => {
+export const removeLights = (lights: Light[]): void => {
   for (const light of lights) {
     if (isRemovableParent(light.parent)) {
       light.parent.remove(light);
@@ -128,9 +101,9 @@ export const removeLights = (lights: LightLike[]): void => {
 /**
  * Get child by name
  */
-export const getChild = <T extends Object3DLike = Object3DLike>(
+export const getChild = <T extends Object3D = Object3D>(
   name: string,
-  object: Object3DLike
+  object: Object3D
 ): T | undefined => {
   let node: T | undefined;
 
