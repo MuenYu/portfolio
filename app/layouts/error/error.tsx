@@ -102,7 +102,7 @@ export function Error({ error }: ErrorProps) {
   const { summary, message } = getMessage();
 
   return (
-    <section className={styles.page}>
+    <section className={styles['page']}>
       {flatlined && (
         <style
           dangerouslySetInnerHTML={{
@@ -122,11 +122,11 @@ export function Error({ error }: ErrorProps) {
       <Transition in>
         {({ visible }) => (
           <>
-            <div className={styles.details}>
-              <div className={styles.text}>
+            <div className={styles['details']}>
+              <div className={styles['text']}>
                 {!flatlined && (
                   <Heading
-                    className={styles.title}
+                    className={styles['title']}
                     data-visible={visible}
                     level={0}
                     weight="bold"
@@ -136,7 +136,7 @@ export function Error({ error }: ErrorProps) {
                 )}
                 {flatlined && (
                   <Heading
-                    className={styles.titleFlatline}
+                    className={styles['titleFlatline']}
                     data-visible={visible}
                     level={2}
                     as="h1"
@@ -150,7 +150,7 @@ export function Error({ error }: ErrorProps) {
                 {!flatlined && (
                   <Heading
                     aria-hidden
-                    className={styles.subheading}
+                    className={styles['subheading']}
                     data-visible={visible}
                     as="h2"
                     level={4}
@@ -158,14 +158,14 @@ export function Error({ error }: ErrorProps) {
                     <DecoderText text={summary} start={visible} delay={300} />
                   </Heading>
                 )}
-                <Text className={styles.description} data-visible={visible} as="p">
+                <Text className={styles['description']} data-visible={visible} as="p">
                   {message}
                 </Text>
                 {flatlined ? (
                   <Button
                     secondary
                     iconHoverShift
-                    className={styles.button}
+                    className={styles['button']}
                     data-visible={visible}
                     href="https://www.youtube.com/watch?v=EuQzHGcsjlA"
                     icon="chevron-right"
@@ -176,7 +176,7 @@ export function Error({ error }: ErrorProps) {
                   <Button
                     secondary
                     iconHoverShift
-                    className={styles.button}
+                    className={styles['button']}
                     data-visible={visible}
                     href="/"
                     icon="chevron-right"
@@ -187,19 +187,19 @@ export function Error({ error }: ErrorProps) {
               </div>
             </div>
 
-            <div className={styles.videoContainer} data-visible={visible}>
+            <div className={styles['videoContainer']} data-visible={visible}>
               <Image
                 reveal
                 cover
                 noPauseButton
                 delay={600}
-                className={styles.video}
+                className={styles['video']}
                 src={flatlined ? flatlineVideo : notFoundVideo}
                 placeholder={flatlined ? flatlinePoster : notFoundPoster}
               />
               {flatlined ? (
                 <a
-                  className={styles.credit}
+                  className={styles['credit']}
                   data-visible={visible}
                   href="https://www.imdb.com/title/tt0318871/"
                   target="_blank"
@@ -209,7 +209,7 @@ export function Error({ error }: ErrorProps) {
                 </a>
               ) : (
                 <a
-                  className={styles.credit}
+                  className={styles['credit']}
                   data-visible={visible}
                   href="https://www.imdb.com/title/tt0113568/"
                   target="_blank"

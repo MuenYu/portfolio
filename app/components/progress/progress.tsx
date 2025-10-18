@@ -58,7 +58,7 @@ export function Progress() {
 
   return (
     <div
-      className={styles.progress}
+      className={styles['progress']}
       data-status={state}
       data-visible={visible}
       data-complete={animationComplete}

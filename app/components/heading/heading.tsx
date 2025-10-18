@@ -29,7 +29,7 @@ export const Heading = ({
   return (
     <Fragment>
       <Component
-        className={classes(styles.heading, className)}
+        className={classes(styles['heading'], className)}
         data-align={align}
         data-weight={weight}
         data-level={clampedLevel}

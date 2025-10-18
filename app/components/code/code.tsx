@@ -33,16 +33,16 @@ export const Code = (props: CodeProps) => {
   };
 
   return (
-    <div className={styles.code} data-theme={theme}>
+    <div className={styles['code']} data-theme={theme}>
       {!!lang && (
-        <Text secondary size="s" className={styles.lang}>
+        <Text secondary size="s" className={styles['lang']}>
           {lang}
         </Text>
       )}
       <pre ref={elementRef} className={className} {...preProps} />
-      <div className={styles.actions}>
+      <div className={styles['actions']}>
         <Button iconOnly onClick={handleCopy} aria-label="Copy">
-          <span className={styles.copyIcon}>
+          <span className={styles['copyIcon']}>
             <Transition in={!copied}>
               {({ visible, nodeRef }) => (
                 <Icon ref={nodeRef} icon="copy" data-visible={visible} />

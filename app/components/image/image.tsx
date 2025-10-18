@@ -53,7 +53,7 @@ export const Image = ({
 
   return (
     <div
-      className={classes(styles.image, className)}
+      className={classes(styles['image'], className)}
       data-visible={inViewport || loaded}
       data-reveal={reveal}
       data-raised={raised}
@@ -184,7 +184,7 @@ const ImageElements = ({
 
   return (
     <div
-      className={styles.elementWrapper}
+      className={styles['elementWrapper']}
       data-reveal={reveal}
       data-visible={inViewport || loaded}
       style={cssProps({ delay: numToMs(delay + 1000) })}
@@ -195,7 +195,7 @@ const ImageElements = ({
             muted
             loop
             playsInline
-            className={styles.element}
+            className={styles['element']}
             data-loaded={loaded}
             data-cover={cover}
             autoPlay={!reduceMotion}
@@ -206,7 +206,7 @@ const ImageElements = ({
             {...rest}
           />
           {!noPauseButton && (
-            <Button className={styles.button} onClick={togglePlaying}>
+            <Button className={styles['button']} onClick={togglePlaying}>
               <Icon icon={playing ? 'pause' : 'play'} />
               {playing ? 'Pause' : 'Play'}
             </Button>
@@ -215,7 +215,7 @@ const ImageElements = ({
       )}
       {!isVideo && (
         <img
-          className={styles.element}
+          className={styles['element']}
           data-loaded={loaded}
           data-cover={cover}
           onLoad={onLoad}
@@ -232,7 +232,7 @@ const ImageElements = ({
       {showPlaceholder && (
         <img
           aria-hidden
-          className={styles.placeholder}
+          className={styles['placeholder']}
           data-loaded={loaded}
           data-cover={cover}
           style={cssProps({ delay: numToMs(delay) })}

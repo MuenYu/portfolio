@@ -25,7 +25,7 @@ const SectionInner = <E extends ElementType = 'div'>(
   const Component = as ?? 'div';
 
   return (
-    <Component className={classes(styles.section, className)} ref={ref} {...rest}>
+    <Component className={classes(styles['section'], className)} ref={ref} {...rest}>
       {children}
     </Component>
   );

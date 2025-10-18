@@ -475,27 +475,27 @@ export const Carousel = ({
 
   return (
     // eslint-disable-next-line jsx-a11y/no-static-element-interactions
-    <div className={styles.carousel} onKeyDown={handleKeyDown} {...rest}>
-      <div className={styles.content}>
+    <div className={styles['carousel']} onKeyDown={handleKeyDown} {...rest}>
+      <div className={styles['content']}>
         <div
-          className={styles.imageWrapper}
+          className={styles['imageWrapper']}
           data-dragging={dragging}
           onPointerDown={handlePointerDown}
           style={cssProps({ aspectRatio: `${width} / ${height}` })}
         >
           <div
             aria-atomic
-            className={styles.canvasWrapper}
+            className={styles['canvasWrapper']}
             aria-live="polite"
             aria-label={currentImageAlt}
             role="img"
           >
-            <canvas aria-hidden className={styles.canvas} ref={canvas} />
+            <canvas aria-hidden className={styles['canvas']} ref={canvas} />
           </div>
           {showPlaceholder && placeholder && (
             <img
               aria-hidden
-              className={styles.placeholder}
+              className={styles['placeholder']}
               data-loaded={loaded && !!textures}
               src={placeholder}
               ref={placeholderRef}
@@ -505,7 +505,7 @@ export const Carousel = ({
           )}
         </div>
         <button
-          className={styles.button}
+          className={styles['button']}
           data-prev={true}
           aria-label="Previous slide"
           onClick={() => navigate({ direction: -1 })}
@@ -513,7 +513,7 @@ export const Carousel = ({
           <ArrowLeft />
         </button>
         <button
-          className={styles.button}
+          className={styles['button']}
           data-next={true}
           aria-label="Next slide"
           onClick={() => navigate({ direction: 1 })}
@@ -521,10 +521,10 @@ export const Carousel = ({
           <ArrowRight />
         </button>
       </div>
-      <div className={styles.nav}>
+      <div className={styles['nav']}>
         {images.map((image, index) => (
           <button
-            className={styles.navButton}
+            className={styles['navButton']}
             key={image.alt}
             onClick={() => onNavClick(index)}
             aria-label={`Jump to slide ${index + 1}`}

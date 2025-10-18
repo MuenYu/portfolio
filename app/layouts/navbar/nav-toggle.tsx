@@ -13,15 +13,20 @@ export const NavToggle = ({ menuOpen, ...rest }: NavToggleProps) => {
   return (
     <Button
       iconOnly
-      className={styles.toggle}
+      className={styles['toggle']}
       aria-label="Menu"
       aria-expanded={menuOpen}
       {...rest}
     >
-      <div className={styles.inner}>
-        <Icon className={styles.icon} data-menu={true} data-open={menuOpen} icon="menu" />
+      <div className={styles['inner']}>
         <Icon
-          className={styles.icon}
+          className={styles['icon']}
+          data-menu={true}
+          data-open={menuOpen}
+          icon="menu"
+        />
+        <Icon
+          className={styles['icon']}
           data-close={true}
           data-open={menuOpen}
           icon="close"

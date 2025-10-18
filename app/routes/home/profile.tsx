@@ -73,7 +73,7 @@ const ProfileText = ({ visible, titleId }: ProfileTextProps): JSX.Element => {
   const paragraphs = portfolioProfile.paragraphs.map((paragraph, index) => (
     <Text
       key={index}
-      className={styles.description}
+      className={styles['description']}
       data-visible={visible}
       size="l"
       as="p"
@@ -83,7 +83,7 @@ const ProfileText = ({ visible, titleId }: ProfileTextProps): JSX.Element => {
   ));
   return (
     <Fragment>
-      <Heading className={styles.title} data-visible={visible} level={3} id={titleId}>
+      <Heading className={styles['title']} data-visible={visible} level={3} id={titleId}>
         <DecoderText text={portfolioProfile.greeting} start={visible} delay={500} />
       </Heading>
       {paragraphs}
@@ -97,7 +97,7 @@ export const Profile = ({ id, visible, sectionRef }: ProfileProps): JSX.Element 
 
   return (
     <Section
-      className={styles.profile}
+      className={styles['profile']}
       onFocus={() => setFocused(true)}
       onBlur={() => setFocused(false)}
       as="section"
@@ -108,12 +108,12 @@ export const Profile = ({ id, visible, sectionRef }: ProfileProps): JSX.Element 
     >
       <Transition in={visible || focused} timeout={0}>
         {({ visible: isVisible, nodeRef }) => (
-          <div className={styles.content} ref={nodeRef}>
-            <div className={styles.column}>
+          <div className={styles['content']} ref={nodeRef}>
+            <div className={styles['column']}>
               <ProfileText visible={isVisible} titleId={titleId} />
               <Button
                 secondary
-                className={styles.button}
+                className={styles['button']}
                 data-visible={isVisible}
                 href="/contact"
                 icon="send"
@@ -121,19 +121,19 @@ export const Profile = ({ id, visible, sectionRef }: ProfileProps): JSX.Element 
                 Send me a message
               </Button>
             </div>
-            <div className={styles.column}>
-              <div className={styles.tag} aria-hidden>
+            <div className={styles['column']}>
+              <div className={styles['tag']} aria-hidden>
                 <Divider
                   notchWidth="64px"
                   notchHeight="8px"
                   collapsed={!isVisible}
                   collapseDelay={1000}
                 />
-                <div className={styles.tagText} data-visible={isVisible}>
+                <div className={styles['tagText']} data-visible={isVisible}>
                   About me
                 </div>
               </div>
-              <div className={styles.image}>
+              <div className={styles['image']}>
                 <Image
                   reveal
                   delay={100}

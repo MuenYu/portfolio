@@ -118,7 +118,7 @@ export const SegmentedControl = ({
   return (
     <SegmentedControlContext.Provider value={contextValue}>
       <div
-        className={styles.container}
+        className={styles['container']}
         role="radiogroup"
         tabIndex={0}
         aria-labelledby={labelId}
@@ -128,10 +128,10 @@ export const SegmentedControl = ({
         <VisuallyHidden as="label" id={labelId}>
           {label}
         </VisuallyHidden>
-        <div className={styles.options}>
+        <div className={styles['options']}>
           {indicator && (
             <div
-              className={styles.indicator}
+              className={styles['indicator']}
               data-last={currentIndex === optionRefs.current.length - 1}
               style={cssProps(indicator)}
             />
@@ -173,7 +173,7 @@ export const SegmentedControlOption = ({
 
   return (
     <button
-      className={styles.button}
+      className={styles['button']}
       tabIndex={isSelected ? 0 : -1}
       role="radio"
       aria-checked={isSelected}

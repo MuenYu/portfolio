@@ -22,7 +22,7 @@ export const Loader = forwardRef<HTMLDivElement, LoaderProps>(
 
     if (reduceMotion) {
       return (
-        <Text className={classes(styles.text, className)} weight="medium" {...rest}>
+        <Text className={classes(styles['text'], className)} weight="medium" {...rest}>
           {text}
         </Text>
       );
@@ -31,12 +31,12 @@ export const Loader = forwardRef<HTMLDivElement, LoaderProps>(
     return (
       <div
         ref={ref}
-        className={classes(styles.loader, className)}
+        className={classes(styles['loader'], className)}
         data-center={center}
         style={cssProps({ width, height }, style ?? {})}
         {...rest}
       >
-        <div className={styles.span} />
+        <div className={styles['span']} />
       </div>
     );
   }

@@ -9,16 +9,6 @@ import { cloudflareDevProxy as reactRouterCloudflareDevProxy } from '@react-rout
 import { defineConfig } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
-type DefineRoutes = (
-  register: (
-    route: (
-      path: string,
-      file: string,
-      options?: { caseSensitive?: boolean; id?: string; index?: boolean }
-    ) => void
-  ) => void
-) => void;
-
 export default defineConfig({
   assetsInclude: ['**/*.glb', '**/*.hdr', '**/*.glsl'],
   build: {
@@ -34,13 +24,7 @@ export default defineConfig({
       providerImportSource: '@mdx-js/react',
     }),
     reactRouterCloudflareDevProxy(),
-    reactRouter({
-      routes(defineRoutes: DefineRoutes) {
-        defineRoutes(route => {
-          route('/', 'routes/home/route.tsx', { index: true });
-        });
-      },
-    }),
+    reactRouter(),
     tsconfigPaths(),
   ],
 });

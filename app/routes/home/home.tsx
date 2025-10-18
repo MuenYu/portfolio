@@ -87,7 +87,7 @@ export const Home = () => {
   }, [visibleSections, projects, intro]);
 
   return (
-    <div className={styles.home}>
+    <div className={styles['home']}>
       <Intro
         id="intro"
         sectionRef={intro}

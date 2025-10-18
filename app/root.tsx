@@ -90,13 +90,18 @@ export default function App(): JSX.Element {
       <body data-theme={theme}>
         <ThemeProvider theme={theme} toggleTheme={toggleTheme}>
           <Progress />
-          <VisuallyHidden showOnFocus as="a" className={styles.skip} href="#main-content">
+          <VisuallyHidden
+            showOnFocus
+            as="a"
+            className={styles['skip']}
+            href="#main-content"
+          >
             Skip to main content
           </VisuallyHidden>
           <Navbar />
           <main
             id="main-content"
-            className={styles.container}
+            className={styles['container']}
             tabIndex={-1}
             data-loading={state === 'loading'}
           >

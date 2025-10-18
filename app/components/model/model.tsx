@@ -468,7 +468,7 @@ export const Model = ({
 
   return (
     <div
-      className={classes(styles.model, className)}
+      className={classes(styles['model'], className)}
       data-loaded={loaded}
       style={cssProps({ delay: numToMs(showDelay) }, style ?? {})}
       ref={container}
@@ -476,7 +476,7 @@ export const Model = ({
       aria-label={alt}
       {...rest}
     >
-      <canvas className={styles.canvas} ref={canvas} />
+      <canvas className={styles['canvas']} ref={canvas} />
       {models.map((model, index) => (
         <Device
           key={`${model.url}-${index}`}

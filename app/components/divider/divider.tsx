@@ -25,7 +25,7 @@ export const Divider = ({
   ...rest
 }: DividerProps): JSX.Element => (
   <div
-    className={classes(styles.divider, className)}
+    className={classes(styles['divider'], className)}
     style={cssProps(
       {
         lineWidth,
@@ -38,9 +38,9 @@ export const Divider = ({
     )}
     {...rest}
   >
-    <div className={styles.line} data-collapsed={collapsed} />
+    <div className={styles['line']} data-collapsed={collapsed} />
     <div
-      className={styles.notch}
+      className={styles['notch']}
       data-collapsed={collapsed}
       style={cssProps({ collapseDelay: numToMs(collapseDelay + 160) })}
     />

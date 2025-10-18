@@ -47,14 +47,14 @@ export const Post = ({ children, title, date, banner, timecode }: PostProps) => 
   const titleWords = title.split(' ');
 
   return (
-    <article className={styles.post}>
+    <article className={styles['post']}>
       <Section>
         {banner && (
-          <div className={styles.banner} ref={imageRef}>
-            <div className={styles.bannerImage}>
+          <div className={styles['banner']} ref={imageRef}>
+            <div className={styles['bannerImage']}>
               <Image role="presentation" src={banner} placeholder={placeholder} alt="" />
             </div>
-            <div className={styles.bannerImageBlur}>
+            <div className={styles['bannerImageBlur']}>
               <Image
                 role="presentation"
                 src={placeholder ?? banner}
@@ -64,23 +64,23 @@ export const Post = ({ children, title, date, banner, timecode }: PostProps) => 
             </div>
           </div>
         )}
-        <header className={styles.header}>
-          <div className={styles.headerText}>
+        <header className={styles['header']}>
+          <div className={styles['headerText']}>
             <Transition in timeout={msToNum(tokens.base.durationM)}>
               {({ visible, nodeRef }) => (
-                <div className={styles.date} ref={nodeRef}>
+                <div className={styles['date']} ref={nodeRef}>
                   <Divider notchWidth="64px" notchHeight="8px" collapsed={!visible} />
-                  <Text className={styles.dateText} data-visible={visible}>
+                  <Text className={styles['dateText']} data-visible={visible}>
                     {date}
                   </Text>
                 </div>
               )}
             </Transition>
-            <Heading level={2} as="h1" className={styles.title} aria-label={title}>
+            <Heading level={2} as="h1" className={styles['title']} aria-label={title}>
               {titleWords.map((word, index) => (
-                <span className={styles.titleWordWrapper} key={`${word}-${index}`}>
+                <span className={styles['titleWordWrapper']} key={`${word}-${index}`}>
                   <span
-                    className={styles.titleWord}
+                    className={styles['titleWord']}
                     style={cssProps({ delay: numToMs(index * 100 + 100) })}
                   >
                     {word}
@@ -89,10 +89,10 @@ export const Post = ({ children, title, date, banner, timecode }: PostProps) => 
                 </span>
               ))}
             </Heading>
-            <div className={styles.details}>
+            <div className={styles['details']}>
               <RouterLink
                 to="#postContent"
-                className={styles.arrow}
+                className={styles['arrow']}
                 aria-label="Scroll to post content"
                 onClick={handleScrollIndicatorClick}
               >
@@ -106,13 +106,13 @@ export const Post = ({ children, title, date, banner, timecode }: PostProps) => 
                   <path d="M1 1l20.5 12L42 1" strokeWidth="2" fill="none" />
                 </svg>
               </RouterLink>
-              <div className={styles.timecode}>{timecode}</div>
+              <div className={styles['timecode']}>{timecode}</div>
             </div>
           </div>
         </header>
       </Section>
-      <Section className={styles.wrapper} id="postContent" tabIndex={-1}>
-        <Text as="div" size="l" className={styles.content}>
+      <Section className={styles['wrapper']} id="postContent" tabIndex={-1}>
+        <Text as="div" size="l" className={styles['content']}>
           {children}
         </Text>
       </Section>

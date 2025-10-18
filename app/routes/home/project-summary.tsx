@@ -93,31 +93,31 @@ export function ProjectSummary({
 
   function renderDetails(visible: boolean) {
     return (
-      <div className={styles.details}>
-        <div aria-hidden className={styles.index}>
+      <div className={styles['details']}>
+        <div aria-hidden className={styles['index']}>
           <Divider
             notchWidth="64px"
             notchHeight="8px"
             collapsed={!visible}
             collapseDelay={1000}
           />
-          <span className={styles.indexNumber} data-visible={visible}>
+          <span className={styles['indexNumber']} data-visible={visible}>
             {indexText}
           </span>
         </div>
         <Heading
           level={3}
           as="h2"
-          className={styles.title}
+          className={styles['title']}
           data-visible={visible}
           id={titleId}
         >
           {title}
         </Heading>
-        <Text className={styles.description} data-visible={visible} as="p">
+        <Text className={styles['description']} data-visible={visible} as="p">
           {description}
         </Text>
-        <div className={styles.button} data-visible={visible}>
+        <div className={styles['button']} data-visible={visible}>
           {buttons.map(button => (
             <Button
               key={button.link}
@@ -135,13 +135,13 @@ export function ProjectSummary({
 
   function renderPreview(visible: boolean) {
     return (
-      <div className={styles.preview}>
+      <div className={styles['preview']}>
         {model.type === 'laptop' && (
           <>
             {/* {renderKatakana('laptop', visible)} */}
-            <div className={styles.model} data-device="laptop">
+            <div className={styles['model']} data-device="laptop">
               {!modelLoaded && (
-                <Loader center className={styles.loader} data-visible={visible} />
+                <Loader center className={styles['loader']} data-visible={visible} />
               )}
               {isHydrated && visible && (
                 <Suspense>
@@ -169,9 +169,9 @@ export function ProjectSummary({
         {model.type === 'phone' && (
           <>
             {/* {renderKatakana('phone', visible)} */}
-            <div className={styles.model} data-device="phone">
+            <div className={styles['model']} data-device="phone">
               {!modelLoaded && (
-                <Loader center className={styles.loader} data-visible={visible} />
+                <Loader center className={styles['loader']} data-visible={visible} />
               )}
               {isHydrated && visible && (
                 <Suspense>
@@ -211,7 +211,7 @@ export function ProjectSummary({
 
   return (
     <Section
-      className={styles.summary}
+      className={styles['summary']}
       data-alternate={alternate}
       data-first={index === 1}
       onFocus={() => setFocused(true)}
@@ -223,7 +223,7 @@ export function ProjectSummary({
       tabIndex={-1}
       {...rest}
     >
-      <div className={styles.content}>
+      <div className={styles['content']}>
         <Transition in={transitionVisible}>
           {({ visible }) => (
             <>
