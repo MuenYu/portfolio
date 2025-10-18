@@ -1,13 +1,21 @@
 import { DecoderText } from '~/components/decoder-text';
 import { Heading } from '~/components/heading';
 import { Section } from '~/components/section';
+import type { SectionProps } from '~/components/section/section';
 import { useTheme } from '~/components/theme-provider';
 import { tokens } from '~/components/theme-provider/theme';
 import { Transition } from '~/components/transition';
 import { VisuallyHidden } from '~/components/visually-hidden';
 import { Link as RouterLink } from 'react-router';
 import { useInterval, usePrevious, useScrollToHash } from '~/hooks';
-import { Suspense, lazy, useEffect, useState } from 'react';
+import {
+  Suspense,
+  lazy,
+  useEffect,
+  useState,
+  type MouseEvent as ReactMouseEvent,
+  type RefObject,
+} from 'react';
 import { cssProps } from '~/utils/style';
 import config from '~/config.json';
 import { useHydrated } from '~/hooks/useHydrated';
@@ -17,23 +25,33 @@ const DisplacementSphere = lazy(() =>
   import('./displacement-sphere').then(module => ({ default: module.DisplacementSphere }))
 );
 
-export function Intro({ id, sectionRef, scrollIndicatorHidden, ...rest }) {
+type IntroSectionProps = SectionProps<'section'>;
+
+interface IntroProps extends Omit<IntroSectionProps, 'id' | 'ref'> {
+  id: string;
+  sectionRef: RefObject<HTMLElement>;
+  scrollIndicatorHidden: boolean;
+}
+
+export function Intro({ id, sectionRef, scrollIndicatorHidden, ...rest }: IntroProps): JSX.Element {
   const { theme } = useTheme();
   const { disciplines } = config;
   const [disciplineIndex, setDisciplineIndex] = useState(0);
   const prevTheme = usePrevious(theme);
-  const introLabel = [disciplines.slice(0, -1).join(', '), disciplines.slice(-1)[0]].join(
-    ', and '
-  );
-  const currentDiscipline = disciplines.find((item, index) => index === disciplineIndex);
+  const [lastDiscipline = ''] = disciplines.slice(-1);
+  const previousDisciplines = disciplines.slice(0, -1).join(', ');
+  const introLabel =
+    disciplines.length > 1 && previousDisciplines
+      ? `${previousDisciplines}, and ${lastDiscipline}`
+      : lastDiscipline;
+  const currentDiscipline = disciplines[disciplineIndex] ?? disciplines[0];
   const titleId = `${id}-title`;
   const scrollToHash = useScrollToHash();
   const isHydrated = useHydrated();
 
   useInterval(
     () => {
-      const index = (disciplineIndex + 1) % disciplines.length;
-      setDisciplineIndex(index);
+      setDisciplineIndex(index => (index + 1) % disciplines.length);
     },
     5000,
     theme
@@ -45,7 +63,7 @@ export function Intro({ id, sectionRef, scrollIndicatorHidden, ...rest }) {
     }
   }, [theme, prevTheme]);
 
-  const handleScrollClick = event => {
+  const handleScrollClick = (event: ReactMouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
     scrollToHash(event.currentTarget.href);
   };
