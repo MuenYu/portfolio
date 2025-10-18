@@ -47,13 +47,10 @@ type SectionElement = HTMLElement;
 
 type SectionProps = ComponentPropsWithoutRef<typeof Section>;
 
-interface ProjectSummaryProps
-  extends Omit<SectionProps, 'children' | 'ref'> {
+interface ProjectSummaryProps extends Omit<SectionProps, 'children' | 'ref'> {
   id: string;
   visible: boolean;
-  sectionRef:
-    | MutableRefObject<SectionElement | null>
-    | RefObject<SectionElement>;
+  sectionRef: MutableRefObject<SectionElement | null> | RefObject<SectionElement>;
   index: number;
   title: string;
   description: ReactNode;
@@ -227,19 +224,19 @@ export function ProjectSummary({
       {...rest}
     >
       <div className={styles.content}>
-          <Transition in={transitionVisible}>
+        <Transition in={transitionVisible}>
           {({ visible }) => (
             <>
-                {!useAlternateLayout && (
-                  <>
-                    {renderDetails(visible)}
-                    {renderPreview(visible)}
-                  </>
-                )}
-                {useAlternateLayout && (
-                  <>
-                    {renderPreview(visible)}
-                    {renderDetails(visible)}
+              {!useAlternateLayout && (
+                <>
+                  {renderDetails(visible)}
+                  {renderPreview(visible)}
+                </>
+              )}
+              {useAlternateLayout && (
+                <>
+                  {renderPreview(visible)}
+                  {renderDetails(visible)}
                 </>
               )}
             </>

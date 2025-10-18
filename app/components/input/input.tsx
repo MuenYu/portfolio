@@ -15,7 +15,8 @@ import { classes, cssProps, msToNum } from '~/utils/style';
 import { TextArea } from './text-area';
 import styles from './input.module.css';
 
-interface BaseInputProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'onBlur'> {
+interface BaseInputProps
+  extends Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'onBlur'> {
   error?: string;
   label: string;
   multiline?: boolean;

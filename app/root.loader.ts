@@ -9,7 +9,10 @@ interface RootLoaderData {
   readonly theme: string;
 }
 
-export const loader = async ({ request, context }: LoaderFunctionArgs<PortfolioContext>) => {
+export const loader = async ({
+  request,
+  context,
+}: LoaderFunctionArgs<PortfolioContext>) => {
   const { url } = request;
   const { pathname } = new URL(url);
   const canonicalUrl = buildCanonicalUrl(pathname, config.url);

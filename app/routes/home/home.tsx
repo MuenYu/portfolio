@@ -39,10 +39,7 @@ export const Home = () => {
   const [visibleSections, setVisibleSections] = useState<Element[]>([]);
   const [scrollIndicatorHidden, setScrollIndicatorHidden] = useState(false);
   const intro = useRef<HTMLElement | null>(null);
-  const projects = useMemo(
-    () => config.projects.map(() => createRef<HTMLElement>()),
-    []
-  );
+  const projects = useMemo(() => config.projects.map(() => createRef<HTMLElement>()), []);
   const about = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -102,8 +99,7 @@ export const Home = () => {
           id={`project-${index + 1}`}
           sectionRef={projects[index]}
           visible={
-            !!projects[index].current &&
-            visibleSections.includes(projects[index].current)
+            !!projects[index].current && visibleSections.includes(projects[index].current)
           }
           index={index + 1}
           title={project.title}

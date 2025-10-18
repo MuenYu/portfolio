@@ -5,8 +5,7 @@ import { forwardRef } from 'react';
 import type { HTMLAttributes } from 'react';
 import styles from './loader.module.css';
 
-interface LoaderProps
-  extends Omit<HTMLAttributes<HTMLDivElement>, 'style' | 'children'> {
+interface LoaderProps extends Omit<HTMLAttributes<HTMLDivElement>, 'style' | 'children'> {
   readonly center?: boolean;
   readonly height?: number;
   readonly text?: string;
@@ -16,15 +15,7 @@ interface LoaderProps
 
 export const Loader = forwardRef<HTMLDivElement, LoaderProps>(
   (
-    {
-      className,
-      style,
-      width = 32,
-      height = 4,
-      text = 'Loading...',
-      center,
-      ...rest
-    },
+    { className, style, width = 32, height = 4, text = 'Loading...', center, ...rest },
     ref
   ) => {
     const reduceMotion = useReducedMotion();

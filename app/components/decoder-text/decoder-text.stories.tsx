@@ -16,7 +16,11 @@ const meta = {
   args: {
     text: 'Slick cyberpunk text',
   },
-} satisfies { title: string; component: typeof DecoderText; args: Partial<DecoderTextProps> };
+} satisfies {
+  title: string;
+  component: typeof DecoderText;
+  args: Partial<DecoderTextProps>;
+};
 
 export default meta;
 

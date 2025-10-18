@@ -2,12 +2,7 @@ import { useTheme } from '~/components/theme-provider';
 import { Transition } from '~/components/transition';
 import { useReducedMotion, useSpring } from 'framer-motion';
 import { useInViewport, useWindowSize } from '~/hooks';
-import {
-  startTransition,
-  useEffect,
-  useRef,
-  type ComponentPropsWithoutRef,
-} from 'react';
+import { startTransition, useEffect, useRef, type ComponentPropsWithoutRef } from 'react';
 import {
   AmbientLight,
   DirectionalLight,
@@ -80,12 +75,7 @@ export const DisplacementSphere = (
     rendererInstance.outputColorSpace = LinearSRGBColorSpace;
     renderer.current = rendererInstance;
 
-    const cameraInstance = new PerspectiveCamera(
-      54,
-      innerWidth / innerHeight,
-      0.1,
-      100
-    );
+    const cameraInstance = new PerspectiveCamera(54, innerWidth / innerHeight, 0.1, 100);
     cameraInstance.position.z = 52;
     camera.current = cameraInstance;
 
@@ -93,9 +83,7 @@ export const DisplacementSphere = (
     scene.current = sceneInstance;
 
     const materialInstance = new MeshPhongMaterial();
-    materialInstance.onBeforeCompile = (
-      shader: WebGLProgramParametersWithUniforms
-    ) => {
+    materialInstance.onBeforeCompile = (shader: WebGLProgramParametersWithUniforms) => {
       uniforms.current = UniformsUtils.merge([
         shader.uniforms,
         { time: { value: 0 } },

@@ -15,8 +15,8 @@ type DefineRoutes = (
       path: string,
       file: string,
       options?: { caseSensitive?: boolean; id?: string; index?: boolean }
-    ) => void,
-  ) => void,
+    ) => void
+  ) => void
 ) => void;
 
 export default defineConfig({

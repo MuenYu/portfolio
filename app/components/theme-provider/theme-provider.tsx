@@ -77,9 +77,7 @@ export function squish(styles: string): string {
 /**
  * Transform theme token objects into CSS custom property strings
  */
-export function createThemeProperties(
-  theme: Record<string, string | number>
-): string {
+export function createThemeProperties(theme: Record<string, string | number>): string {
   return squish(
     Object.keys(theme)
       .map(key => `--${key}: ${theme[key]};`)

@@ -33,7 +33,12 @@ interface IntroProps extends Omit<IntroSectionProps, 'id' | 'ref'> {
   scrollIndicatorHidden: boolean;
 }
 
-export function Intro({ id, sectionRef, scrollIndicatorHidden, ...rest }: IntroProps): JSX.Element {
+export function Intro({
+  id,
+  sectionRef,
+  scrollIndicatorHidden,
+  ...rest
+}: IntroProps): JSX.Element {
   const { theme } = useTheme();
   const { disciplines } = config;
   const [disciplineIndex, setDisciplineIndex] = useState(0);

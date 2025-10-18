@@ -1,9 +1,4 @@
-import {
-  type MouseEvent as ReactMouseEvent,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { type MouseEvent as ReactMouseEvent, useEffect, useRef, useState } from 'react';
 import { Link as RouterLink, useLocation } from 'react-router';
 import { Icon } from '~/components/icon';
 import { Monogram } from '~/components/monogram';

@@ -106,7 +106,13 @@ const createCarouselMaterial = (
   return Object.assign(shaderMaterial, { uniforms });
 };
 
-export const Carousel = ({ width, height, images, placeholder, ...rest }: CarouselProps) => {
+export const Carousel = ({
+  width,
+  height,
+  images,
+  placeholder,
+  ...rest
+}: CarouselProps) => {
   const [dragging, setDragging] = useState(false);
   const [imageIndex, setImageIndex] = useState(0);
   const [loaded, setLoaded] = useState(false);

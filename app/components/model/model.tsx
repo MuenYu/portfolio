@@ -175,11 +175,7 @@ export const Model = ({
       0.1,
       100
     );
-    cameraInstance.position.set(
-      cameraPosition.x,
-      cameraPosition.y,
-      cameraPosition.z
-    );
+    cameraInstance.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
 
     const sceneInstance = new Scene();
     const modelGroupInstance = new Group();
@@ -263,9 +259,10 @@ export const Model = ({
     shadowGroupInstance.add(shadowCameraInstance);
 
     const depthMaterialInstance = new MeshDepthMaterial();
-    const darknessUniforms = depthMaterialInstance.userData as typeof depthMaterialInstance.userData & {
-      darkness?: IUniform<number>;
-    };
+    const darknessUniforms =
+      depthMaterialInstance.userData as typeof depthMaterialInstance.userData & {
+        darkness?: IUniform<number>;
+      };
     darknessUniforms.darkness = { value: shadowDarkness };
     depthMaterialInstance.onBeforeCompile = shader => {
       if (darknessUniforms.darkness) {
@@ -282,9 +279,7 @@ export const Model = ({
     depthMaterialInstance.depthTest = false;
     depthMaterialInstance.depthWrite = false;
 
-    const horizontalBlurMaterialInstance = new ShaderMaterial(
-      HorizontalBlurShader
-    );
+    const horizontalBlurMaterialInstance = new ShaderMaterial(HorizontalBlurShader);
     horizontalBlurMaterialInstance.depthTest = false;
 
     const verticalBlurMaterialInstance = new ShaderMaterial(VerticalBlurShader);
@@ -661,11 +656,7 @@ const Device = ({
         }
       });
 
-      const targetPosition = new Vector3(
-        position.x,
-        position.y,
-        position.z
-      );
+      const targetPosition = new Vector3(position.x, position.y, position.z);
 
       if (reduceMotion) {
         gltf.scene.position.set(...targetPosition.toArray());
@@ -674,8 +665,7 @@ const Device = ({
       if (model.animation === ModelAnimationType.SpringUp) {
         playAnimation = () => {
           const frameNode = gltf.scene.children.find(
-            (child): child is Mesh =>
-              child.name === MeshType.Frame && isMeshObject(child)
+            (child): child is Mesh => child.name === MeshType.Frame && isMeshObject(child)
           );
 
           if (!frameNode) {
@@ -709,8 +699,7 @@ const Device = ({
       if (model.animation === ModelAnimationType.LaptopOpen) {
         playAnimation = () => {
           const frameNode = gltf.scene.children.find(
-            (child): child is Mesh =>
-              child.name === MeshType.Frame && isMeshObject(child)
+            (child): child is Mesh => child.name === MeshType.Frame && isMeshObject(child)
           );
 
           if (!frameNode) {
@@ -738,14 +727,13 @@ const Device = ({
         };
       }
 
-        const defaultLoadFullResTexture = () => Promise.resolve();
+      const defaultLoadFullResTexture = () => Promise.resolve();
 
-        return {
-          loadFullResTexture:
-            loadFullResTexture ?? defaultLoadFullResTexture,
-          playAnimation: playAnimation ?? (() => undefined),
-        };
+      return {
+        loadFullResTexture: loadFullResTexture ?? defaultLoadFullResTexture,
+        playAnimation: playAnimation ?? (() => undefined),
       };
+    };
 
     setLoadDevice({ start: load });
 

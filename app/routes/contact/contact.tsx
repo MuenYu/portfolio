@@ -174,7 +174,7 @@ export const Contact = () => {
                   ref={nodeRef}
                   data-status={errorStatus}
                   style={cssProps({
-                    height: errorStatus ? errorRef.current?.offsetHeight ?? 0 : 0,
+                    height: errorStatus ? (errorRef.current?.offsetHeight ?? 0) : 0,
                   })}
                 >
                   <div className={styles.formErrorContent} ref={errorRef}>

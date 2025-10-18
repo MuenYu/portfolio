@@ -1,12 +1,5 @@
 import { Cache, TextureLoader, Mesh } from 'three';
-import type {
-  Material,
-  Object3D,
-  Scene,
-  Texture,
-  WebGLRenderer,
-  Light,
-} from 'three';
+import type { Material, Object3D, Scene, Texture, WebGLRenderer, Light } from 'three';
 import { DRACOLoader, GLTFLoader } from 'three-stdlib';
 
 const isMeshObject = (object: Object3D): object is Mesh => object instanceof Mesh;
@@ -63,9 +56,7 @@ export const cleanScene = (scene?: Scene | null): void => {
 export const cleanMaterial = (material: Material): void => {
   material.dispose();
 
-  const entries = Object.entries(
-    material as Material & Record<string, unknown>
-  );
+  const entries = Object.entries(material as Material & Record<string, unknown>);
 
   for (const [, value] of entries) {
     if (!isDisposableMaterialProp(value)) continue;
@@ -73,9 +64,7 @@ export const cleanMaterial = (material: Material): void => {
     value.dispose();
 
     // Close GLTF bitmap textures
-    const source = value.source as
-      | { data?: { close?: () => void } }
-      | undefined;
+    const source = value.source as { data?: { close?: () => void } } | undefined;
     source?.data?.close?.();
   }
 };

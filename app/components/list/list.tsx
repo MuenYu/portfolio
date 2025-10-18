@@ -16,7 +16,12 @@ type OrderedListProps = {
 
 type ListProps = UnorderedListProps | OrderedListProps;
 
-export const List = ({ ordered, children, className, ...rest }: ListProps): JSX.Element => {
+export const List = ({
+  ordered,
+  children,
+  className,
+  ...rest
+}: ListProps): JSX.Element => {
   const Element = ordered ? 'ol' : 'ul';
 
   return (

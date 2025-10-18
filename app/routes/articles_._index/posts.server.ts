@@ -32,7 +32,9 @@ export async function getPosts(): Promise<ArticlePost[]> {
     Object.entries(modules).map(async ([file, post]) => {
       const slug = file.replace('../articles.', '').replace(/\.mdx$/, '');
 
-      const textModule = (await import(`../articles.${slug}.mdx?raw`)) as RawArticleModule;
+      const textModule = (await import(
+        `../articles.${slug}.mdx?raw`
+      )) as RawArticleModule;
       const readTime = readingTime(textModule.default);
       const timecode = formatTimecode(readTime);
 

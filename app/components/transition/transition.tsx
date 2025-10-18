@@ -125,24 +125,14 @@ const TransitionContent = ({
     // Force reflow
     void nodeRef.current?.offsetHeight;
 
-    const actualTimeout =
-      typeof timeout === 'object' ? timeout.enter : timeout;
+    const actualTimeout = typeof timeout === 'object' ? timeout.enter : timeout;
     const delay = typeof actualTimeout === 'number' ? actualTimeout : 0;
 
     enterTimeout.current = window.setTimeout(() => {
       setStatus('entered');
       onEntered?.();
     }, delay);
-  }, [
-    enterTimeout,
-    exitTimeout,
-    hasEntered,
-    onEnter,
-    onEntered,
-    show,
-    timeout,
-    nodeRef,
-  ]);
+  }, [enterTimeout, exitTimeout, hasEntered, onEnter, onEntered, show, timeout, nodeRef]);
 
   useEffect(() => {
     if (isPresent && show) return;
@@ -160,8 +150,7 @@ const TransitionContent = ({
     // Force reflow
     void nodeRef.current?.offsetHeight;
 
-    const actualTimeout =
-      typeof timeout === 'object' ? timeout.exit : timeout;
+    const actualTimeout = typeof timeout === 'object' ? timeout.exit : timeout;
     const delay = typeof actualTimeout === 'number' ? actualTimeout : 0;
 
     exitTimeout.current = window.setTimeout(() => {

@@ -71,58 +71,58 @@ const DecoderTextComponent = memo(function DecoderTextComponent({
   className,
   ...rest
 }: DecoderTextProps) {
-    const output = useRef<CharOutput[]>([{ type: CharType.Glyph, value: '' }]);
-    const container = useRef<HTMLSpanElement | null>(null);
-    const reduceMotion = useReducedMotion();
-    const decoderSpring: MotionValue<number> = useSpring(0, { stiffness: 8, damping: 5 });
+  const output = useRef<CharOutput[]>([{ type: CharType.Glyph, value: '' }]);
+  const container = useRef<HTMLSpanElement | null>(null);
+  const reduceMotion = useReducedMotion();
+  const decoderSpring: MotionValue<number> = useSpring(0, { stiffness: 8, damping: 5 });
 
-    useEffect(() => {
-      const containerInstance = container.current;
-      if (!containerInstance) return;
+  useEffect(() => {
+    const containerInstance = container.current;
+    if (!containerInstance) return;
 
-      const content = text.split('');
+    const content = text.split('');
 
-      const renderOutput = () => {
-        const characterMap = output.current.map(item => {
-          return `<span class="${styles[item.type]}">${item.value}</span>`;
-        });
-
-        containerInstance.innerHTML = characterMap.join('');
-      };
-
-      const unsubscribeSpring = decoderSpring.on('change', value => {
-        output.current = shuffle(content, output.current, value);
-        renderOutput();
+    const renderOutput = () => {
+      const characterMap = output.current.map(item => {
+        return `<span class="${styles[item.type]}">${item.value}</span>`;
       });
 
-      const startSpring = async () => {
-        await delay(startDelay);
-        decoderSpring.set(content.length);
-      };
+      containerInstance.innerHTML = characterMap.join('');
+    };
 
-      if (start && !reduceMotion) {
-        void startSpring();
-      }
+    const unsubscribeSpring = decoderSpring.on('change', value => {
+      output.current = shuffle(content, output.current, value);
+      renderOutput();
+    });
 
-      if (reduceMotion) {
-        output.current = content.map((value, index) => ({
-          type: CharType.Value,
-          value: content[index],
-        }));
-        renderOutput();
-      }
+    const startSpring = async () => {
+      await delay(startDelay);
+      decoderSpring.set(content.length);
+    };
 
-      return () => {
-        unsubscribeSpring();
-      };
-    }, [decoderSpring, reduceMotion, start, startDelay, text]);
+    if (start && !reduceMotion) {
+      void startSpring();
+    }
 
-    return (
-      <span className={classes(styles.text, className)} {...rest}>
-        <VisuallyHidden className={styles.label}>{text}</VisuallyHidden>
-        <span aria-hidden className={styles.content} ref={container} />
-      </span>
-    );
+    if (reduceMotion) {
+      output.current = content.map((value, index) => ({
+        type: CharType.Value,
+        value: content[index],
+      }));
+      renderOutput();
+    }
+
+    return () => {
+      unsubscribeSpring();
+    };
+  }, [decoderSpring, reduceMotion, start, startDelay, text]);
+
+  return (
+    <span className={classes(styles.text, className)} {...rest}>
+      <VisuallyHidden className={styles.label}>{text}</VisuallyHidden>
+      <span aria-hidden className={styles.content} ref={container} />
+    </span>
+  );
 });
 
 DecoderTextComponent.displayName = 'DecoderText';

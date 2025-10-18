@@ -80,7 +80,10 @@ export function ProjectHeader({
 
 type ProjectContainerProps = ComponentPropsWithoutRef<'article'>;
 
-export const ProjectContainer = ({ className, ...rest }: ProjectContainerProps): JSX.Element => (
+export const ProjectContainer = ({
+  className,
+  ...rest
+}: ProjectContainerProps): JSX.Element => (
   <article className={classes(styles.project, className)} {...rest} />
 );
 
@@ -137,7 +140,11 @@ type ProjectBackgroundProps = {
   opacity?: number;
 } & Omit<ImageComponentProps, 'className'>;
 
-export const ProjectBackground = ({ opacity = 0.7, className, ...rest }: ProjectBackgroundProps) => {
+export const ProjectBackground = ({
+  opacity = 0.7,
+  className,
+  ...rest
+}: ProjectBackgroundProps) => {
   const imageRef = useRef<HTMLDivElement | null>(null);
 
   useParallax(0.6, value => {
@@ -169,7 +176,11 @@ type ProjectImageProps = {
   alt: string;
 } & Omit<ImageComponentProps, 'className' | 'alt'>;
 
-export const ProjectImage = ({ className, alt, ...rest }: ProjectImageProps): JSX.Element => (
+export const ProjectImage = ({
+  className,
+  alt,
+  ...rest
+}: ProjectImageProps): JSX.Element => (
   <div className={classes(styles.image, className)}>
     <Image reveal alt={alt} delay={300} {...rest} />
   </div>
@@ -192,7 +203,10 @@ export const ProjectSectionContent = ({
   />
 );
 
-type ProjectSectionHeadingProps = Omit<ComponentPropsWithoutRef<typeof Heading>, 'className'> & {
+type ProjectSectionHeadingProps = Omit<
+  ComponentPropsWithoutRef<typeof Heading>,
+  'className'
+> & {
   className?: string;
 };
 
@@ -211,7 +225,10 @@ export const ProjectSectionHeading = ({
   />
 );
 
-type ProjectSectionTextProps = Omit<ComponentPropsWithoutRef<typeof Text>, 'className'> & {
+type ProjectSectionTextProps = Omit<
+  ComponentPropsWithoutRef<typeof Text>,
+  'className'
+> & {
   className?: string;
 };
 

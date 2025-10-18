@@ -15,22 +15,19 @@ export function useInViewport(
 
     if (!target) return undefined;
 
-    const observer = new IntersectionObserver(
-      (entries: IntersectionObserverEntry[]) => {
-        const [entry] = entries;
-        if (!entry) return;
+    const observer = new IntersectionObserver((entries: IntersectionObserverEntry[]) => {
+      const [entry] = entries;
+      if (!entry) return;
 
-        const { isIntersecting } = entry;
+      const { isIntersecting } = entry;
 
-        setIntersect(isIntersecting);
+      setIntersect(isIntersecting);
 
-        if (isIntersecting && unobserveOnIntersect) {
-          observer.unobserve(entry.target);
-          setIsUnobserved(true);
-        }
-      },
-      options
-    );
+      if (isIntersecting && unobserveOnIntersect) {
+        observer.unobserve(entry.target);
+        setIsUnobserved(true);
+      }
+    }, options);
 
     if (!isUnobserved && shouldObserve) {
       observer.observe(target);

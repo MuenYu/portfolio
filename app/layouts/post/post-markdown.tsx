@@ -117,7 +117,10 @@ const PostPre = (props: PreProps): JSX.Element => {
   );
 };
 
-type BlockquoteProps = DetailedHTMLProps<HTMLAttributes<HTMLQuoteElement>, HTMLQuoteElement>;
+type BlockquoteProps = DetailedHTMLProps<
+  HTMLAttributes<HTMLQuoteElement>,
+  HTMLQuoteElement
+>;
 
 const PostBlockquote = (props: BlockquoteProps): JSX.Element => {
   return <blockquote className={styles.blockquote} {...props} />;

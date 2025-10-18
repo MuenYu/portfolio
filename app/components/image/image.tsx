@@ -1,10 +1,6 @@
 import { useReducedMotion } from 'framer-motion';
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
-import type {
-  CSSProperties,
-  ComponentPropsWithoutRef,
-  MouseEvent,
-} from 'react';
+import type { CSSProperties, ComponentPropsWithoutRef, MouseEvent } from 'react';
 import { Button } from '~/components/button';
 import { Icon } from '~/components/icon';
 import { useTheme } from '~/components/theme-provider';
@@ -13,8 +9,7 @@ import { resolveSrcFromSrcSet } from '~/utils/image';
 import { classes, cssProps, numToMs } from '~/utils/style';
 import styles from './image.module.css';
 
-type MediaElementAttributes =
-  Partial<ComponentPropsWithoutRef<'img'>> &
+type MediaElementAttributes = Partial<ComponentPropsWithoutRef<'img'>> &
   Partial<ComponentPropsWithoutRef<'video'>>;
 
 interface ImageProps
@@ -81,14 +76,16 @@ export const Image = ({
   );
 };
 
-type ImageElementsProps =
-  Omit<ImageProps, 'className' | 'style' | 'raised' | 'src' | 'onLoad'> & {
-    onLoad: () => void;
-    loaded: boolean;
-    inViewport: boolean;
-    src: string;
-    delay: number;
-  };
+type ImageElementsProps = Omit<
+  ImageProps,
+  'className' | 'style' | 'raised' | 'src' | 'onLoad'
+> & {
+  onLoad: () => void;
+  loaded: boolean;
+  inViewport: boolean;
+  src: string;
+  delay: number;
+};
 
 const ImageElements = ({
   onLoad,

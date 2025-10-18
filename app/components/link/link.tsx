@@ -22,8 +22,7 @@ type AnchorProps = AnchorHTMLAttributes<HTMLAnchorElement>;
 
 type RouterLinkComponentProps = ComponentPropsWithoutRef<typeof RouterLink>;
 
-interface AppLinkProps
-  extends Omit<AnchorProps, 'href' | 'className' | 'children'> {
+interface AppLinkProps extends Omit<AnchorProps, 'href' | 'className' | 'children'> {
   children?: ReactNode;
   className?: string;
   href?: string;

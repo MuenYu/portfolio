@@ -147,14 +147,18 @@ interface SegmentedControlOptionProps extends ComponentPropsWithoutRef<'button'>
   children: ReactNode;
 }
 
-export const SegmentedControlOption = ({ children, ...props }: SegmentedControlOptionProps) => {
+export const SegmentedControlOption = ({
+  children,
+  ...props
+}: SegmentedControlOptionProps) => {
   const context = useContext(SegmentedControlContext);
 
   if (!context) {
     throw new Error('SegmentedControlOption must be used within a SegmentedControl');
   }
 
-  const { optionRefs, currentIndex, onChange, registerOption, unregisterOption } = context;
+  const { optionRefs, currentIndex, onChange, registerOption, unregisterOption } =
+    context;
   const optionRef = useRef<HTMLButtonElement | null>(null);
   const index = optionRefs.current.indexOf(optionRef);
   const isSelected = currentIndex === index;
