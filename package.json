@@ -21,7 +21,8 @@
     "lint:ox:fix": "oxlint --fix .",
     "lint:eslint": "eslint --max-warnings=0 .",
     "lint:eslint:fix": "eslint --max-warnings=0 --fix .",
-    "lint": "npm run lint:ox && npm run lint:eslint"
+    "lint": "npm run lint:ox && npm run lint:eslint",
+    "clean": "rm -rf node_modules && rm -rf build && rm -rf dist && rm -rf storybook-static && rm -rf .react-router"
   },
   "dependencies": {
     "@mdx-js/react": "^3.1.1",
