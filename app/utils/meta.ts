@@ -1,7 +1,7 @@
 import type { MetaDescriptor } from 'react-router';
 import config from '~/config.json';
 
-const { name, url, twitter } = config;
+const { name, url, twitter = '' } = config;
 const defaultOgImage = `${url}/preview.png`;
 
 type BaseMetaArgs = {

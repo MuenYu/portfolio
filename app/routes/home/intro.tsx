@@ -7,7 +7,8 @@ import { Transition } from '~/components/transition';
 import { VisuallyHidden } from '~/components/visually-hidden';
 import { Link as RouterLink } from 'react-router';
 import { useInterval, usePrevious, useScrollToHash } from '~/hooks';
-import { Suspense, lazy, useEffect, useState } from 'react';
+import type { ComponentPropsWithoutRef, MouseEvent, RefObject } from 'react';
+import { Suspense, lazy, useEffect, useMemo, useState } from 'react';
 import { cssProps } from '~/utils/style';
 import config from '~/config.json';
 import { useHydrated } from '~/hooks/useHydrated';
@@ -17,15 +18,28 @@ const DisplacementSphere = lazy(() =>
   import('./displacement-sphere').then(module => ({ default: module.DisplacementSphere }))
 );
 
-export function Intro({ id, sectionRef, scrollIndicatorHidden, ...rest }) {
+type IntroProps = {
+  id: string;
+  sectionRef: RefObject<HTMLElement>;
+  scrollIndicatorHidden: boolean;
+} & ComponentPropsWithoutRef<typeof Section>;
+
+export function Intro({ id, sectionRef, scrollIndicatorHidden, ...rest }: IntroProps) {
   const { theme } = useTheme();
   const { disciplines } = config;
-  const [disciplineIndex, setDisciplineIndex] = useState(0);
+  const [disciplineIndex, setDisciplineIndex] = useState<number>(0);
   const prevTheme = usePrevious(theme);
-  const introLabel = [disciplines.slice(0, -1).join(', '), disciplines.slice(-1)[0]].join(
-    ', and '
-  );
-  const currentDiscipline = disciplines.find((item, index) => index === disciplineIndex);
+  const introLabel = useMemo(() => {
+    if (disciplines.length <= 1) {
+      return disciplines[0] ?? '';
+    }
+
+    const leading = disciplines.slice(0, -1).join(', ');
+    const trailing = disciplines[disciplines.length - 1];
+
+    return [leading, trailing].filter(Boolean).join(', and ');
+  }, [disciplines]);
+  const currentDiscipline = disciplines[disciplineIndex] ?? disciplines[0] ?? '';
   const titleId = `${id}-title`;
   const scrollToHash = useScrollToHash();
   const isHydrated = useHydrated();
@@ -45,7 +59,7 @@ export function Intro({ id, sectionRef, scrollIndicatorHidden, ...rest }) {
     }
   }, [theme, prevTheme]);
 
-  const handleScrollClick = event => {
+  const handleScrollClick = (event: MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
     scrollToHash(event.currentTarget.href);
   };

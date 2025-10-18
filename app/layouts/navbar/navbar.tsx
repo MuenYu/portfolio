@@ -1,3 +1,4 @@
+import type { MouseEvent } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { Link as RouterLink, useLocation } from 'react-router';
 import { Icon } from '~/components/icon';
@@ -13,14 +14,20 @@ import { navLinks, socialLinks } from './nav-data';
 import config from '~/config.json';
 import styles from './navbar.module.css';
 
+type Measurement = {
+  element: HTMLElement;
+  top: number;
+  bottom: number;
+};
+
 export const Navbar = () => {
-  const [current, setCurrent] = useState();
+  const [current, setCurrent] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [target, setTarget] = useState();
+  const [target, setTarget] = useState<string | null>(null);
   const { theme } = useTheme();
   const location = useLocation();
   const windowSize = useWindowSize();
-  const headerRef = useRef();
+  const headerRef = useRef<HTMLElement | null>(null);
   const isMobile = windowSize.width <= media.mobile || windowSize.height <= 696;
   const scrollToHash = useScrollToHash();
 
@@ -38,14 +45,14 @@ export const Navbar = () => {
 
   // Handle swapping the theme when intersecting with inverse themed elements
   useEffect(() => {
-    const navItems = document.querySelectorAll('[data-navbar-item]');
+    const navItems = document.querySelectorAll<HTMLElement>('[data-navbar-item]');
     const inverseTheme = theme === 'dark' ? 'light' : 'dark';
     const { innerHeight } = window;
 
-    let inverseMeasurements = [];
-    let navItemMeasurements = [];
+    let inverseMeasurements: Measurement[] = [];
+    let navItemMeasurements: Measurement[] = [];
 
-    const isOverlap = (rect1, rect2, scrollY) => {
+    const isOverlap = (rect1: Measurement, rect2: Measurement, scrollY: number) => {
       return !(rect1.bottom - scrollY < rect2.top || rect1.top - scrollY > rect2.bottom);
     };
 
@@ -56,7 +63,7 @@ export const Navbar = () => {
     };
 
     const handleInversion = () => {
-      const invertedElements = document.querySelectorAll(
+      const invertedElements = document.querySelectorAll<HTMLElement>(
         `[data-theme='${inverseTheme}'][data-invert]`
       );
 
@@ -124,7 +131,7 @@ export const Navbar = () => {
   };
 
   // Store the current hash to scroll to
-  const handleNavItemClick = event => {
+  const handleNavItemClick = (event: MouseEvent<HTMLAnchorElement>) => {
     const hash = event.currentTarget.href.split('#')[1];
     setTarget(null);
 
@@ -134,7 +141,7 @@ export const Navbar = () => {
     }
   };
 
-  const handleMobileNavClick = event => {
+  const handleMobileNavClick = (event: MouseEvent<HTMLAnchorElement>) => {
     handleNavItemClick(event);
     if (menuOpen) setMenuOpen(false);
   };

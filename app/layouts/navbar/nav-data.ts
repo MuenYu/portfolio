@@ -1,6 +1,17 @@
 import config from '~/config.json';
 
-export const navLinks = [
+type NavLink = {
+  label: string;
+  pathname: string;
+};
+
+type SocialLink = {
+  label: string;
+  url: string;
+  icon: string;
+};
+
+export const navLinks: NavLink[] = [
   {
     label: 'Projects',
     pathname: '/#project-1',
@@ -19,54 +30,74 @@ export const navLinks = [
   },
 ];
 
-export const socialLinks = [
-  {
-    label: 'Blog',
-    url: `${config.social.blog}`,
-    icon: 'home',
-  },
-  {
-    label: 'Github',
-    url: `https://github.com/${config.social.github}`,
-    icon: 'github',
-  },
-  {
-    label: 'Telegram',
-    url: `https://t.me/${config.social.telegram}`,
-    icon: 'telegram',
-  },
-  {
-    label: 'LinkedIn',
-    url: `https://www.linkedin.com/in/${config.social.linkedin}/`,
-    icon: 'linkedin',
-  },
-  {
-    label: 'X',
-    url: `https://x.com/${config.social.x}`,
-    icon: 'x',
-  },
-  {
-    label: 'LeetCode',
-    url: `https://leetcode.com/u/${config.social.leetcode}`,
-    icon: 'leetcode',
-  },
-  {
-    label: 'YouTube',
-    url: `https://www.youtube.com/${config.social.youtube}`,
-    icon: 'youtube',
-  },
-  {
-    label: 'Bluesky',
-    url: `https://bsky.app/profile/${config.social.bluesky}`,
-    icon: 'bluesky',
-  },
-  {
-    label: 'Figma',
-    url: `https://www.figma.com/${config.social.figma}`,
-    icon: 'figma',
-  },
-].filter(x => {
-  const flag = config.social[x.label.toLowerCase()];
-  // Filter out social links that are not in config.json
-  return flag !== undefined && flag.length > 0;
-});
+const social = config.social;
+
+const socialLinksData: Array<SocialLink | null> = [
+  social.blog
+    ? {
+        label: 'Blog',
+        url: social.blog,
+        icon: 'home',
+      }
+    : null,
+  social.github
+    ? {
+        label: 'Github',
+        url: `https://github.com/${social.github}`,
+        icon: 'github',
+      }
+    : null,
+  social.telegram
+    ? {
+        label: 'Telegram',
+        url: `https://t.me/${social.telegram}`,
+        icon: 'telegram',
+      }
+    : null,
+  social.linkedin
+    ? {
+        label: 'LinkedIn',
+        url: `https://www.linkedin.com/in/${social.linkedin}/`,
+        icon: 'linkedin',
+      }
+    : null,
+  social.x
+    ? {
+        label: 'X',
+        url: `https://x.com/${social.x}`,
+        icon: 'x',
+      }
+    : null,
+  social.leetcode
+    ? {
+        label: 'LeetCode',
+        url: `https://leetcode.com/u/${social.leetcode}`,
+        icon: 'leetcode',
+      }
+    : null,
+  social.youtube
+    ? {
+        label: 'YouTube',
+        url: `https://www.youtube.com/${social.youtube}`,
+        icon: 'youtube',
+      }
+    : null,
+  social.bluesky
+    ? {
+        label: 'Bluesky',
+        url: `https://bsky.app/profile/${social.bluesky}`,
+        icon: 'bluesky',
+      }
+    : null,
+  social.figma
+    ? {
+        label: 'Figma',
+        url: `https://www.figma.com/${social.figma}`,
+        icon: 'figma',
+      }
+    : null,
+];
+
+export const socialLinks = socialLinksData.filter(
+  (link): link is SocialLink => link !== null
+);

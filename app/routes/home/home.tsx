@@ -2,8 +2,9 @@ import { Footer } from '~/components/footer';
 import { baseMeta } from '~/utils/meta';
 import { Intro } from './intro';
 import { Profile } from './profile';
-import { ProjectSummary } from './project-summary';
-import { useEffect, useRef, useState } from 'react';
+import { ProjectSummary, type ProjectSummaryModel } from './project-summary';
+import { createRef, useEffect, useMemo, useRef, useState } from 'react';
+import type { ProjectModel } from '~/types/config';
 import config from '~/config.json';
 import styles from './home.module.css';
 
@@ -34,48 +35,104 @@ export const meta = () => {
   });
 };
 
+const buildProjectModel = (project: (typeof config.projects)[number]): ProjectSummaryModel => {
+  if (project.models.length === 1) {
+    const [singleModel] = project.models;
+    const textures: [ProjectModel] = [
+      {
+        srcSet: `${singleModel.srcSet} 800w, ${singleModel.srcSet} 1920w`,
+        placeholder: singleModel.placeholder,
+      },
+    ];
+
+    return {
+      type: 'laptop',
+      alt: `${project.title} UI`,
+      textures,
+    };
+  }
+
+  const [firstModel, secondModel] = project.models;
+
+  const textures: [ProjectModel, ProjectModel] = [
+    {
+      srcSet: `${firstModel.srcSet} 375w, ${firstModel.srcSet} 750w`,
+      placeholder: firstModel.placeholder,
+    },
+    {
+      srcSet: `${secondModel.srcSet} 375w, ${secondModel.srcSet} 750w`,
+      placeholder: secondModel.placeholder,
+    },
+  ];
+
+  return {
+    type: 'phone',
+    alt: `${project.title} UI`,
+    textures,
+  };
+};
+
 export const Home = () => {
-  const [visibleSections, setVisibleSections] = useState([]);
+  const [visibleSections, setVisibleSections] = useState<HTMLElement[]>([]);
   const [scrollIndicatorHidden, setScrollIndicatorHidden] = useState(false);
-  const intro = useRef();
-  const projects = new Array(config.projects.length).fill().map(() => useRef());
-  const about = useRef();
+  const intro = useRef<HTMLElement | null>(null);
+  const projects = useMemo(
+    () =>
+      Array.from({ length: config.projects.length }, () =>
+        createRef<HTMLElement>()
+      ),
+    []
+  );
+  const about = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    const sections = [intro, ...projects, about];
-
+    const sectionRefs = [intro, ...projects, about];
     const sectionObserver = new IntersectionObserver(
       (entries, observer) => {
         entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            const section = entry.target;
-            observer.unobserve(section);
-            if (visibleSections.includes(section)) return;
-            setVisibleSections(prevSections => [...prevSections, section]);
+          if (entry.isIntersecting && entry.target instanceof HTMLElement) {
+            observer.unobserve(entry.target);
+            setVisibleSections(prevSections => {
+              if (prevSections.includes(entry.target)) {
+                return prevSections;
+              }
+
+              return [...prevSections, entry.target];
+            });
           }
         });
       },
       { rootMargin: '0px 0px -10% 0px', threshold: 0.1 }
     );
 
-    const indicatorObserver = new IntersectionObserver(
-      ([entry]) => {
-        setScrollIndicatorHidden(!entry.isIntersecting);
-      },
-      { rootMargin: '-100% 0px 0px 0px' }
-    );
-
-    sections.forEach(section => {
-      sectionObserver.observe(section.current);
+    sectionRefs.forEach(section => {
+      const element = section.current;
+      if (element) {
+        sectionObserver.observe(element);
+      }
     });
 
-    indicatorObserver.observe(intro.current);
+    let indicatorObserver: IntersectionObserver | null = null;
+
+    if (intro.current) {
+      indicatorObserver = new IntersectionObserver(
+        ([entry]) => {
+          setScrollIndicatorHidden(!entry.isIntersecting);
+        },
+        { rootMargin: '-100% 0px 0px 0px' }
+      );
+
+      indicatorObserver.observe(intro.current);
+    }
 
     return () => {
       sectionObserver.disconnect();
-      indicatorObserver.disconnect();
+      indicatorObserver?.disconnect();
     };
-  }, [visibleSections]);
+  }, [projects]);
+
+  const aboutElement = about.current;
+  const isAboutVisible = aboutElement ? visibleSections.includes(aboutElement) : false;
 
   return (
     <div className={styles.home}>
@@ -84,45 +141,29 @@ export const Home = () => {
         sectionRef={intro}
         scrollIndicatorHidden={scrollIndicatorHidden}
       />
-      {config.projects.map((project, index) => (
-        <ProjectSummary
-          key={index}
-          id={`project-${index + 1}`}
-          sectionRef={projects[index]}
-          visible={visibleSections.includes(projects[index].current)}
-          index={index + 1}
-          title={project.title}
-          description={project.description}
-          buttons={project.buttons}
-          model={{
-            type: project.models.length === 1 ? 'laptop' : 'phone',
-            alt: `${project.title} UI`,
-            textures:
-              project.models.length === 1
-                ? [
-                    {
-                      srcSet: `${project.models[0].srcSet} 800w, ${project.models[0].srcSet} 1920w`,
-                      placeholder: project.models[0].placeholder,
-                    },
-                  ]
-                : [
-                    {
-                      srcSet: `${project.models[0].srcSet} 375w, ${project.models[0].srcSet} 750w`,
-                      placeholder: project.models[0].placeholder,
-                    },
-                    {
-                      srcSet: `${project.models[1].srcSet} 375w, ${project.models[1].srcSet} 750w`,
-                      placeholder: project.models[1].placeholder,
-                    },
-                  ],
-          }}
-        />
-      ))}
-      <Profile
-        sectionRef={about}
-        visible={visibleSections.includes(about.current)}
-        id="about"
-      />
+      {config.projects.map((project, index) => {
+        const projectRef = projects[index];
+        const projectElement = projectRef.current;
+        const isProjectVisible = projectElement
+          ? visibleSections.includes(projectElement)
+          : false;
+        const summaryModel = buildProjectModel(project);
+
+        return (
+          <ProjectSummary
+            key={project.title}
+            id={`project-${index + 1}`}
+            sectionRef={projectRef}
+            visible={isProjectVisible}
+            index={index + 1}
+            title={project.title}
+            description={project.description}
+            buttons={project.buttons}
+            model={summaryModel}
+          />
+        );
+      })}
+      <Profile sectionRef={about} visible={isAboutVisible} id="about" />
       <Footer />
     </div>
   );

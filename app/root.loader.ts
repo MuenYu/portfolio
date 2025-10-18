@@ -1,8 +1,19 @@
+import type { LoaderFunctionArgs } from 'react-router';
 import { createCookieSessionStorage } from 'react-router';
 import config from '~/config.json';
 import { buildCanonicalUrl } from '~/utils/url';
 
-export const loader = async ({ request, context }) => {
+type CloudflareContext = {
+  cloudflare: {
+    env: {
+      SESSION_SECRET?: string;
+    };
+  };
+};
+
+type LoaderArgs = LoaderFunctionArgs & { context: CloudflareContext };
+
+export const loader = async ({ request, context }: LoaderArgs) => {
   const { url } = request;
   const { pathname } = new URL(url);
   const canonicalUrl = buildCanonicalUrl(pathname, config.url);
@@ -14,7 +25,7 @@ export const loader = async ({ request, context }) => {
       maxAge: 604_800,
       path: '/',
       sameSite: 'lax',
-      secrets: [context.cloudflare.env.SESSION_SECRET || ' '],
+      secrets: [context.cloudflare.env.SESSION_SECRET ?? ' '],
       secure: true,
     },
   });
