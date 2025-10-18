@@ -11,7 +11,7 @@ type HeadingProps = Omit<HTMLAttributes<HTMLElement>, 'children' | 'className'> 
   as?: keyof JSX.IntrinsicElements;
   align?: HeadingAlign;
   weight?: HeadingWeight;
-  className?: string | null | false;
+  className?: string | null | false | undefined;
 };
 
 export const Heading = ({

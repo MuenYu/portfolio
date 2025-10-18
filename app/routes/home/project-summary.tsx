@@ -25,7 +25,7 @@ interface ProjectSummaryButton {
 
 interface ModelTexture {
   srcSet: string;
-  placeholder?: string;
+  placeholder: string;
   sizes?: string;
 }
 

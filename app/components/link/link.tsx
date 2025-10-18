@@ -24,7 +24,7 @@ type RouterLinkComponentProps = ComponentPropsWithoutRef<typeof RouterLink>;
 
 interface AppLinkProps extends Omit<AnchorProps, 'href' | 'className' | 'children'> {
   children?: ReactNode;
-  className?: string;
+  className?: string | undefined;
   href?: string;
   secondary?: boolean;
 }
@@ -54,7 +54,7 @@ export const Link = forwardRef<HTMLAnchorElement, AppLinkProps>(
     const routerLinkProps: RouterLinkComponentProps = {
       ...(sharedProps as unknown as RouterLinkComponentProps),
       to: href ?? '#',
-      unstable_viewtransition: 'true',
+      unstable_viewTransition: true,
       prefetch: 'intent',
     };
 

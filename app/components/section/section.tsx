@@ -5,7 +5,7 @@ import type { PolymorphicProps, PolymorphicRef } from '~/types/polymorphic';
 import styles from './section.module.css';
 
 interface SectionOwnProps {
-  className?: string;
+  className?: string | undefined;
   children?: ReactNode;
 }
 

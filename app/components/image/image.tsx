@@ -14,7 +14,7 @@ type MediaElementAttributes = Partial<ComponentPropsWithoutRef<'img'>> &
 
 interface ImageProps
   extends Omit<MediaElementAttributes, 'className' | 'style' | 'src' | 'srcSet'> {
-  className?: string;
+  className?: string | undefined;
   style?: CSSProperties;
   reveal?: boolean;
   delay?: number;

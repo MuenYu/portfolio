@@ -25,7 +25,7 @@ interface ThemeContextValue {
 type ThemeProviderProps<E extends ElementType> = {
   theme?: ThemeName;
   children?: ReactNode;
-  className?: string;
+  className?: string | undefined;
   as?: E;
   toggleTheme?: (nextTheme?: string) => void;
 } & Omit<ComponentPropsWithoutRef<E>, 'as' | 'children' | 'className'>;

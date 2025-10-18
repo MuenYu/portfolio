@@ -119,7 +119,7 @@ export const Contact = () => {
       <Transition unmount in={!actionData?.success} timeout={1600}>
         {({ status, nodeRef }) => (
           <Form
-            unstable_viewtransition="true"
+            unstable_viewTransition
             className={styles['form']}
             method="post"
             ref={nodeRef as MutableRefObject<HTMLFormElement | null>}

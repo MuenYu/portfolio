@@ -19,7 +19,7 @@ import styles from './project.module.css';
 const initDelay = 300;
 
 interface ProjectHeaderProps {
-  className?: string;
+  className?: string | undefined;
   description: ReactNode;
   linkLabel?: string;
   roles?: string[];
@@ -136,7 +136,7 @@ ProjectSection.displayName = 'ProjectSection';
 type ImageComponentProps = ComponentPropsWithoutRef<typeof Image>;
 
 type ProjectBackgroundProps = {
-  className?: string;
+  className?: string | undefined;
   opacity?: number;
 } & Omit<ImageComponentProps, 'className'>;
 
@@ -172,7 +172,7 @@ export const ProjectBackground = ({
 };
 
 type ProjectImageProps = {
-  className?: string;
+  className?: string | undefined;
   alt: string;
 } & Omit<ImageComponentProps, 'className' | 'alt'>;
 
@@ -187,7 +187,7 @@ export const ProjectImage = ({
 );
 
 type ProjectSectionContentProps = {
-  className?: string;
+  className?: string | undefined;
   width?: string;
 } & HTMLAttributes<HTMLDivElement>;
 
@@ -207,7 +207,7 @@ type ProjectSectionHeadingProps = Omit<
   ComponentPropsWithoutRef<typeof Heading>,
   'className'
 > & {
-  className?: string;
+  className?: string | undefined;
 };
 
 export const ProjectSectionHeading = ({
@@ -229,7 +229,7 @@ type ProjectSectionTextProps = Omit<
   ComponentPropsWithoutRef<typeof Text>,
   'className'
 > & {
-  className?: string;
+  className?: string | undefined;
 };
 
 export const ProjectSectionText = ({
@@ -242,7 +242,7 @@ export const ProjectSectionText = ({
 type ProjectTextRowProps = {
   center?: boolean;
   centerMobile?: boolean;
-  className?: string;
+  className?: string | undefined;
   justify?: string;
   noMargin?: boolean;
   stretch?: boolean;

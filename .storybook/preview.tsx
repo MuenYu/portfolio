@@ -6,10 +6,10 @@ import '../app/global.css';
 import './preview.css';
 
 const ThemeDecorator: Decorator = (Story, context) => {
-  const theme = context.globals.theme as string;
+  const theme = context.globals.theme as 'light' | 'dark';
 
   useEffect(() => {
-    document.body.dataset.theme = theme;
+    document.body.dataset['theme'] = theme;
   }, [theme]);
 
   return (

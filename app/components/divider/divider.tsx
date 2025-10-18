@@ -9,7 +9,7 @@ type DividerProps = Omit<HTMLAttributes<HTMLDivElement>, 'className' | 'style'> 
   notchHeight?: string | number;
   collapseDelay?: number;
   collapsed?: boolean;
-  className?: string | null | false;
+  className?: string | null | false | undefined;
   style?: CSSProperties;
 };
 
