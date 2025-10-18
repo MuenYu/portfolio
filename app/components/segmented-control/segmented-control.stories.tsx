@@ -1,6 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
-import { SegmentedControl, SegmentedControlOption } from '~/components/segmented-control';
+import {
+  SegmentedControl,
+  SegmentedControlOption,
+} from '~/components/segmented-control';
 import { StoryContainer } from '../../../.storybook/story-container';
 
 const meta = {
@@ -16,8 +19,11 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
+type RenderArgs = Story['args'] & { options?: string[] };
+
 export const Default: Story = {
-  render: ({ options, ...args }) => {
+  render: ({ options, ...args }: RenderArgs) => {
+    const optionList = options ?? [];
     const [currentIndex, setCurrentIndex] = useState(0);
 
     return (
@@ -27,7 +33,7 @@ export const Default: Story = {
           onChange={setCurrentIndex}
           {...args}
         >
-          {options.map((option, index) => (
+          {optionList.map((option, index) => (
             <SegmentedControlOption key={`${option}-${index}`}>
               {option}
             </SegmentedControlOption>
