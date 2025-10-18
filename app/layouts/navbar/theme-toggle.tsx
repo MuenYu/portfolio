@@ -1,12 +1,38 @@
-import { useId } from 'react';
+import { useId, type MouseEvent } from 'react';
+import type { ButtonProps } from '~/components/button';
 import { Button } from '~/components/button';
 import { useTheme } from '~/components/theme-provider';
 import styles from './theme-toggle.module.css';
 
-export const ThemeToggle = ({ isMobile, ...rest }) => {
+type ThemeToggleClickEvent = MouseEvent<HTMLButtonElement | HTMLAnchorElement>;
+
+type ThemeToggleProps = Omit<ButtonProps, 'children' | 'onClick'> & {
+  isMobile?: boolean;
+  onClick?: (event: ThemeToggleClickEvent) => void;
+};
+
+export const ThemeToggle = ({
+  isMobile = false,
+  onClick,
+  ...rest
+}: ThemeToggleProps): JSX.Element => {
   const id = useId();
-  const { toggleTheme } = useTheme();
+  type ToggleThemeHandler = (nextTheme?: string) => void;
+  const theme = useTheme();
+  const toToggleTheme = (toggle?: ToggleThemeHandler) => {
+    if (typeof toggle === 'function') {
+      toggle();
+    }
+  };
   const maskId = `${id}theme-toggle-mask`;
+
+  const handleClick = (event: ThemeToggleClickEvent) => {
+    toToggleTheme(theme.toggleTheme as ToggleThemeHandler | undefined);
+
+    if (typeof onClick === 'function') {
+      onClick(event);
+    }
+  };
 
   return (
     <Button
@@ -14,7 +40,7 @@ export const ThemeToggle = ({ isMobile, ...rest }) => {
       className={styles.toggle}
       data-mobile={isMobile}
       aria-label="Toggle theme"
-      onClick={() => toggleTheme()}
+      onClick={handleClick}
       {...rest}
     >
       <svg aria-hidden className={styles.svg} width="38" height="38" viewBox="0 0 38 38">

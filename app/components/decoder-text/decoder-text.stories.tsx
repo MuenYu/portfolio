@@ -1,7 +1,14 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { ComponentProps } from 'react';
 import { DecoderText } from '~/components/decoder-text';
 import { Heading } from '~/components/heading';
 import { StoryContainer } from '../../../.storybook/story-container';
+
+type DecoderTextProps = ComponentProps<typeof DecoderText>;
+
+interface DecoderTextStory {
+  render: (args: DecoderTextProps) => JSX.Element;
+  args?: Partial<DecoderTextProps>;
+}
 
 const meta = {
   title: 'DecoderText',
@@ -9,13 +16,11 @@ const meta = {
   args: {
     text: 'Slick cyberpunk text',
   },
-} satisfies Meta<typeof DecoderText>;
+} satisfies { title: string; component: typeof DecoderText; args: Partial<DecoderTextProps> };
 
 export default meta;
 
-type Story = StoryObj<typeof meta>;
-
-export const Text: Story = {
+export const Text: DecoderTextStory = {
   render: args => (
     <StoryContainer>
       <Heading level={3}>

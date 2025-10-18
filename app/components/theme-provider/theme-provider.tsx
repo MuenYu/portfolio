@@ -19,7 +19,7 @@ type ThemeName = keyof typeof themes;
 
 interface ThemeContextValue {
   theme?: ThemeName;
-  toggleTheme?: () => void;
+  toggleTheme?: (nextTheme?: string) => void;
 }
 
 type ThemeProviderProps<E extends ElementType> = {
@@ -27,7 +27,7 @@ type ThemeProviderProps<E extends ElementType> = {
   children?: ReactNode;
   className?: string;
   as?: E;
-  toggleTheme?: () => void;
+  toggleTheme?: (nextTheme?: string) => void;
 } & Omit<ComponentPropsWithoutRef<E>, 'as' | 'children' | 'className'>;
 
 export const ThemeContext = createContext<ThemeContextValue>({});
