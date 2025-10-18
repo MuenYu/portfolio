@@ -4,15 +4,63 @@ import { Heading } from '~/components/heading';
 import { deviceModels } from '~/components/model/device-models';
 import { Section } from '~/components/section';
 import { Text } from '~/components/text';
-import { useTheme } from '~/components/theme-provider';
 import { Transition } from '~/components/transition';
 import { Loader } from '~/components/loader';
 import { useWindowSize } from '~/hooks';
+import type {
+  ComponentPropsWithoutRef,
+  MutableRefObject,
+  ReactNode,
+  RefObject,
+} from 'react';
 import { Suspense, lazy, useState } from 'react';
-import { cssProps, media } from '~/utils/style';
+import { media } from '~/utils/style';
 import { useHydrated } from '~/hooks/useHydrated';
-import katakana from './katakana.svg';
 import styles from './project-summary.module.css';
+
+interface ProjectSummaryButton {
+  text: string;
+  link: string;
+}
+
+interface ModelTexture {
+  srcSet: string;
+  placeholder?: string;
+  sizes?: string;
+}
+
+interface LaptopProjectModel {
+  type: 'laptop';
+  alt: string;
+  textures: [ModelTexture];
+}
+
+interface PhoneProjectModel {
+  type: 'phone';
+  alt: string;
+  textures: [ModelTexture, ModelTexture];
+}
+
+type ProjectModel = LaptopProjectModel | PhoneProjectModel;
+
+type SectionElement = HTMLElement;
+
+type SectionProps = ComponentPropsWithoutRef<typeof Section>;
+
+interface ProjectSummaryProps
+  extends Omit<SectionProps, 'children' | 'ref'> {
+  id: string;
+  visible: boolean;
+  sectionRef:
+    | MutableRefObject<SectionElement | null>
+    | RefObject<SectionElement>;
+  index: number;
+  title: string;
+  description: ReactNode;
+  buttons?: readonly ProjectSummaryButton[];
+  model: ProjectModel;
+  alternate?: boolean;
+}
 
 const Model = lazy(() =>
   import('~/components/model').then(module => ({ default: module.Model }))
@@ -29,40 +77,24 @@ export function ProjectSummary({
   buttons = [],
   alternate,
   ...rest
-}) {
+}: ProjectSummaryProps) {
   const [focused, setFocused] = useState(false);
   const [modelLoaded, setModelLoaded] = useState(false);
-  const { theme } = useTheme();
   const { width } = useWindowSize();
   const isHydrated = useHydrated();
   const titleId = `${id}-title`;
   const isMobile = width <= media.tablet;
-  const svgOpacity = theme === 'light' ? 0.7 : 1;
   const indexText = index < 10 ? `0${index}` : index;
   const phoneSizes = `(max-width: ${media.tablet}px) 30vw, 20vw`;
   const laptopSizes = `(max-width: ${media.tablet}px) 80vw, 40vw`;
+  const transitionVisible = sectionVisible ? true : focused;
+  const useAlternateLayout = alternate === true ? true : isMobile;
 
   function handleModelLoad() {
     setModelLoaded(true);
   }
 
-  // function renderKatakana(device, visible) {
-  //   return (
-  //     <svg
-  //       type="project"
-  //       data-visible={visible && modelLoaded}
-  //       data-light={theme === 'light'}
-  //       style={cssProps({ opacity: svgOpacity })}
-  //       className={styles.svg}
-  //       data-device={device}
-  //       viewBox="0 0 751 136"
-  //     >
-  //       <use href={`${katakana}#katakana-project`} />
-  //     </svg>
-  //   );
-  // }
-
-  function renderDetails(visible) {
+  function renderDetails(visible: boolean) {
     return (
       <div className={styles.details}>
         <div aria-hidden className={styles.index}>
@@ -89,8 +121,13 @@ export function ProjectSummary({
           {description}
         </Text>
         <div className={styles.button} data-visible={visible}>
-          {buttons.map((button, index) => (
-            <Button key={index} iconHoverShift href={button.link} iconEnd="arrow-right">
+          {buttons.map(button => (
+            <Button
+              key={button.link}
+              iconHoverShift
+              href={button.link}
+              iconEnd="arrow-right"
+            >
               {button.text}
             </Button>
           ))}
@@ -99,7 +136,7 @@ export function ProjectSummary({
     );
   }
 
-  function renderPreview(visible) {
+  function renderPreview(visible: boolean) {
     return (
       <div className={styles.preview}>
         {model.type === 'laptop' && (
@@ -190,19 +227,19 @@ export function ProjectSummary({
       {...rest}
     >
       <div className={styles.content}>
-        <Transition in={sectionVisible || focused}>
+          <Transition in={transitionVisible}>
           {({ visible }) => (
             <>
-              {!alternate && !isMobile && (
-                <>
-                  {renderDetails(visible)}
-                  {renderPreview(visible)}
-                </>
-              )}
-              {(alternate || isMobile) && (
-                <>
-                  {renderPreview(visible)}
-                  {renderDetails(visible)}
+                {!useAlternateLayout && (
+                  <>
+                    {renderDetails(visible)}
+                    {renderPreview(visible)}
+                  </>
+                )}
+                {useAlternateLayout && (
+                  <>
+                    {renderPreview(visible)}
+                    {renderDetails(visible)}
                 </>
               )}
             </>

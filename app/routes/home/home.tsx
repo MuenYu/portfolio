@@ -3,7 +3,8 @@ import { baseMeta } from '~/utils/meta';
 import { Intro } from './intro';
 import { Profile } from './profile';
 import { ProjectSummary } from './project-summary';
-import { useEffect, useRef, useState } from 'react';
+import { createRef, useEffect, useMemo, useRef, useState } from 'react';
+import type { MutableRefObject, RefObject } from 'react';
 import config from '~/config.json';
 import styles from './home.module.css';
 
@@ -35,14 +36,21 @@ export const meta = () => {
 };
 
 export const Home = () => {
-  const [visibleSections, setVisibleSections] = useState([]);
+  const [visibleSections, setVisibleSections] = useState<Element[]>([]);
   const [scrollIndicatorHidden, setScrollIndicatorHidden] = useState(false);
-  const intro = useRef();
-  const projects = new Array(config.projects.length).fill().map(() => useRef());
-  const about = useRef();
+  const intro = useRef<HTMLElement | null>(null);
+  const projects = useMemo(
+    () => config.projects.map(() => createRef<HTMLElement>()),
+    []
+  );
+  const about = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    const sections = [intro, ...projects, about];
+    const sections: (MutableRefObject<HTMLElement | null> | RefObject<HTMLElement>)[] = [
+      intro,
+      ...projects,
+      about,
+    ];
 
     const sectionObserver = new IntersectionObserver(
       (entries, observer) => {
@@ -66,16 +74,20 @@ export const Home = () => {
     );
 
     sections.forEach(section => {
-      sectionObserver.observe(section.current);
+      if (section.current) {
+        sectionObserver.observe(section.current);
+      }
     });
 
-    indicatorObserver.observe(intro.current);
+    if (intro.current) {
+      indicatorObserver.observe(intro.current);
+    }
 
     return () => {
       sectionObserver.disconnect();
       indicatorObserver.disconnect();
     };
-  }, [visibleSections]);
+  }, [visibleSections, projects, intro]);
 
   return (
     <div className={styles.home}>
@@ -89,7 +101,10 @@ export const Home = () => {
           key={index}
           id={`project-${index + 1}`}
           sectionRef={projects[index]}
-          visible={visibleSections.includes(projects[index].current)}
+          visible={
+            !!projects[index].current &&
+            visibleSections.includes(projects[index].current)
+          }
           index={index + 1}
           title={project.title}
           description={project.description}
