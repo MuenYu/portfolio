@@ -28,7 +28,7 @@ export function useScrollToHash(): (hash: string, onDone?: () => void) => () => 
 
           if (window.location.pathname === location.pathname) {
             onDone?.();
-            navigate(`${location.pathname}#${id}`, { scroll: false });
+            void navigate(`${location.pathname}#${id}`, { scroll: false });
           }
         }, 50);
       };
