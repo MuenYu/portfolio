@@ -1,7 +1,22 @@
+import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 import { classes } from '~/utils/style';
 import styles from './list.module.css';
 
-export const List = ({ ordered, children, className, ...rest }) => {
+type UnorderedListProps = {
+  ordered?: false;
+  children?: ReactNode;
+  className?: string;
+} & Omit<ComponentPropsWithoutRef<'ul'>, 'children' | 'className'>;
+
+type OrderedListProps = {
+  ordered: true;
+  children?: ReactNode;
+  className?: string;
+} & Omit<ComponentPropsWithoutRef<'ol'>, 'children' | 'className'>;
+
+type ListProps = UnorderedListProps | OrderedListProps;
+
+export const List = ({ ordered, children, className, ...rest }: ListProps): JSX.Element => {
   const Element = ordered ? 'ol' : 'ul';
 
   return (
@@ -11,7 +26,9 @@ export const List = ({ ordered, children, className, ...rest }) => {
   );
 };
 
-export const ListItem = ({ children, ...rest }) => {
+type ListItemProps = ComponentPropsWithoutRef<'li'>;
+
+export const ListItem = ({ children, ...rest }: ListItemProps): JSX.Element => {
   return (
     <li className={styles.item} {...rest}>
       {children}
