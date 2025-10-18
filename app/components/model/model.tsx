@@ -1,4 +1,9 @@
-import { animate, useReducedMotion, useSpring } from 'framer-motion';
+import {
+  animate,
+  type AnimationPlaybackControls,
+  useReducedMotion,
+  useSpring,
+} from 'framer-motion';
 import { useInViewport } from '~/hooks';
 import {
   createRef,
@@ -8,6 +13,7 @@ import {
   useRef,
   useState,
 } from 'react';
+import type { HTMLAttributes, MutableRefObject } from 'react';
 import {
   AmbientLight,
   Color,
@@ -26,6 +32,11 @@ import {
   Vector3,
   WebGLRenderTarget,
   WebGLRenderer,
+  type Light,
+  type Material,
+  type Object3D,
+  type ShaderUniform,
+  type Texture,
 } from 'three';
 import { HorizontalBlurShader, VerticalBlurShader } from 'three-stdlib';
 import { resolveSrcFromSrcSet } from '~/utils/image';
@@ -45,13 +56,62 @@ const MeshType = {
   Frame: 'Frame',
   Logo: 'Logo',
   Screen: 'Screen',
-};
+} as const;
+
+type ModelAnimation = (typeof ModelAnimationType)[keyof typeof ModelAnimationType];
+
+interface ModelTexture {
+  readonly placeholder: string;
+  readonly srcSet: string;
+  readonly sizes?: string;
+}
+
+interface VectorCoordinates {
+  readonly x: number;
+  readonly y: number;
+  readonly z: number;
+}
+
+interface DeviceModelConfig {
+  readonly animation: ModelAnimation;
+  readonly position: VectorCoordinates;
+  readonly texture: ModelTexture;
+  readonly url: string;
+}
+
+interface ModelProps extends Omit<HTMLAttributes<HTMLDivElement>, 'style' | 'children'> {
+  readonly alt: string;
+  readonly cameraPosition?: VectorCoordinates;
+  readonly models: readonly DeviceModelConfig[];
+  readonly onLoad?: () => void;
+  readonly show?: boolean;
+  readonly showDelay?: number;
+  readonly style?: Record<string, string | number | undefined>;
+}
+
+type BlurUniforms = Record<string, ShaderUniform>;
+
+type BlurPlaneMesh = Mesh<PlaneGeometry, ShaderMaterial>;
+
+type PlaneMesh = Mesh<PlaneGeometry, MeshBasicMaterial>;
 
 const rotationSpringConfig = {
   stiffness: 40,
   damping: 20,
   mass: 1.4,
   restSpeed: 0.001,
+};
+
+const isMeshObject = (object: Object3D | null | undefined): object is Mesh =>
+  Boolean(object && (object as Mesh).isMesh);
+
+const isShaderUniform = (
+  uniform: ShaderUniform | undefined
+): uniform is ShaderUniform => Boolean(uniform);
+
+const getPrimaryMaterial = (mesh: Mesh): Material | undefined => {
+  const { material } = mesh;
+  return Array.isArray(material) ? material[0] : material;
 };
 
 export const Model = ({
@@ -64,67 +124,83 @@ export const Model = ({
   onLoad,
   alt,
   ...rest
-}) => {
+}: ModelProps) => {
   const [loaded, setLoaded] = useState(false);
-  const container = useRef();
-  const canvas = useRef();
-  const camera = useRef();
-  const modelGroup = useRef();
-  const scene = useRef();
-  const renderer = useRef();
-  const shadowGroup = useRef();
-  const renderTarget = useRef();
-  const renderTargetBlur = useRef();
-  const shadowCamera = useRef();
-  const depthMaterial = useRef();
-  const horizontalBlurMaterial = useRef();
-  const verticalBlurMaterial = useRef();
-  const plane = useRef();
-  const lights = useRef();
-  const blurPlane = useRef();
-  const fillPlane = useRef();
+  const container = useRef<HTMLDivElement | null>(null);
+  const canvas = useRef<HTMLCanvasElement | null>(null);
+  const camera = useRef<PerspectiveCamera | null>(null);
+  const modelGroup = useRef<Group | null>(null);
+  const scene = useRef<Scene | null>(null);
+  const renderer = useRef<WebGLRenderer | null>(null);
+  const shadowGroup = useRef<Group | null>(null);
+  const renderTarget = useRef<WebGLRenderTarget | null>(null);
+  const renderTargetBlur = useRef<WebGLRenderTarget | null>(null);
+  const shadowCamera = useRef<OrthographicCamera | null>(null);
+  const depthMaterial = useRef<MeshDepthMaterial | null>(null);
+  const horizontalBlurMaterial = useRef<ShaderMaterial | null>(null);
+  const verticalBlurMaterial = useRef<ShaderMaterial | null>(null);
+  const plane = useRef<PlaneMesh | null>(null);
+  const lights = useRef<Light[]>([]);
+  const blurPlane = useRef<BlurPlaneMesh | null>(null);
+  const fillPlane = useRef<PlaneMesh | null>(null);
   const isInViewport = useInViewport(container, false, { threshold: 0.2 });
   const reduceMotion = useReducedMotion();
   const rotationX = useSpring(0, rotationSpringConfig);
   const rotationY = useSpring(0, rotationSpringConfig);
 
   useEffect(() => {
-    const { clientWidth, clientHeight } = container.current;
+    const containerElement = container.current;
+    const canvasElement = canvas.current;
 
-    renderer.current = new WebGLRenderer({
-      canvas: canvas.current,
+    if (!containerElement || !canvasElement) {
+      return;
+    }
+
+    const { clientWidth, clientHeight } = containerElement;
+
+    const rendererInstance = new WebGLRenderer({
+      canvas: canvasElement,
       alpha: true,
       antialias: false,
       powerPreference: 'high-performance',
       failIfMajorPerformanceCaveat: true,
     });
 
-    renderer.current.setPixelRatio(2);
-    renderer.current.setSize(clientWidth, clientHeight);
-    renderer.current.outputColorSpace = SRGBColorSpace;
+    rendererInstance.setPixelRatio(2);
+    rendererInstance.setSize(clientWidth, clientHeight);
+    rendererInstance.outputColorSpace = SRGBColorSpace;
 
-    camera.current = new PerspectiveCamera(36, clientWidth / clientHeight, 0.1, 100);
-    camera.current.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
-    scene.current = new Scene();
+    const cameraInstance = new PerspectiveCamera(
+      36,
+      clientWidth / clientHeight,
+      0.1,
+      100
+    );
+    cameraInstance.position.set(
+      cameraPosition.x,
+      cameraPosition.y,
+      cameraPosition.z
+    );
 
-    modelGroup.current = new Group();
-    scene.current.add(modelGroup.current);
+    const sceneInstance = new Scene();
+    const modelGroupInstance = new Group();
 
-    // Lighting
+    sceneInstance.add(modelGroupInstance);
+
     const ambientLight = new AmbientLight(0xffffff, 1.2);
     const keyLight = new DirectionalLight(0xffffff, 1.1);
     const fillLight = new DirectionalLight(0xffffff, 0.8);
 
     fillLight.position.set(-6, 2, 2);
     keyLight.position.set(0.5, 0, 0.866);
-    lights.current = [ambientLight, keyLight, fillLight];
-    lights.current.forEach(light => scene.current.add(light));
 
-    // The shadow container, if you need to move the plane just move this
-    shadowGroup.current = new Group();
-    scene.current.add(shadowGroup.current);
-    shadowGroup.current.position.set(0, 0, -0.8);
-    shadowGroup.current.rotateX(Math.PI / 2);
+    lights.current = [ambientLight, keyLight, fillLight];
+    lights.current.forEach(light => sceneInstance.add(light));
+
+    const shadowGroupInstance = new Group();
+    sceneInstance.add(shadowGroupInstance);
+    shadowGroupInstance.position.set(0, 0, -0.8);
+    shadowGroupInstance.rotateX(Math.PI / 2);
 
     const renderTargetSize = 512;
     const planeWidth = 8;
@@ -133,47 +209,50 @@ export const Model = ({
     const shadowOpacity = 0.8;
     const shadowDarkness = 3;
 
-    // The render target that will show the shadows in the plane texture
-    renderTarget.current = new WebGLRenderTarget(renderTargetSize, renderTargetSize);
-    renderTarget.current.texture.generateMipmaps = false;
+    const renderTargetInstance = new WebGLRenderTarget(
+      renderTargetSize,
+      renderTargetSize
+    );
+    renderTargetInstance.texture.generateMipmaps = false;
 
-    // The render target that we will use to blur the first render target
-    renderTargetBlur.current = new WebGLRenderTarget(renderTargetSize, renderTargetSize);
-    renderTargetBlur.current.texture.generateMipmaps = false;
+    const renderTargetBlurInstance = new WebGLRenderTarget(
+      renderTargetSize,
+      renderTargetSize
+    );
+    renderTargetBlurInstance.texture.generateMipmaps = false;
 
-    // Make a plane and make it face up
-    const planeGeometry = new PlaneGeometry(planeWidth, planeHeight).rotateX(Math.PI / 2);
+    const planeGeometry = new PlaneGeometry(planeWidth, planeHeight);
+    planeGeometry.rotateX(Math.PI / 2);
 
     const planeMaterial = new MeshBasicMaterial({
-      map: renderTarget.current.texture,
+      map: renderTargetInstance.texture,
       opacity: shadowOpacity,
       transparent: true,
     });
 
-    plane.current = new Mesh(planeGeometry, planeMaterial);
-    // The y from the texture is flipped!
-    plane.current.scale.y = -1;
-    shadowGroup.current.add(plane.current);
+    const planeMesh = new Mesh(planeGeometry, planeMaterial);
+    planeMesh.scale.y = -1;
+    shadowGroupInstance.add(planeMesh);
 
-    // The plane onto which to blur the texture
-    blurPlane.current = new Mesh(planeGeometry);
-    blurPlane.current.visible = false;
-    shadowGroup.current.add(blurPlane.current);
+    const blurPlaneMesh = new Mesh<PlaneGeometry, ShaderMaterial>(
+      planeGeometry,
+      new ShaderMaterial()
+    );
+    blurPlaneMesh.visible = false;
+    shadowGroupInstance.add(blurPlaneMesh);
 
-    // The plane with the color of the ground
     const fillMaterial = new MeshBasicMaterial({
       color: 0xffffff,
       opacity: 0,
       transparent: true,
     });
 
-    fillPlane.current = new Mesh(planeGeometry, fillMaterial);
-    fillPlane.current.rotateX(Math.PI);
-    fillPlane.current.position.y -= 0.00001;
-    shadowGroup.current.add(fillPlane.current);
+    const fillPlaneMesh = new Mesh(planeGeometry, fillMaterial);
+    fillPlaneMesh.rotateX(Math.PI);
+    fillPlaneMesh.position.y -= 0.00001;
+    shadowGroupInstance.add(fillPlaneMesh);
 
-    // The camera to render the depth material from
-    shadowCamera.current = new OrthographicCamera(
+    const shadowCameraInstance = new OrthographicCamera(
       -planeWidth / 2,
       planeWidth / 2,
       planeHeight / 2,
@@ -181,15 +260,17 @@ export const Model = ({
       0,
       cameraHeight
     );
-    // Get the camera to look up
-    shadowCamera.current.rotation.x = Math.PI / 2;
-    shadowGroup.current.add(shadowCamera.current);
+    shadowCameraInstance.rotation.x = Math.PI / 2;
+    shadowGroupInstance.add(shadowCameraInstance);
 
-    // Like MeshDepthMaterial, but goes from black to transparent
-    depthMaterial.current = new MeshDepthMaterial();
-    depthMaterial.current.userData.darkness = { value: shadowDarkness };
-    depthMaterial.current.onBeforeCompile = shader => {
-      shader.uniforms.darkness = depthMaterial.current.userData.darkness;
+    const depthMaterialInstance = new MeshDepthMaterial();
+    const darknessUniforms = depthMaterialInstance.userData as Record<
+      string,
+      ShaderUniform<number>
+    >;
+    darknessUniforms.darkness = { value: shadowDarkness };
+    depthMaterialInstance.onBeforeCompile = shader => {
+      shader.uniforms.darkness = darknessUniforms.darkness;
       shader.fragmentShader = `
         uniform float darkness;
         ${shader.fragmentShader.replace(
@@ -198,88 +279,149 @@ export const Model = ({
         )}
       `;
     };
-    depthMaterial.current.depthTest = false;
-    depthMaterial.current.depthWrite = false;
+    depthMaterialInstance.depthTest = false;
+    depthMaterialInstance.depthWrite = false;
 
-    horizontalBlurMaterial.current = new ShaderMaterial(HorizontalBlurShader);
-    horizontalBlurMaterial.current.depthTest = false;
+    const horizontalBlurMaterialInstance = new ShaderMaterial(
+      HorizontalBlurShader
+    );
+    horizontalBlurMaterialInstance.depthTest = false;
 
-    verticalBlurMaterial.current = new ShaderMaterial(VerticalBlurShader);
-    verticalBlurMaterial.current.depthTest = false;
+    const verticalBlurMaterialInstance = new ShaderMaterial(VerticalBlurShader);
+    verticalBlurMaterialInstance.depthTest = false;
+
+    renderer.current = rendererInstance;
+    camera.current = cameraInstance;
+    scene.current = sceneInstance;
+    modelGroup.current = modelGroupInstance;
+    shadowGroup.current = shadowGroupInstance;
+    renderTarget.current = renderTargetInstance;
+    renderTargetBlur.current = renderTargetBlurInstance;
+    shadowCamera.current = shadowCameraInstance;
+    depthMaterial.current = depthMaterialInstance;
+    horizontalBlurMaterial.current = horizontalBlurMaterialInstance;
+    verticalBlurMaterial.current = verticalBlurMaterialInstance;
+    plane.current = planeMesh;
+    blurPlane.current = blurPlaneMesh;
+    fillPlane.current = fillPlaneMesh;
 
     const unsubscribeX = rotationX.on('change', renderFrame);
     const unsubscribeY = rotationY.on('change', renderFrame);
 
     return () => {
-      renderTarget.current.dispose();
-      renderTargetBlur.current.dispose();
+      renderTargetInstance.dispose();
+      renderTargetBlurInstance.dispose();
       removeLights(lights.current);
-      cleanScene(scene.current);
-      cleanRenderer(renderer.current);
+      cleanScene(scene.current ?? undefined);
+      if (renderer.current) {
+        cleanRenderer(renderer.current);
+      }
+
       unsubscribeX();
       unsubscribeY();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cameraPosition.x, cameraPosition.y, cameraPosition.z]);
+
+  const blurShadow = useCallback((amount: number) => {
+    const rendererInstance = renderer.current;
+    const renderTargetInstance = renderTarget.current;
+    const renderTargetBlurInstance = renderTargetBlur.current;
+    const blurPlaneInstance = blurPlane.current;
+    const horizontalMaterial = horizontalBlurMaterial.current;
+    const verticalMaterial = verticalBlurMaterial.current;
+    const shadowCameraInstance = shadowCamera.current;
+
+    if (
+      !rendererInstance ||
+      !renderTargetInstance ||
+      !renderTargetBlurInstance ||
+      !blurPlaneInstance ||
+      !horizontalMaterial ||
+      !verticalMaterial ||
+      !shadowCameraInstance
+    ) {
+      return;
+    }
+
+    blurPlaneInstance.visible = true;
+
+    blurPlaneInstance.material = horizontalMaterial;
+
+    const horizontalUniforms = horizontalMaterial.uniforms as BlurUniforms;
+    const horizontalTextureUniform = horizontalUniforms.tDiffuse;
+    if (isShaderUniform(horizontalTextureUniform)) {
+      horizontalTextureUniform.value = renderTargetInstance.texture;
+    }
+    const horizontalValueUniform = horizontalUniforms.h;
+    if (isShaderUniform(horizontalValueUniform)) {
+      horizontalValueUniform.value = amount * (1 / 256);
+    }
+
+    rendererInstance.setRenderTarget(renderTargetBlurInstance);
+    rendererInstance.render(blurPlaneInstance, shadowCameraInstance);
+
+    blurPlaneInstance.material = verticalMaterial;
+
+    const verticalUniforms = verticalMaterial.uniforms as BlurUniforms;
+    const verticalTextureUniform = verticalUniforms.tDiffuse;
+    if (isShaderUniform(verticalTextureUniform)) {
+      verticalTextureUniform.value = renderTargetBlurInstance.texture;
+    }
+    const verticalValueUniform = verticalUniforms.v;
+    if (isShaderUniform(verticalValueUniform)) {
+      verticalValueUniform.value = amount * (1 / 256);
+    }
+
+    rendererInstance.setRenderTarget(renderTargetInstance);
+    rendererInstance.render(blurPlaneInstance, shadowCameraInstance);
+
+    blurPlaneInstance.visible = false;
   }, []);
 
-  const blurShadow = useCallback(amount => {
-    blurPlane.current.visible = true;
-
-    // Blur horizontally and draw in the renderTargetBlur
-    blurPlane.current.material = horizontalBlurMaterial.current;
-    blurPlane.current.material.uniforms.tDiffuse.value = renderTarget.current.texture;
-    horizontalBlurMaterial.current.uniforms.h.value = amount * (1 / 256);
-
-    renderer.current.setRenderTarget(renderTargetBlur.current);
-    renderer.current.render(blurPlane.current, shadowCamera.current);
-
-    // Blur vertically and draw in the main renderTarget
-    blurPlane.current.material = verticalBlurMaterial.current;
-    blurPlane.current.material.uniforms.tDiffuse.value = renderTargetBlur.current.texture;
-    verticalBlurMaterial.current.uniforms.v.value = amount * (1 / 256);
-
-    renderer.current.setRenderTarget(renderTarget.current);
-    renderer.current.render(blurPlane.current, shadowCamera.current);
-
-    blurPlane.current.visible = false;
-  }, []);
-
-  // Handle render passes for a single frame
   const renderFrame = useCallback(() => {
+    const rendererInstance = renderer.current;
+    const sceneInstance = scene.current;
+    const cameraInstance = camera.current;
+    const shadowCameraInstance = shadowCamera.current;
+    const modelGroupInstance = modelGroup.current;
+    const depthMaterialInstance = depthMaterial.current;
+    const renderTargetInstance = renderTarget.current;
+
+    if (
+      !rendererInstance ||
+      !sceneInstance ||
+      !cameraInstance ||
+      !shadowCameraInstance ||
+      !modelGroupInstance ||
+      !depthMaterialInstance ||
+      !renderTargetInstance
+    ) {
+      return;
+    }
+
+    const initialBackground = sceneInstance.background;
+    sceneInstance.background = null;
+    sceneInstance.overrideMaterial = depthMaterialInstance;
+
+    rendererInstance.setRenderTarget(renderTargetInstance);
+    rendererInstance.render(sceneInstance, shadowCameraInstance);
+
+    sceneInstance.overrideMaterial = null;
+
     const blurAmount = 5;
-
-    // Remove the background
-    const initialBackground = scene.current.background;
-    scene.current.background = null;
-
-    // Force the depthMaterial to everything
-    // cameraHelper.visible = false;
-    scene.current.overrideMaterial = depthMaterial.current;
-
-    // Render to the render target to get the depths
-    renderer.current.setRenderTarget(renderTarget.current);
-    renderer.current.render(scene.current, shadowCamera.current);
-
-    // And reset the override material
-    scene.current.overrideMaterial = null;
-
     blurShadow(blurAmount);
-
-    // A second pass to reduce the artifacts
-    // (0.4 is the minimum blur amout so that the artifacts are gone)
     blurShadow(blurAmount * 0.4);
 
-    // Reset and render the normal scene
-    renderer.current.setRenderTarget(null);
-    scene.current.background = initialBackground;
+    rendererInstance.setRenderTarget(null);
+    sceneInstance.background = initialBackground;
 
-    modelGroup.current.rotation.x = rotationX.get();
-    modelGroup.current.rotation.y = rotationY.get();
+    modelGroupInstance.rotation.x = rotationX.get();
+    modelGroupInstance.rotation.y = rotationY.get();
 
-    renderer.current.render(scene.current, camera.current);
+    rendererInstance.render(sceneInstance, cameraInstance);
   }, [blurShadow, rotationX, rotationY]);
 
-  // Handle mouse move animation
   useEffect(() => {
     const onMouseMove = throttle(event => {
       const { innerWidth, innerHeight } = window;
@@ -302,16 +444,21 @@ export const Model = ({
     };
   }, [isInViewport, reduceMotion, rotationX, rotationY]);
 
-  // Handle window resize
   useEffect(() => {
     const handleResize = () => {
-      if (!container.current) return;
+      const containerElement = container.current;
+      const rendererInstance = renderer.current;
+      const cameraInstance = camera.current;
 
-      const { clientWidth, clientHeight } = container.current;
+      if (!containerElement || !rendererInstance || !cameraInstance) {
+        return;
+      }
 
-      renderer.current.setSize(clientWidth, clientHeight);
-      camera.current.aspect = clientWidth / clientHeight;
-      camera.current.updateProjectionMatrix();
+      const { clientWidth, clientHeight } = containerElement;
+
+      rendererInstance.setSize(clientWidth, clientHeight);
+      cameraInstance.aspect = clientWidth / clientHeight;
+      cameraInstance.updateProjectionMatrix();
 
       renderFrame();
     };
@@ -328,7 +475,7 @@ export const Model = ({
     <div
       className={classes(styles.model, className)}
       data-loaded={loaded}
-      style={cssProps({ delay: numToMs(showDelay) }, style)}
+      style={cssProps({ delay: numToMs(showDelay) }, style ?? {})}
       ref={container}
       role="img"
       aria-label={alt}
@@ -337,7 +484,7 @@ export const Model = ({
       <canvas className={styles.canvas} ref={canvas} />
       {models.map((model, index) => (
         <Device
-          key={JSON.stringify(model.position)}
+          key={`${model.url}-${index}`}
           renderer={renderer}
           modelGroup={modelGroup}
           show={show}
@@ -353,6 +500,27 @@ export const Model = ({
   );
 };
 
+interface DeviceProps {
+  readonly renderer: MutableRefObject<WebGLRenderer | null>;
+  readonly model: DeviceModelConfig;
+  readonly modelGroup: MutableRefObject<Group | null>;
+  readonly renderFrame: () => void;
+  readonly index: number;
+  readonly showDelay: number;
+  readonly setLoaded: (value: boolean) => void;
+  readonly onLoad?: () => void;
+  readonly show: boolean;
+}
+
+interface LoadDeviceResult {
+  loadFullResTexture: () => Promise<void>;
+  playAnimation: () => AnimationPlaybackControls | void;
+}
+
+interface LoadDeviceState {
+  start: () => Promise<LoadDeviceResult>;
+}
+
 const Device = ({
   renderer,
   model,
@@ -363,63 +531,118 @@ const Device = ({
   setLoaded,
   onLoad,
   show,
-}) => {
-  const [loadDevice, setLoadDevice] = useState();
+}: DeviceProps) => {
+  const [loadDevice, setLoadDevice] = useState<LoadDeviceState | null>(null);
   const reduceMotion = useReducedMotion();
-  const placeholderScreen = createRef();
+  const placeholderScreen = createRef<Mesh | null>();
 
   useEffect(() => {
-    const applyScreenTexture = async (texture, node) => {
-      texture.colorSpace = SRGBColorSpace;
-      texture.flipY = false;
-      texture.anisotropy = renderer.current.capabilities.getMaxAnisotropy();
-      texture.generateMipmaps = false;
-
-      // Decode the texture to prevent jank on first render
-      await renderer.current.initTexture(texture);
-
-      node.material.color = new Color(0xffffff);
-      node.material.transparent = true;
-      node.material.map = texture;
-    };
-
-    // Generate promises to await when ready
-    const load = async () => {
-      const { texture, position, url } = model;
-      let loadFullResTexture;
-      let playAnimation;
-
-      const [placeholder, gltf] = await Promise.all([
-        await textureLoader.loadAsync(texture.placeholder),
-        await modelLoader.loadAsync(url),
-      ]);
-
-      modelGroup.current.add(gltf.scene);
-
-      gltf.scene.traverse(async node => {
-        if (node.material) {
-          node.material.color = new Color(0x1f2025);
+      const applyScreenTexture = async (texture: Texture, node: Mesh) => {
+        const rendererInstance = renderer.current;
+        if (!rendererInstance) {
+          return;
         }
 
-        if (node.name === MeshType.Screen) {
-          // Create a copy of the screen mesh so we can fade it out
-          // over the full resolution screen texture
-          placeholderScreen.current = node.clone();
-          placeholderScreen.current.material = node.material.clone();
-          node.parent.add(placeholderScreen.current);
-          placeholderScreen.current.material.opacity = 1;
-          placeholderScreen.current.position.z += 0.001;
+        texture.colorSpace = SRGBColorSpace;
+        texture.flipY = false;
+        texture.anisotropy = rendererInstance.capabilities.getMaxAnisotropy();
+        texture.generateMipmaps = false;
 
-          applyScreenTexture(placeholder, placeholderScreen.current);
+        await rendererInstance.initTexture(texture);
+
+        const material = getPrimaryMaterial(node);
+
+        if (!material) {
+          return;
+        }
+
+      material.color = new Color(0xffffff);
+      material.transparent = true;
+      material.map = texture;
+    };
+
+    const load = async (): Promise<LoadDeviceResult> => {
+      const { texture, position, url } = model;
+      const rendererInstance = renderer.current;
+      const modelGroupInstance = modelGroup.current;
+
+        if (!rendererInstance || !modelGroupInstance) {
+          return {
+            loadFullResTexture: () => Promise.resolve(),
+            playAnimation: () => undefined,
+          };
+        }
+
+        let loadFullResTexture: (() => Promise<void>) | undefined;
+        let playAnimation: (() => AnimationPlaybackControls | void) | undefined;
+
+      const [placeholder, gltf] = await Promise.all([
+        textureLoader.loadAsync(texture.placeholder),
+        modelLoader.loadAsync(url),
+      ]);
+
+      modelGroupInstance.add(gltf.scene);
+
+        gltf.scene.traverse(async node => {
+          if (!isMeshObject(node)) {
+            return;
+          }
+
+          const material = getPrimaryMaterial(node);
+
+          if (material) {
+            material.color = new Color(0x1f2025);
+          }
+
+          if (node.name === MeshType.Screen) {
+            const screenMaterial = material;
+            if (!screenMaterial) {
+              return;
+            }
+
+            const screenClone = node.clone();
+            const parent = node.parent;
+
+            if (!screenClone || !parent) {
+              return;
+            }
+
+            screenClone.material = screenMaterial.clone();
+            parent.add(screenClone);
+            screenClone.position.z += 0.001;
+
+            const placeholderMaterial = getPrimaryMaterial(screenClone);
+
+            if (!placeholderMaterial) {
+              return;
+            }
+
+          placeholderMaterial.opacity = 1;
+          placeholderScreen.current = screenClone;
+
+          await applyScreenTexture(placeholder, screenClone);
 
           loadFullResTexture = async () => {
-            const image = await resolveSrcFromSrcSet(texture);
+            const image = await resolveSrcFromSrcSet({
+              srcSet: texture.srcSet,
+              sizes: texture.sizes,
+            });
             const fullSize = await textureLoader.loadAsync(image);
             await applyScreenTexture(fullSize, node);
 
             animate(1, 0, {
               onUpdate: value => {
-                placeholderScreen.current.material.opacity = value;
+                const screen = placeholderScreen.current;
+                if (screen) {
+                  const cloneMaterial = Array.isArray(screen.material)
+                    ? screen.material[0]
+                    : screen.material;
+
+                  if (cloneMaterial) {
+                    cloneMaterial.opacity = value;
+                  }
+                }
+
                 renderFrame();
               },
             });
@@ -427,15 +650,27 @@ const Device = ({
         }
       });
 
-      const targetPosition = new Vector3(position.x, position.y, position.z);
+      const targetPosition = new Vector3(
+        position.x,
+        position.y,
+        position.z
+      );
 
       if (reduceMotion) {
         gltf.scene.position.set(...targetPosition.toArray());
       }
 
-      // Simple slide up animation
       if (model.animation === ModelAnimationType.SpringUp) {
         playAnimation = () => {
+          const frameNode = gltf.scene.children.find(
+            (child): child is Mesh =>
+              child.name === MeshType.Frame && isMeshObject(child)
+          );
+
+          if (!frameNode) {
+            return undefined;
+          }
+
           const startPosition = new Vector3(
             targetPosition.x,
             targetPosition.y - 1,
@@ -444,7 +679,7 @@ const Device = ({
 
           gltf.scene.position.set(...startPosition.toArray());
 
-          animate(startPosition.y, targetPosition.y, {
+          return animate(startPosition.y, targetPosition.y, {
             type: 'spring',
             delay: (300 * index + showDelay) / 1000,
             stiffness: 60,
@@ -460,12 +695,17 @@ const Device = ({
         };
       }
 
-      // Swing the laptop lid open
       if (model.animation === ModelAnimationType.LaptopOpen) {
         playAnimation = () => {
           const frameNode = gltf.scene.children.find(
-            node => node.name === MeshType.Frame
+            (child): child is Mesh =>
+              child.name === MeshType.Frame && isMeshObject(child)
           );
+
+          if (!frameNode) {
+            return undefined;
+          }
+
           const startRotation = new Vector3(MathUtils.degToRad(90), 0, 0);
           const endRotation = new Vector3(0, 0, 0);
 
@@ -487,8 +727,14 @@ const Device = ({
         };
       }
 
-      return { loadFullResTexture, playAnimation };
-    };
+        const defaultLoadFullResTexture = () => Promise.resolve();
+
+        return {
+          loadFullResTexture:
+            loadFullResTexture ?? defaultLoadFullResTexture,
+          playAnimation: playAnimation ?? (() => undefined),
+        };
+      };
 
     setLoadDevice({ start: load });
 
@@ -496,8 +742,11 @@ const Device = ({
   }, []);
 
   useEffect(() => {
-    if (!loadDevice || !show) return;
-    let animation;
+    if (!loadDevice || !show) {
+      return;
+    }
+
+    let animation: AnimationPlaybackControls | undefined;
 
     const onModelLoad = async () => {
       const { loadFullResTexture, playAnimation } = await loadDevice.start();
@@ -506,7 +755,10 @@ const Device = ({
       onLoad?.();
 
       if (!reduceMotion) {
-        animation = playAnimation();
+        const result = playAnimation();
+        if (result) {
+          animation = result;
+        }
       }
 
       await loadFullResTexture();
@@ -517,7 +769,7 @@ const Device = ({
     };
 
     startTransition(() => {
-      onModelLoad();
+      void onModelLoad();
     });
 
     return () => {

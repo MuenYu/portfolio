@@ -2,11 +2,29 @@ import { Text } from '~/components/text';
 import { useReducedMotion } from 'framer-motion';
 import { classes, cssProps } from '~/utils/style';
 import { forwardRef } from 'react';
+import type { HTMLAttributes } from 'react';
 import styles from './loader.module.css';
 
-export const Loader = forwardRef(
+interface LoaderProps
+  extends Omit<HTMLAttributes<HTMLDivElement>, 'style' | 'children'> {
+  readonly center?: boolean;
+  readonly height?: number;
+  readonly text?: string;
+  readonly width?: number;
+  readonly style?: Record<string, string | number | undefined>;
+}
+
+export const Loader = forwardRef<HTMLDivElement, LoaderProps>(
   (
-    { className, style, width = 32, height = 4, text = 'Loading...', center, ...rest },
+    {
+      className,
+      style,
+      width = 32,
+      height = 4,
+      text = 'Loading...',
+      center,
+      ...rest
+    },
     ref
   ) => {
     const reduceMotion = useReducedMotion();
@@ -24,7 +42,7 @@ export const Loader = forwardRef(
         ref={ref}
         className={classes(styles.loader, className)}
         data-center={center}
-        style={cssProps({ width, height }, style)}
+        style={cssProps({ width, height }, style ?? {})}
         {...rest}
       >
         <div className={styles.span} />
@@ -32,3 +50,5 @@ export const Loader = forwardRef(
     );
   }
 );
+
+Loader.displayName = 'Loader';
