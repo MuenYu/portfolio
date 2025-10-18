@@ -38,26 +38,35 @@ interface ProfileProps {
 
 const portfolioProfile: ProfileContentConfig = config.profile;
 
-const linkPattern = /\[(.*?)\]\((.*?)\)/;
+const linkPattern = /\[([^\]]+)\]\(([^)]+)\)/;
 
 const renderTextWithLinks = (text: string): (string | JSX.Element)[] => {
-  const parts = text.split(new RegExp(`(${linkPattern.source})`, 'g'));
+  const nodes: (string | JSX.Element)[] = [];
+  const matcher = new RegExp(linkPattern.source, 'g');
+  let lastIndex = 0;
 
-  return parts.map((part, index) => {
-    const linkMatch = linkPattern.exec(part);
+  for (const match of text.matchAll(matcher)) {
+    const [fullMatch, label, href] = match;
+    const matchIndex = match.index ?? 0;
 
-    if (!linkMatch) {
-      return part;
+    if (matchIndex > lastIndex) {
+      nodes.push(text.slice(lastIndex, matchIndex));
     }
 
-    const [, label, href] = linkMatch;
-
-    return (
-      <Link key={`${href}-${index}`} href={href}>
+    nodes.push(
+      <Link key={`${href}-${matchIndex}`} href={href}>
         {label}
       </Link>
     );
-  });
+
+    lastIndex = matchIndex + fullMatch.length;
+  }
+
+  if (lastIndex < text.length) {
+    nodes.push(text.slice(lastIndex));
+  }
+
+  return nodes.length ? nodes : [text];
 };
 
 const ProfileText = ({ visible, titleId }: ProfileTextProps): JSX.Element => {
