@@ -1,3 +1,4 @@
+import type { LinksFunction } from 'react-router';
 import {
   Links,
   Meta,
@@ -20,7 +21,7 @@ import styles from './root.module.css';
 import resetStylesHref from './reset.css?url';
 import globalStylesHref from './global.css?url';
 
-export const links = () => [
+export const links: LinksFunction = () => [
   {
     rel: 'preload',
     href: GothamMedium,
@@ -45,23 +46,30 @@ export const links = () => [
   { rel: 'stylesheet', href: globalStylesHref },
 ];
 
+interface RootLoaderData {
+  readonly canonicalUrl: string;
+  readonly theme: string;
+}
+
 export { loader } from './root.loader';
 
-export default function App() {
-  let { canonicalUrl, theme } = useLoaderData();
+export default function App(): JSX.Element {
+  const { canonicalUrl, theme: loaderTheme } = useLoaderData<RootLoaderData>();
   const fetcher = useFetcher();
   const { state } = useNavigation();
 
-  if (fetcher.formData?.has('theme')) {
-    theme = fetcher.formData.get('theme');
-  }
+  const formTheme = fetcher.formData?.get('theme');
+  const theme = typeof formTheme === 'string' ? formTheme : loaderTheme;
 
-  function toggleTheme(newTheme) {
-    fetcher.submit(
-      { theme: newTheme ? newTheme : theme === 'dark' ? 'light' : 'dark' },
+  const toggleTheme = (nextTheme?: string): void => {
+    const resolvedTheme =
+      typeof nextTheme === 'string' ? nextTheme : theme === 'dark' ? 'light' : 'dark';
+
+    void fetcher.submit(
+      { theme: resolvedTheme },
       { action: '/api/set-theme', method: 'post' }
     );
-  }
+  };
 
   return (
     <html lang="en">
@@ -102,7 +110,7 @@ export default function App() {
   );
 }
 
-export function ErrorBoundary() {
+export function ErrorBoundary(): JSX.Element {
   const error = useRouteError();
 
   return (
